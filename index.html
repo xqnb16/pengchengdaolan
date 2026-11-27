@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>
+  const ua = navigator.userAgent;
+  if (matchMedia('(hover: none) and (pointer: coarse)').matches ||
+      (/MicroMessenger\//i.test(ua) && /Android|iPhone|iPad|iPod/i.test(ua))) {
+    document.documentElement.classList.add('touch-lite');
+  }
+</script>
 <title>汉韵彭城 · 徐州汉文化数字导览</title>
 <meta name="description" content="跟着汉画里的朱雀和白虎，读懂徐州的汉墓、汉兵马俑与汉画像石：九处景点的故事、纹样出处、开放时间与交通。">
 <link rel="stylesheet" href="assets/css/style.css?v=11">
@@ -21,7 +28,7 @@
 <link rel="stylesheet" href="assets/css/craft-motion.css?v=23">
 <link rel="stylesheet" href="assets/css/obsidian-glass.css?v=36">
 <link rel="stylesheet" href="assets/css/flagship-craft.css?v=37">
-<link rel="stylesheet" href="assets/css/ethereal-izanami.css?v=61">
+<link rel="stylesheet" href="assets/css/ethereal-izanami.css?v=63">
 <link rel="stylesheet" href="assets/css/detail-plus.css?v=50">
 <link rel="stylesheet" href="assets/css/detail-editorial.css?v=60">
 </head>
@@ -29,7 +36,7 @@
 <div class="ed-ambient-bg" id="edAmbientBg" aria-hidden="true">
  <div class="ed-amb-stage" id="edAmbStage">
   <img class="ed-amb-img ed-amb-a on" src="assets/img/night/act1_night.webp" alt="">
-  <img class="ed-amb-img ed-amb-b" src="" alt="">
+  <img class="ed-amb-img ed-amb-b" alt="">
  </div>
  <div class="ed-amb-aura" id="edAmbAura"></div>
  <div class="ed-amb-veil" id="edAmbVeil"></div>
@@ -289,8 +296,8 @@
 <script src="assets/js/v7.js?v=11"></script>
 <script src="assets/js/v8.js?v=12"></script>
 <script src="assets/js/v10.js?v=11"></script>
-<script src="assets/js/editorial-motion.js?v=60"></script>
-<script src="assets/js/ethereal-fx.js?v=60"></script>
+<script src="assets/js/editorial-motion.js?v=63"></script>
+<script src="assets/js/ethereal-fx.js?v=63"></script>
 <script src="assets/js/relic-3d.js?v=60"></script>
 <script src="assets/js/detail-plus.js?v=60"></script>
 </body>

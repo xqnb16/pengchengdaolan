@@ -10,7 +10,7 @@
   const $$ = (q, el = document) => [...el.querySelectorAll(q)];
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
-  if (RM) return;
+  if (RM || document.documentElement.classList.contains('touch-lite')) return;
 
   /* ---------- 1. 全站「香烟流光 · 墨雾游丝」鼠标流体尾迹 & 点击涟漪 ---------- */
   if (FINE) {

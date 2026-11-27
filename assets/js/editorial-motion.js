@@ -11,11 +11,12 @@
   const $$ = (q, el = document) => [...el.querySelectorAll(q)];
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const TOUCH = document.documentElement.classList.contains('touch-lite');
 
   /* ---------- 1. 开卷预加载幕帘 (IZANAMI 00→100 丝幕轻揭) + 首屏错峰入场仪式 ---------- */
   const pre = $('#edPreloader');
   if (pre) {
-    if (RM) {
+    if (RM || TOUCH) {
       pre.remove();
       document.documentElement.classList.add('ed-ready');
     } else {
@@ -358,7 +359,7 @@
     }
 
     // 双行反向视差画廊带
-    if (skStrip && rowA && rowB && !RM) {
+    if (skStrip && rowA && rowB && !RM && !TOUCH) {
       const r = skStrip.getBoundingClientRect();
       if (r.bottom > -100 && r.top < vh + 100) {
         const p = (vh - r.top) / (vh + r.height);
@@ -474,11 +475,8 @@
   if (heroEl) heroEl.dataset.season = curSeason;
 
   if (heroEl) {
-    const cv = document.createElement('canvas');
-    cv.className = 'ed-hero-fx';
-    cv.setAttribute('aria-hidden', 'true');
-    heroEl.appendChild(cv);
-    const ctx = cv.getContext('2d');
+    const cv = TOUCH ? null : document.createElement('canvas');
+    const ctx = cv?.getContext('2d');
     let W = 0, H = 0, dpr = 1;
     const resize = () => {
       W = heroEl.clientWidth || 1440;
@@ -487,8 +485,13 @@
       cv.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
-    resize();
-    addEventListener('resize', resize);
+    if (ctx) {
+      cv.className = 'ed-hero-fx';
+      cv.setAttribute('aria-hidden', 'true');
+      heroEl.appendChild(cv);
+      resize();
+      addEventListener('resize', resize);
+    }
 
     // 季节手绘质感粒子池（清晰可见且保留钢笔淡彩雅致质感）
     let parts = [];
@@ -566,7 +569,7 @@
         }
       }
       const count = s === 'winter' ? 115 : (s === 'night' ? 48 : (s === 'autumn' ? 52 : (s === 'spring' ? 46 : 36)));
-      parts = Array.from({ length: count }, () => spawnPart(s, true));
+      if (ctx) parts = Array.from({ length: count }, () => spawnPart(s, true));
     };
     const SEASON_FREQ = { night: 220, spring: 293.66, summer: 329.63, autumn: 440, winter: 493.88 };
     initSeason(curSeason, false);
@@ -681,7 +684,7 @@
         playCue(dark ? 220 : 369.99, 2.2);
       };
       themeBtn.onclick = () => {
-        if (!RM && document.startViewTransition) {
+        if (!RM && !TOUCH && document.startViewTransition) {
           const r = themeBtn.getBoundingClientRect();
           const cx = r.left + r.width / 2;
           const cy = r.top + r.height / 2;
@@ -731,15 +734,17 @@
     const lakeRipples = [];
     let lastRip = 0, heroVis = true, heroRaf = 0;
     const wakeHero = () => {
-      if (heroVis && !heroRaf && !document.hidden && !document.body.classList.contains('ed-detail-open')) {
+      if (ctx && heroVis && !heroRaf && !document.hidden && !document.body.classList.contains('ed-detail-open')) {
         heroRaf = requestAnimationFrame(drawFX);
       }
     };
-    new IntersectionObserver(es => {
-      heroVis = !!(es[0] && es[0].isIntersecting);
-      if (heroVis) wakeHero();
-    }).observe(heroEl);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeHero(); });
+    if (ctx) {
+      new IntersectionObserver(es => {
+        heroVis = !!(es[0] && es[0].isIntersecting);
+        if (heroVis) wakeHero();
+      }).observe(heroEl);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) wakeHero(); });
+    }
 
     heroEl.addEventListener('pointermove', e => {
       if (e.pointerType !== 'mouse') return;
@@ -1146,7 +1151,7 @@
      ========================================================================== */
 
   // V31-1: 全域极稀暗夜浮金尘埃（dpr=1 + 24fps 节流 + 详情页自动休眠，减少 4.5× GPU 像素填充）
-  if (!RM) {
+  if (!RM && !TOUCH) {
     const dustCv = document.createElement('canvas');
     dustCv.className = 'ed-ambient-dust';
     dustCv.setAttribute('aria-hidden', 'true');
@@ -1248,7 +1253,7 @@
 
   // V31-3: Window Parallax 窗景微视差（缓存节点，无旧版 .sc5 时零 DOM 遍历）
   const wpImgs = $$('#sites .sc5 .im img, #sanjue .sjc .im img');
-  if (!RM && wpImgs.length) {
+  if (!RM && !TOUCH && wpImgs.length) {
     let wpRaf = 0;
     const updateWindowParallax = () => {
       wpRaf = 0;
@@ -1324,7 +1329,7 @@
     }, { passive: true });
     card.addEventListener('pointerleave', () => { hovering = false; });
     // 未悬停时：仅在进入视口时极缓慢柔和地巡检微光（离屏自动完全休眠）
-    if (!RM) {
+    if (!RM && !TOUCH) {
       let cardInView = false, swRaf = 0;
       const autoSweep = t => {
         swRaf = 0;
@@ -1432,7 +1437,7 @@
 
   const izNodes = $$('.iz-prologue, .iz-scene');
   if (izNodes.length) {
-    if (RM || !('IntersectionObserver' in window)) {
+    if (RM || TOUCH || !('IntersectionObserver' in window)) {
       izNodes.forEach(n => n.classList.add('iz-vis', 'is-focus'));
     } else {
       document.documentElement.classList.add('iz-motion-ready');
@@ -1559,10 +1564,12 @@
       }
     }
   };
-  addEventListener('scroll', () => {
-    if (!izRaf) izRaf = requestAnimationFrame(updateIzEthereal);
-  }, { passive: true });
-  updateIzEthereal();
+  if (!TOUCH) {
+    addEventListener('scroll', () => {
+      if (!izRaf) izRaf = requestAnimationFrame(updateIzEthereal);
+    }, { passive: true });
+    updateIzEthereal();
+  }
 
   // 3) V57：移除悬停瞬移偏移 (--iz-mx1/my1)，确保九景主画在滑动与鼠标悬停透视石刻时端正稳固、绝不跳动
 

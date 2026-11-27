@@ -2726,3 +2726,26 @@ html.theme-obsidian #go select option {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Touch scroll stays native. Decorative full-screen layers are optional. */
+html.touch-lite {
+  overscroll-behavior-y: none;
+}
+.touch-lite .ed-preloader,
+.touch-lite #edAmbientBg,
+.touch-lite #izProLiveCv,
+.touch-lite .iz-pro-cue {
+  display: none !important;
+}
+.touch-lite #sites .iz-folio-bg img,
+.touch-lite #sites .iz-folio-in,
+.touch-lite .iz-pro-back,
+.touch-lite .iz-pro-front {
+  will-change: auto;
+}
+html.touch-lite .nav,
+html.touch-lite .nav .nav-glass-pill,
+html.touch-lite .tabbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
