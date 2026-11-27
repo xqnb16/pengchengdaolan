@@ -1,0 +1,722 @@
+/* ==========================================================================
+   汉韵彭城 · V17「玄墨暗馆 · 宣纸生光」沉浸式视觉体系
+   深度对齐 IZANAMI (izanami-official.com) × SAKAZUKI (sakazuki.io)
+   核心美学：深邃重色暗馆背景(#11100E) + 轻盈温润浅色浮字(#F1EDE4) + 暗室展柜发光手绘长卷
+   ========================================================================== */
+
+:root {
+  --dk-bg: #100F0D;              /* 深墨暗馆主底 */
+  --dk-bg-2: #171512;            /* 次级展厅石黑 */
+  --dk-bg-3: #1E1B17;            /* 面板暗褐 */
+  --dk-abyss: #090807;           /* 三绝极暗漆室 */
+  --dk-text: #F1EDE4;            /* 轻盈宣白主字 */
+  --dk-text-2: rgba(241, 237, 228, 0.68); /* 柔和次字 */
+  --dk-text-3: rgba(241, 237, 228, 0.42); /* 极轻注释/坐标 */
+  --dk-red: #C84337;             /* 暗馆发光朱砂 */
+  --dk-red-soft: rgba(200, 67, 55, 0.24);
+  --dk-gold: #C8A86B;            /* 哑光古泥金 */
+  --dk-jade: #629B84;            /* 夜色黛青 */
+  --dk-hair: rgba(241, 237, 228, 0.13);
+  --dk-hair-soft: rgba(241, 237, 228, 0.07);
+  --dk-paper-mat: #EAE4D9;       /* 展柜宣纸托底（专供手绘融纸标本） */
+
+  /* 统一覆盖全站令牌 */
+  --iz-paper: var(--dk-bg);
+  --iz-paper-2: var(--dk-bg-2);
+  --iz-surface: var(--dk-bg-2);
+  --iz-ink: var(--dk-text);
+  --iz-ink-2: var(--dk-text-2);
+  --iz-ink-3: var(--dk-text-3);
+  --iz-red: var(--dk-red);
+  --iz-jade: var(--dk-jade);
+  --iz-obsidian: var(--dk-abyss);
+  --iz-obsidian-2: #141210;
+  --iz-gold: var(--dk-gold);
+  --iz-hair: var(--dk-hair);
+  --iz-hair-soft: var(--dk-hair-soft);
+  --ed-paper: var(--dk-bg);
+  --ed-surface: var(--dk-bg-2);
+  --ed-ink: var(--dk-text);
+  --ed-ink-2: var(--dk-text-2);
+  --ed-ink-3: var(--dk-text-3);
+  --ed-red: var(--dk-red);
+  --ed-hair: var(--dk-hair);
+  --ed-hair-soft: var(--dk-hair-soft);
+  --paper: var(--dk-bg);
+  --cream: var(--dk-bg-2);
+  --ink: var(--dk-text);
+  --ink2: var(--dk-text-2);
+  --ink3: var(--dk-text-3);
+  --red: var(--dk-red);
+  --jade: var(--dk-jade);
+}
+
+/* ==========================================================================
+   1. 全局深邃暗馆空间 + 极淡建筑光丝竖线 + 轻盈浅色字体
+   ========================================================================== */
+html, body {
+  background-color: var(--dk-bg) !important;
+  color: var(--dk-text) !important;
+}
+body::after {
+  opacity: 0.14 !important;
+  mix-blend-mode: overlay !important;
+}
+
+#sites, #fy, #go, .sc-sticky, .sk-strip-sec {
+  background-color: var(--dk-bg) !important;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(25% - 0.5px),
+    rgba(241, 237, 228, 0.04) calc(25% - 0.5px),
+    rgba(241, 237, 228, 0.04) 25%,
+    transparent 25%,
+    transparent calc(50% - 0.5px),
+    rgba(241, 237, 228, 0.04) calc(50% - 0.5px),
+    rgba(241, 237, 228, 0.04) 50%,
+    transparent 50%,
+    transparent calc(75% - 0.5px),
+    rgba(241, 237, 228, 0.04) calc(75% - 0.5px),
+    rgba(241, 237, 228, 0.04) 75%,
+    transparent 75%
+  ) !important;
+}
+
+/* 开卷暗馆幕帘（沉浸入场） */
+.ed-preloader {
+  background: var(--dk-abyss) !important;
+}
+.ed-pre-vert {
+  color: var(--dk-text) !important;
+  border-left-color: var(--dk-hair) !important;
+}
+.ed-pre-line {
+  background: rgba(241, 237, 228, 0.14) !important;
+}
+.ed-pre-line i {
+  background: var(--dk-gold) !important;
+}
+
+/* 光标在暗馆下变为温润浅色微光点 */
+.ed-cursor-dot {
+  background: var(--dk-text) !important;
+}
+.ed-cursor-ring {
+  border-color: rgba(241, 237, 228, 0.28) !important;
+}
+.ed-cursor-active .ed-cursor-dot,
+.ed-cursor-link .ed-cursor-dot {
+  background: var(--dk-gold) !important;
+}
+.ed-cursor-active .ed-cursor-ring,
+.ed-cursor-link .ed-cursor-ring {
+  border-color: rgba(200, 168, 107, 0.58) !important;
+  background: rgba(200, 168, 107, 0.07) !important;
+}
+
+/* ==========================================================================
+   2. 顶部导航栏：暗调玻璃隐形化，浅字轻盈悬浮
+   ========================================================================== */
+.nav {
+  background: linear-gradient(180deg, rgba(16, 15, 13, 0.72) 0%, transparent 100%) !important;
+}
+.nav.solid {
+  background: rgba(16, 15, 13, 0.86) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom-color: var(--dk-hair) !important;
+}
+.lg7 b { color: var(--dk-text) !important; }
+.lg7 small { color: var(--dk-text-3) !important; }
+.nav .links a { color: var(--dk-text-2) !important; }
+.nav .links a:hover,
+.nav .links a.on { color: var(--dk-text) !important; }
+.nav .links a::after { background: var(--dk-gold) !important; }
+.nav-guide-btn { color: var(--dk-text-2) !important; }
+.nav-guide-btn:hover { color: var(--dk-text) !important; }
+.nav-sound-btn { color: var(--dk-text-3) !important; }
+.nav-sound-btn:hover,
+.nav-sound-btn[aria-pressed="true"] { color: var(--dk-gold) !important; }
+.nav-ds-link {
+  color: var(--dk-gold) !important;
+  border-left-color: var(--dk-hair) !important;
+}
+.ed-progress i { background: var(--dk-gold) !important; }
+
+/* ==========================================================================
+   3. 首屏「开卷 · 彭城夜雾全景」：100vh 满幅沉浸场景 + 轻盈浅色浮字（IZANAMI 灵魂！）
+   ========================================================================== */
+.hero.kai {
+  background: var(--dk-bg) !important;
+  height: 100vh !important;
+  height: 100svh !important;
+}
+.kai-paper {
+  background: var(--dk-bg) !important;
+}
+.kai-paper::before,
+.pano-cloud,
+.mist10 {
+  display: none !important;
+}
+/* 让手绘徐州全景铺满整屏纵深，叠入暮色青黛暗调影院氛围 */
+.hero .pano-wrap {
+  inset: 0 !important;
+  height: 100% !important;
+}
+.hero .pano {
+  height: 100% !important;
+  width: 100% !important;
+  aspect-ratio: auto !important;
+}
+.hero .pano > img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 62% !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  /* 暮色水墨电影级压暗调色：背景沉重有氛围，衬托浅字如月光悬浮 */
+  filter: brightness(0.62) contrast(1.12) saturate(0.76) sepia(0.08) !important;
+}
+/* 四周影院级深邃暗角 + 顶部/左侧阅读柔光暗幕 + 底部无缝溶入深墨 */
+.hero.kai::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(82% 72% at 58% 58%, rgba(16, 15, 13, 0.06) 0%, rgba(16, 15, 13, 0.62) 100%),
+    linear-gradient(108deg, rgba(16, 15, 13, 0.82) 0%, rgba(16, 15, 13, 0.42) 38%, rgba(16, 15, 13, 0.08) 68%),
+    linear-gradient(180deg, rgba(16, 15, 13, 0.72) 0%, rgba(16, 15, 13, 0) 26%, rgba(16, 15, 13, 0) 78%, #100F0D 100%);
+}
+.hero.kai::after {
+  height: 96px !important;
+  z-index: 4 !important;
+  background: linear-gradient(to bottom, rgba(16, 15, 13, 0) 0%, #100F0D 100%) !important;
+}
+
+/* 轻盈浅色浮字：人在画境中 */
+.hero .kai-title {
+  top: clamp(98px, 12vh, 138px) !important;
+  z-index: 9 !important;
+}
+.hero .tv h1 {
+  color: rgba(247, 244, 236, 0.94) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 8px 36px rgba(0, 0, 0, 0.55) !important;
+}
+.hero .seal-s {
+  background: var(--dk-red) !important;
+  color: #F7F4EC !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+}
+.hero .vline {
+  color: var(--dk-gold) !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+.hero .tdesc p,
+.hero.tight2 .tdesc > p {
+  display: block !important;
+  color: rgba(241, 237, 228, 0.78) !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.65) !important;
+}
+.hero .cta {
+  border-top-color: rgba(241, 237, 228, 0.22) !important;
+}
+.hero .cta .lnk,
+.hero .cta .lnk.ghost,
+.hero .cta .lnk.subtle-ink {
+  color: rgba(241, 237, 228, 0.88) !important;
+  font-weight: 500 !important;
+}
+.hero .cta .lnk:first-child {
+  color: #F7F4EC !important;
+}
+.hero .cta .lnk:first-child::after {
+  background: var(--dk-gold) !important;
+}
+.hero .cta .lnk:hover {
+  color: var(--dk-gold) !important;
+}
+.hero .cta .lnk:hover::after {
+  background: var(--dk-gold) !important;
+}
+.hero .cta .lnk.ghost::after,
+.hero .cta .lnk.subtle-ink::after {
+  background: rgba(241, 237, 228, 0.26) !important;
+}
+
+/* 右侧竖排滚动指示 + 左下实时彭城时钟 + 右下地标开关：轻盈通透暗玻璃 */
+.ed-scroll-cue { z-index: 9 !important; }
+.ed-scroll-cue span { color: rgba(241, 237, 228, 0.58) !important; }
+.ed-scroll-cue i { background: rgba(241, 237, 228, 0.2) !important; }
+.ed-scroll-cue i::after { background: var(--dk-gold) !important; }
+
+.ed-live-clock {
+  z-index: 10 !important;
+  background: rgba(16, 15, 13, 0.56) !important;
+  color: rgba(241, 237, 228, 0.65) !important;
+  border-left-color: var(--dk-gold) !important;
+  border-top: 1px solid rgba(241, 237, 228, 0.1);
+}
+.ed-live-clock b { color: #F7F4EC !important; }
+
+.ed-pins-toggle {
+  z-index: 10 !important;
+  background: rgba(16, 15, 13, 0.56) !important;
+  color: rgba(241, 237, 228, 0.78) !important;
+  border-bottom-color: rgba(241, 237, 228, 0.24) !important;
+  padding: 6px 12px !important;
+}
+.ed-pins-toggle i { background: var(--dk-gold) !important; }
+.ed-pins-toggle:hover {
+  color: var(--dk-gold) !important;
+  border-bottom-color: var(--dk-gold) !important;
+}
+
+/* 暮色全景图上的微光坐标点与暗调丝绢悬停卡 */
+.pin2 .dot {
+  background: var(--dk-gold) !important;
+  box-shadow: 0 0 0 3px rgba(16, 15, 13, 0.65), 0 0 14px rgba(200, 168, 107, 0.85) !important;
+}
+.pin2 .dot::before,
+.pin2 .dot::after {
+  border-color: rgba(200, 168, 107, 0.65) !important;
+}
+.pin2 .tag {
+  background: rgba(20, 18, 15, 0.92) !important;
+  border-top-color: rgba(200, 168, 107, 0.4) !important;
+  border-bottom-color: rgba(200, 168, 107, 0.4) !important;
+}
+.pin2 em { color: var(--dk-text) !important; font-weight: 500 !important; }
+.pin2 .seal {
+  background: var(--dk-red) !important;
+  color: #F7F4EC !important;
+  border-color: var(--dk-red) !important;
+}
+.pin2 .pv {
+  background: rgba(22, 20, 17, 0.96) !important;
+  border-color: rgba(200, 168, 107, 0.35) !important;
+  color: var(--dk-text) !important;
+}
+.pin2 .pvt strong { color: var(--dk-text) !important; }
+.pin2 .pvt small { color: var(--dk-text-2) !important; }
+.pin2 .pvt .go { color: var(--dk-gold) !important; }
+.river-tag { color: rgba(241, 237, 228, 0.62) !important; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
+
+/* ==========================================================================
+   4. 01 彭城七里长卷：暗馆夜游画卷（画作如博物馆射灯照亮，文字轻盈浮现）
+   ========================================================================== */
+.scrollsec, .sc-sticky {
+  background-color: var(--dk-bg) !important;
+}
+.sc-head {
+  border-bottom-color: var(--dk-hair) !important;
+}
+.sch6 .eye { color: var(--dk-gold) !important; }
+.sch6 h2 { color: var(--dk-text) !important; }
+#scRoutes .chip { color: var(--dk-text-3) !important; }
+#scRoutes .chip:hover,
+#scRoutes .chip[aria-pressed="true"] {
+  color: var(--dk-text) !important;
+  border-bottom-color: var(--dk-gold) !important;
+}
+.skipsc {
+  color: var(--dk-text-2) !important;
+  border-left-color: var(--dk-hair) !important;
+}
+.skipsc:hover { color: var(--dk-gold) !important; }
+.intro-panel .big {
+  color: var(--dk-text) !important;
+  border-left-color: var(--dk-gold) !important;
+}
+.intro-panel .big em { color: var(--dk-gold) !important; }
+.intro-panel .meta { color: var(--dk-text-2) !important; }
+.intro-panel .meta b { color: var(--dk-text) !important; }
+.sc-cue-line {
+  color: var(--dk-gold) !important;
+  border-bottom-color: var(--dk-gold) !important;
+}
+
+/* 长卷挂轴画框：暗室聚光展画 */
+.stop-frame {
+  background: var(--dk-bg-2) !important;
+  border: 1px solid rgba(241, 237, 228, 0.14) !important;
+  box-shadow: 0 28px 64px -28px rgba(0, 0, 0, 0.85) !important;
+}
+.stop.cur .stop-frame,
+.stop:hover .stop-frame {
+  border-color: rgba(200, 168, 107, 0.55) !important;
+}
+.stop .vg {
+  filter: brightness(0.92) contrast(1.04) saturate(0.9) !important;
+}
+.stop:hover .vg,
+.stop.cur .vg {
+  filter: brightness(1) contrast(1.05) saturate(0.98) !important;
+}
+.stop-meta { border-top-color: var(--dk-hair-soft) !important; }
+.stop-meta strong { color: var(--dk-text) !important; }
+.stop-meta em { color: var(--dk-text-2) !important; }
+.outro-panel h3 { color: var(--dk-text) !important; }
+.outro-panel p { color: var(--dk-text-2) !important; }
+.outro-lnk { color: var(--dk-gold) !important; border-bottom-color: var(--dk-gold) !important; }
+
+.sc-bar .rail { background: var(--dk-hair) !important; }
+.sc-bar .fill { background: var(--dk-gold) !important; }
+.sc-bar button {
+  background: var(--dk-bg) !important;
+  border-color: var(--dk-text-3) !important;
+}
+.sc-bar button.on {
+  background: var(--dk-gold) !important;
+  border-color: var(--dk-gold) !important;
+  box-shadow: 0 0 0 4px rgba(200, 168, 107, 0.22) !important;
+}
+.sc-bar button em { color: var(--dk-text-3) !important; }
+.sc-bar button.on em { color: var(--dk-gold) !important; }
+.sc-card {
+  background: rgba(22, 20, 17, 0.92) !important;
+  border-color: rgba(200, 168, 107, 0.28) !important;
+  color: var(--dk-text) !important;
+}
+.sc-card .k { color: var(--dk-gold) !important; }
+.sc-card h3 { color: var(--dk-text) !important; }
+.sc-card h3 small,
+.sc-card .leg { color: var(--dk-text-2) !important; background: rgba(241, 237, 228, 0.05) !important; }
+.sc-card .nav2 button {
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text) !important;
+  background: transparent !important;
+}
+
+/* ==========================================================================
+   5. SAKAZUKI 3 幕吸顶翻页剧场：深邃暗调满幅压景 + 轻盈浅字入画！
+   ========================================================================== */
+.sk-stage, .sk-sticky {
+  background: var(--dk-bg) !important;
+  border-color: var(--dk-hair) !important;
+}
+.sk-bg img {
+  filter: brightness(0.60) contrast(1.1) saturate(0.8) !important;
+}
+.sk-bg::after {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 15, 13, 0.94) 0%,
+    rgba(16, 15, 13, 0.72) 38%,
+    rgba(16, 15, 13, 0.16) 72%,
+    rgba(16, 15, 13, 0.32) 100%
+  ) !important;
+}
+/* 第三幕两汉器物长卷：保留完整钢笔淡彩质感，压暗背景柔光融入深墨 */
+.sk-bg-relic {
+  background: #141210;
+}
+.sk-bg-relic img {
+  mix-blend-mode: normal !important;
+  filter: brightness(0.76) contrast(1.08) saturate(0.86) !important;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 32%, #000 94%, transparent 100%),
+                      linear-gradient(180deg, transparent 0%, #000 14%, #000 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 32%, #000 94%, transparent 100%);
+}
+.sk-bg-relic::after {
+  background: linear-gradient(90deg, rgba(16, 15, 13, 0.96) 0%, rgba(16, 15, 13, 0.65) 36%, transparent 62%) !important;
+}
+.sk-inset-plate {
+  background: rgba(20, 18, 15, 0.92) !important;
+  border-color: rgba(200, 168, 107, 0.3) !important;
+}
+.sk-inset-plate span { color: var(--dk-text-2) !important; }
+.sk-act-kicker { color: var(--dk-gold) !important; }
+.sk-act-kicker::after { background: var(--dk-gold) !important; }
+.sk-copy-box h2 { color: var(--dk-text) !important; }
+.sk-copy-box p { color: var(--dk-text-2) !important; }
+.sk-copy-meta { border-top-color: var(--dk-hair) !important; }
+.sk-copy-meta div small { color: var(--dk-text-3) !important; }
+.sk-copy-meta div b { color: var(--dk-text) !important; }
+.sk-pbtn { color: var(--dk-text-3) !important; }
+.sk-pbtn.on { color: var(--dk-text) !important; border-bottom-color: var(--dk-gold) !important; }
+.sk-pbtn.on span { color: var(--dk-gold) !important; }
+
+/* ==========================================================================
+   6. 02 九处彭城 + 风物图谱带：暗室博物馆发光展画墙
+   ========================================================================== */
+.sh5 { border-top-color: var(--dk-hair) !important; }
+.sh5 .eye, .stamp10 { color: var(--dk-gold) !important; }
+.stamp10::after { background: var(--dk-gold) !important; }
+.sh5 h2, .chap .chh h3, .sc5 h3 { color: var(--dk-text) !important; }
+.sh5 > p:not(.eye), .chap .chh p, .sc5 p { color: var(--dk-text-2) !important; }
+.chap { border-top-color: var(--dk-hair) !important; }
+.chap .chh { border-bottom-color: var(--dk-hair-soft) !important; }
+.chap .chn { color: var(--dk-text) !important; opacity: 0.14 !important; }
+.chap .chh p small { color: var(--dk-gold) !important; }
+.chap .q7, #go .q7 { border-left-color: var(--dk-gold) !important; }
+.chap .q7 blockquote, #go .q7 blockquote { color: rgba(241, 237, 228, 0.88) !important; }
+.chap .q7 figcaption, #go .q7 figcaption { color: var(--dk-text-3) !important; }
+
+.ed-sec-meta { border-left-color: var(--dk-hair) !important; }
+.ed-meta-row { border-bottom-color: var(--dk-hair-soft) !important; }
+.ed-meta-row span { color: var(--dk-text-3) !important; }
+.ed-meta-row b { color: var(--dk-text) !important; }
+.ed-chap-nav a { color: var(--dk-text-2) !important; }
+.ed-chap-nav a:hover { color: var(--dk-gold) !important; border-bottom-color: var(--dk-gold) !important; }
+
+/* 暗室里的手绘景点画幅：柔和射灯光感 + 极细浅金边框呼吸 */
+.sc5 .im {
+  background: var(--dk-bg-2) !important;
+  border: 1px solid rgba(241, 237, 228, 0.12) !important;
+  box-shadow: 0 24px 54px -28px rgba(0, 0, 0, 0.85);
+}
+.sc5:hover .im {
+  border-color: rgba(200, 168, 107, 0.48) !important;
+}
+.sc5 .im::after {
+  background: var(--dk-bg) !important;
+}
+.sc5 .im img {
+  filter: brightness(0.90) contrast(1.05) saturate(0.88) !important;
+}
+.sc5:hover .im img {
+  filter: brightness(1.0) contrast(1.06) saturate(0.96) !important;
+}
+.sc5 small { color: var(--dk-text-3) !important; }
+.sc5 h3::after { color: var(--dk-text-3) !important; }
+.sc5:hover h3::after { color: var(--dk-gold) !important; }
+.sc5-foot { border-top-color: var(--dk-hair) !important; }
+.sc5-foot .st { color: var(--dk-text-3) !important; }
+.sc5-foot .st.ok { color: var(--dk-jade) !important; }
+.sc5-foot .feat-tag { color: var(--dk-gold) !important; }
+.sc5-foot .feat-tag.jade { color: var(--dk-text-2) !important; }
+
+/* 双行风物图谱带暗调适配 */
+.sk-strip-sec { border-top-color: var(--dk-hair) !important; }
+.sk-strip-hd h3 { color: var(--dk-text) !important; }
+.sk-strip-hd span { color: var(--dk-text-3) !important; }
+.sk-tile {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+}
+.sk-tile:hover { border-color: var(--dk-gold) !important; }
+.sk-tile .tim img { filter: brightness(0.9) contrast(1.04) saturate(0.88); }
+.sk-tile:hover .tim img { filter: brightness(1) contrast(1.05) saturate(0.96); }
+.sk-tile .sk-cap b { color: var(--dk-text) !important; }
+.sk-tile .sk-cap em { color: var(--dk-text-3) !important; }
+
+/* 步入汉宫暗室过场：夜雾远山 + 极暗无缝沉入 */
+.ed-interlude {
+  background: linear-gradient(180deg, var(--dk-bg) 0%, var(--dk-abyss) 100%);
+  color: var(--dk-text) !important;
+}
+.ed-interlude::before {
+  opacity: 0.16 !important;
+  mix-blend-mode: screen !important;
+  filter: invert(0.88) contrast(1.2) !important;
+}
+.ed-int-en { color: var(--dk-gold) !important; }
+.ed-interlude h3 { color: var(--dk-text) !important; }
+.ed-interlude p { color: var(--dk-text-2) !important; }
+.ed-int-line { background: var(--dk-gold) !important; }
+
+/* 03 汉代三绝沉入极暗漆黑 #090807 */
+#sanjue {
+  background: var(--dk-abyss) !important;
+}
+#sanjue .sh5::before {
+  background:
+    linear-gradient(90deg, rgba(9, 8, 7, 0.05) 0%, rgba(9, 8, 7, 0.35) 38%, rgba(9, 8, 7, 0.92) 58%, #090807 78%),
+    linear-gradient(180deg, #090807 0%, transparent 16%, transparent 82%, #090807 100%),
+    url("../img/ed/lacquer.jpg") left center / min(64vw, 920px) auto no-repeat !important;
+}
+
+/* ==========================================================================
+   7. 04 彭城手艺（暗室射灯标本展柜） & 05 交通导览（暗调建筑路引） & 页脚
+   ========================================================================== */
+.fyg {
+  border-top-color: var(--dk-hair) !important;
+  border-bottom-color: var(--dk-hair) !important;
+}
+.fyc {
+  border-right-color: var(--dk-hair) !important;
+}
+.fyc:hover { background: rgba(241, 237, 228, 0.025) !important; }
+.fyc::before { color: var(--dk-gold) !important; }
+/* 4 幅浅底非遗画作装裱在温润宣纸托盘展柜中，在暗室里自然生光 */
+.fyc .im {
+  background: var(--dk-paper-mat) !important;
+  padding: 14px !important;
+  border: 1px solid rgba(241, 237, 228, 0.14) !important;
+}
+.fyc .im img {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.06) brightness(1.02) !important;
+}
+.fyc small { color: var(--dk-gold) !important; }
+.fyc h3 { color: var(--dk-text) !important; }
+.fyc p { color: var(--dk-text-2) !important; }
+.fyc .lvl { border-top-color: var(--dk-hair-soft) !important; color: var(--dk-text-3) !important; }
+.fyc .lvl .lv { color: var(--dk-gold) !important; border-right-color: var(--dk-hair) !important; }
+
+/* 05 交通导览暗调重构 */
+.go-grid {
+  border-top-color: var(--dk-hair) !important;
+  border-bottom-color: var(--dk-hair) !important;
+}
+.panel.planner { border-right-color: var(--dk-hair) !important; }
+.panel h3 { color: var(--dk-text) !important; border-bottom-color: var(--dk-hair) !important; }
+.panel label { color: var(--dk-text-3) !important; }
+.panel select {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text) !important;
+}
+.panel .swap {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text) !important;
+}
+.ticket li b { color: var(--dk-text) !important; }
+.ticket li small, .ticket .min { color: var(--dk-text-2) !important; }
+.ticket .dot { background: var(--dk-bg) !important; }
+.ticket li::before { background: var(--dk-hair) !important; }
+.tfoot { border-top-color: var(--dk-hair) !important; }
+.tfoot .sum { color: var(--dk-text) !important; }
+
+#bPool .chip {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text-2) !important;
+}
+#bPool .chip:hover { border-color: var(--dk-gold) !important; color: var(--dk-text) !important; }
+#bPool .chip.in {
+  background: var(--dk-gold) !important;
+  border-color: var(--dk-gold) !important;
+  color: var(--dk-abyss) !important;
+}
+.blist li {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair-soft) !important;
+  color: var(--dk-text) !important;
+}
+.blist li .n {
+  background: var(--dk-gold) !important;
+  color: var(--dk-abyss) !important;
+}
+.blist li .lg { color: var(--dk-text-2) !important; }
+.blist li .ops button { color: var(--dk-text-2) !important; border-color: var(--dk-hair) !important; }
+.btn {
+  background: var(--dk-text) !important;
+  color: var(--dk-abyss) !important;
+  border-color: var(--dk-text) !important;
+}
+.btn.ghost, .btn.ghost.dark {
+  background: transparent !important;
+  color: var(--dk-text) !important;
+  border-color: var(--dk-hair) !important;
+}
+.btn.ghost:hover { border-color: var(--dk-gold) !important; color: var(--dk-gold) !important; }
+.btn.red {
+  background: var(--dk-red) !important;
+  border-color: var(--dk-red) !important;
+  color: #F7F4EC !important;
+}
+.note { color: var(--dk-text-3) !important; }
+
+/* 暗馆地铁图：站点文字与边框优雅反白 */
+#metro svg { fill: var(--dk-text) !important; }
+#metro svg circle { fill: var(--dk-bg) !important; stroke: var(--dk-text) !important; }
+
+/* 大页脚暗馆化 */
+.foot.ed-foot {
+  background: var(--dk-abyss) !important;
+  border-top-color: var(--dk-hair) !important;
+}
+.foot.ed-foot::before {
+  opacity: 0.1 !important;
+  mix-blend-mode: screen !important;
+  filter: invert(0.9);
+}
+.ed-foot-brand .foot-brand span { color: var(--dk-text) !important; }
+.ed-foot-poet, .ed-foot-links a { color: var(--dk-text-2) !important; }
+.ed-foot-links a:hover { color: var(--dk-gold) !important; }
+.ed-qr-card {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+}
+.ed-qr-card b { color: var(--dk-text) !important; }
+.ed-qr-card img { background: #F7F4EC; padding: 4px; }
+.ed-foot-bottom a { color: var(--dk-gold) !important; }
+
+/* ==========================================================================
+   8. 景点详情页 (#detail) & 弹窗 (#about / #gpanel) 全暗馆统一
+   ========================================================================== */
+.detail {
+  background: var(--dk-bg) !important;
+  color: var(--dk-text) !important;
+}
+.detail .v5bar {
+  background: rgba(16, 15, 13, 0.92) !important;
+  border-bottom-color: var(--dk-hair) !important;
+}
+.detail .v5bar .bk, .detail .v5bar .bt { color: var(--dk-text) !important; }
+.detail .v5bar .bk:focus-visible { outline: 1px solid rgba(200, 168, 107, 0.45) !important; outline-offset: 4px; }
+.detail .d-toc button { color: var(--dk-text-3) !important; }
+.detail .d-toc button.on, .detail .d-toc button:hover { color: var(--dk-text) !important; }
+.detail .d-toc button.on { border-bottom-color: var(--dk-gold) !important; }
+.detail .v5bar .bnav { color: var(--dk-gold) !important; border-bottom-color: var(--dk-gold) !important; }
+.detail .h5 .eye { color: var(--dk-gold) !important; }
+.detail .h5 h1, .detail .sh h2, .detail .must h3, .detail .f5 h3, .detail .step h3, .detail .sc b { color: var(--dk-text) !important; }
+.detail .h5 .sub, .detail .lead5, .detail .step p, .detail .sh p, .detail .tl5 p, .detail .f5 p, .detail .s6c p { color: var(--dk-text-2) !important; }
+.detail .pcbtn {
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text) !important;
+}
+.detail .pcbtn:hover { background: var(--dk-gold) !important; border-color: var(--dk-gold) !important; color: var(--dk-abyss) !important; }
+.detail .i5 { border-top-color: var(--dk-hair) !important; border-bottom-color: var(--dk-hair) !important; }
+.detail .i5 b, .detail .intro5 dd, .detail .tl5 b { color: var(--dk-text) !important; }
+.detail .i5 small, .detail .intro5 dt { color: var(--dk-text-3) !important; }
+.detail .sc { background: var(--dk-bg-2) !important; border: 1px solid var(--dk-hair) !important; }
+.detail .s6c, .detail .f5, .detail .g5, .detail .must, .detail .dnext a {
+  background: var(--dk-bg-2) !important;
+  border-color: var(--dk-hair) !important;
+  color: var(--dk-text) !important;
+}
+.detail .b5 {
+  background: transparent !important;
+  color: var(--dk-text) !important;
+  border-color: var(--dk-hair) !important;
+}
+.detail .b5.pri {
+  background: var(--dk-gold) !important;
+  border-color: var(--dk-gold) !important;
+  color: var(--dk-abyss) !important;
+}
+.detail .board .ci figcaption b { color: var(--dk-text) !important; }
+.detail .board .ci figcaption span { color: var(--dk-text-3) !important; border-color: var(--dk-hair) !important; }
+.detail .board .ci.cut .im,
+.detail .board .ci.stamp .im,
+.detail .board .ci.wood .im {
+  background: var(--dk-paper-mat) !important;
+}
+
+.abdlg, .gpanel {
+  background: var(--dk-bg-2) !important;
+  color: var(--dk-text) !important;
+  border-color: var(--dk-hair) !important;
+}
+.abdh { background: var(--dk-bg-2) !important; border-bottom-color: var(--dk-hair) !important; }
+.abdx { color: var(--dk-text) !important; border-color: var(--dk-hair) !important; }
+.ghead { border-bottom-color: var(--dk-hair) !important; }
+.gform input { background: var(--dk-bg) !important; color: var(--dk-text) !important; border-color: var(--dk-hair) !important; }
+
+/* 移动端底部 TabBar 暗馆适配 */
+.tabbar {
+  background: rgba(16, 15, 13, 0.94) !important;
+  border-top-color: var(--dk-hair) !important;
+}
+.tabbar a { color: var(--dk-text-3) !important; }
+.tabbar a.on { color: var(--dk-gold) !important; }

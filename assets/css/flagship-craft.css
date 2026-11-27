@@ -1,0 +1,849 @@
+/* ==========================================================================
+   汉韵彭城 · V31「旗舰策展工艺层 · Flagship Craft」
+   超越 IZANAMI × SAKAZUKI 的精微光学、空间呼吸与博物馆级完成度：
+   1. 全域极稀浮金尘埃画布 (.ed-ambient-dust) + 呼吸空气光场
+   2. 右侧极简悬浮「彭城纵轴标尺」(#edRail)：1px 丝线刻度 + 鎏金光点 + 悬停暗琉璃章签
+   3. Window Parallax 窗景微视差 + ±1.8° 3D 玻璃画框微倾角 + 对角防反射琉璃扫光
+   4. 01 彭城七里长卷「中央焦点景深」+ 悬浮策展条与 9 站进度轴零遮挡分离
+   5. 详情页「博物馆 50 Lux 保护光」展柜（低照度暖古绢暗角 → 悬停展柜射灯渐亮）
+   6. 全屏暗琉璃文物鉴赏灯箱 (#lb)
+   ========================================================================== */
+
+/* 1. 全域暗夜浮金尘埃画布（仅在暮夜黛墨模式下显现，极轻极稀绝不喧宾夺主） */
+.ed-ambient-dust {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+html.theme-obsidian .ed-ambient-dust {
+  opacity: 1;
+}
+
+/* 2. 右侧悬浮「彭城纵轴标尺」(#edRail)：IZANAMI × SAKAZUKI 级空间秩序感 */
+.ed-rail {
+  position: fixed;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 48;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 14px 0;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s var(--cm-ease);
+}
+html.ed-ready .ed-rail {
+  opacity: 1;
+}
+body.ed-detail-open .ed-rail {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+/* 贯穿 6 刻度的 1px 极淡纵轴丝线 */
+.ed-rail::before {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 18px;
+  bottom: 18px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(17, 16, 14, 0.16) 18%, rgba(17, 16, 14, 0.16) 82%, transparent);
+  pointer-events: none;
+}
+html.theme-obsidian .ed-rail::before {
+  background: linear-gradient(180deg, transparent, rgba(230, 238, 252, 0.16) 18%, rgba(230, 238, 252, 0.16) 82%, transparent);
+}
+.ed-rail-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 4px 0 4px 10px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+}
+.ed-rail-lbl {
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+  padding: 4px 11px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translateX(6px);
+  pointer-events: none;
+  background: rgba(247, 245, 240, 0.92);
+  color: #1A1918;
+  border: 1px solid rgba(17, 16, 14, 0.14);
+  backdrop-filter: blur(12px);
+  transition: opacity 0.28s ease, transform 0.36s var(--cm-ease);
+}
+html.theme-obsidian .ed-rail-lbl {
+  background: rgba(20, 25, 36, 0.84);
+  color: rgba(247, 245, 240, 0.92);
+  border: 1px solid rgba(230, 238, 252, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 20px -8px rgba(0, 0, 0, 0.7);
+}
+.ed-rail-lbl em {
+  font-style: normal;
+  font-family: monospace;
+  font-size: 10px;
+  margin-right: 6px;
+  color: #9E2A22;
+}
+html.theme-obsidian .ed-rail-lbl em {
+  color: #E5CA90;
+}
+.ed-rail-btn:hover .ed-rail-lbl,
+.ed-rail-btn:focus-visible .ed-rail-lbl {
+  opacity: 1;
+  transform: translateX(0);
+}
+.ed-rail-tick {
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+}
+.ed-rail-tick i {
+  display: block;
+  width: 6px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: rgba(17, 16, 14, 0.34);
+  transition: width 0.4s var(--cm-ease), background 0.35s ease, box-shadow 0.35s ease;
+}
+html.theme-obsidian .ed-rail-tick i {
+  background: rgba(230, 238, 252, 0.32);
+}
+.ed-rail-btn:hover .ed-rail-tick i {
+  width: 11px;
+  background: rgba(17, 16, 14, 0.72);
+}
+html.theme-obsidian .ed-rail-btn:hover .ed-rail-tick i {
+  background: rgba(247, 245, 240, 0.84);
+}
+.ed-rail-btn.on .ed-rail-tick i {
+  width: 16px;
+  height: 2px;
+  background: #9E2A22;
+}
+html.theme-obsidian .ed-rail-btn.on .ed-rail-tick i {
+  background: #E5CA90;
+  box-shadow: 0 0 12px rgba(229, 202, 144, 0.85);
+}
+@media (max-width: 1180px) {
+  .ed-rail { display: none !important; }
+}
+
+/* 3. Window Parallax 窗景微视差 + 对角防反射琉璃扫光 + 3D 微倾角 */
+html.theme-obsidian #sites .cgrid .sc5 .im,
+html.theme-obsidian #sanjue .sjc .im,
+html.theme-obsidian .detail .dv5-hero .h5img {
+  position: relative;
+  overflow: hidden !important;
+}
+/* 对角斜向琉璃光带：悬停时如实装博物馆防反射玻璃轻扫而过 */
+html.theme-obsidian #sites .cgrid .sc5 .im::before,
+html.theme-obsidian #sanjue .sjc .im::before,
+html.theme-obsidian .detail .dv5-hero .h5img::before {
+  content: "";
+  position: absolute;
+  inset: -12% -60%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 38%,
+    rgba(255, 249, 236, 0.14) 48%,
+    rgba(229, 202, 144, 0.08) 52%,
+    transparent 62%
+  );
+  transform: translateX(-78%) skewX(-16deg);
+  transition: transform 0.95s cubic-bezier(0.19, 1, 0.22, 1);
+}
+html.theme-obsidian #sites .cgrid .sc5:hover .im::before,
+html.theme-obsidian #sanjue .sjc:hover .im::before,
+html.theme-obsidian .detail .dv5-hero .h5img:hover::before {
+  transform: translateX(78%) skewX(-16deg);
+}
+/* 窗景视差图片：平滑 1.07 倍裁切余量 + 随滚动轻移 --wp-y */
+html.theme-obsidian #sites .cgrid .sc5.ed-in .im img,
+html.theme-obsidian #sanjue .sjc.cm-in .im img {
+  transform: translate3d(0, var(--wp-y, 0px), 0) scale(1.065) !important;
+  will-change: transform;
+}
+html.theme-obsidian #sites .cgrid .sc5:hover .im img,
+html.theme-obsidian #sanjue .sjc:hover .im img {
+  transform: translate3d(0, var(--wp-y, 0px), 0) scale(1.10) !important;
+}
+/* 3D 微倾角承载器 */
+html.theme-obsidian #sites .cgrid .sc5.ed-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* 4. 01 彭城七里长卷：中央焦点呼吸景深 + 策展条与 9 站进度轴彻底分离零重叠 */
+html.theme-obsidian #scroll .stop .stop-frame {
+  transition: transform 0.65s var(--cm-ease), opacity 0.55s ease, filter 0.55s ease !important;
+  transform: scale(0.945);
+  opacity: 0.72;
+  filter: brightness(0.86);
+}
+html.theme-obsidian #scroll .stop.cur .stop-frame,
+html.theme-obsidian #scroll .stop:hover .stop-frame {
+  transform: scale(1.03);
+  opacity: 1;
+  filter: brightness(1.03);
+}
+html.theme-obsidian #scroll .stop.cur .vg {
+  border-color: rgba(229, 202, 144, 0.68) !important;
+  box-shadow:
+    0 34px 72px -18px rgba(4, 6, 12, 0.94),
+    0 0 58px -12px rgba(212, 180, 117, 0.30) !important;
+}
+/* 彻底解决 .sc-card 遮挡底部 9 站进度轴中间圆点的问题 */
+@media (min-width: 721px) {
+  .scrollsec .sc-bar {
+    bottom: 18px !important;
+    height: 44px !important;
+    z-index: 7 !important;
+  }
+  .scrollsec .sc-card {
+    bottom: 84px !important;
+    z-index: 8 !important;
+  }
+}
+html.theme-obsidian .sc-bar .fill {
+  height: 2px !important;
+  background: linear-gradient(90deg, rgba(212, 180, 117, 0.55), #E5CA90) !important;
+  box-shadow: 0 0 12px rgba(229, 202, 144, 0.55);
+  transition: width 0.2s ease-out;
+}
+
+/* 5. 详情页「博物馆 50 Lux 保护光」展柜：告别刺眼亮白卡纸 → 温润低照度古绢 + 悬停射灯渐亮 */
+html.theme-obsidian .detail .board .ci .im {
+  background: #D6CEBE !important;
+  position: relative;
+  transition: background 0.5s ease, border-color 0.4s ease !important;
+}
+html.theme-obsidian .detail .board .ci .im::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 38px rgba(14, 18, 26, 0.38);
+  transition: box-shadow 0.55s var(--cm-ease);
+}
+html.theme-obsidian .detail .board .ci:not(.rub) .im img {
+  filter: brightness(0.89) sepia(0.08) contrast(1.03);
+  transition: filter 0.55s var(--cm-ease), transform 0.65s var(--cm-ease) !important;
+}
+html.theme-obsidian .detail .board .ci:hover .im {
+  background: #E7DFCF !important;
+  border-color: rgba(226, 197, 138, 0.52) !important;
+}
+html.theme-obsidian .detail .board .ci:hover .im::after {
+  box-shadow: inset 0 0 18px rgba(14, 18, 26, 0.12);
+}
+html.theme-obsidian .detail .board .ci:not(.rub):hover .im img {
+  filter: brightness(1.01) sepia(0.02) contrast(1.05);
+  transform: scale(1.028);
+}
+/* 美食圆形玉盘同样接入柔和博物馆暖照度，消除惨白亮圆刺眼感 */
+html.theme-obsidian .detail .f5 img {
+  background: #D6CEBE !important;
+  filter: brightness(0.90) sepia(0.07) contrast(1.03);
+  box-shadow: inset 0 0 24px rgba(14, 18, 26, 0.25), 0 18px 42px -18px rgba(4, 7, 14, 0.85) !important;
+  transition: filter 0.5s ease, transform 0.6s var(--cm-ease) !important;
+}
+html.theme-obsidian .detail .f5:hover img {
+  filter: brightness(1.01) sepia(0.01) contrast(1.04);
+  transform: scale(1.03);
+}
+
+/* 6. 全屏文物高清鉴赏灯箱 (#lb)：高定暗琉璃博物馆鉴赏模式 */
+html.theme-obsidian .lb {
+  background: rgba(11, 14, 21, 0.90) !important;
+  backdrop-filter: blur(28px) saturate(1.18) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.18) !important;
+  padding: 28px !important;
+}
+html.theme-obsidian .lb > img {
+  background: #DED6C6;
+  padding: 14px;
+  border-radius: 12px !important;
+  border: 1px solid rgba(226, 197, 138, 0.34) !important;
+  box-shadow:
+    inset 0 0 28px rgba(14, 18, 26, 0.22),
+    0 36px 88px -20px rgba(0, 0, 0, 0.92) !important;
+  max-height: 68vh !important;
+}
+html.theme-obsidian .lb .lbb button,
+html.theme-obsidian .lb .side {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.065) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(230, 238, 252, 0.18) !important;
+  color: rgba(247, 245, 240, 0.92) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 12px 28px rgba(0, 0, 0, 0.55) !important;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.35s var(--cm-ease) !important;
+}
+html.theme-obsidian .lb .lbb button:hover,
+html.theme-obsidian .lb .side:hover {
+  background: rgba(212, 180, 117, 0.24) !important;
+  border-color: rgba(226, 197, 138, 0.65) !important;
+  color: #FFFFFF !important;
+  transform: scale(1.06);
+}
+html.theme-obsidian .lb .lbb button:focus:not(:focus-visible),
+html.theme-obsidian .lb .side:focus:not(:focus-visible) {
+  outline: none !important;
+}
+html.theme-obsidian .lb .cap {
+  margin-top: 18px !important;
+  max-width: 680px !important;
+  padding: 16px 24px !important;
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.065) 0%, rgba(20, 25, 36, 0.72) 100%) !important;
+  border: 1px solid rgba(230, 238, 252, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  color: rgba(232, 235, 242, 0.78) !important;
+  line-height: 1.8 !important;
+}
+html.theme-obsidian .lb .cap b {
+  font-family: var(--serif);
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em;
+  color: rgba(247, 245, 240, 0.96) !important;
+}
+html.theme-obsidian .lb .cap small,
+html.theme-obsidian .lb .cap .nat {
+  color: #E5CA90 !important;
+  font-style: normal;
+}
+html.theme-obsidian .lb .cap .rel {
+  display: block;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(230, 238, 252, 0.10);
+  font-size: 12px;
+  color: rgba(214, 220, 234, 0.56) !important;
+}
+
+
+/* ==========================================================================
+   V32「超越级四大重构 · Transcendence Edition」
+   1. 首屏纯净去噪：默认隐去 8 个散落圆点，仅悬停地标区或点「显示全部地标」时如星火浮现
+   2. 03 汉代三绝左栏：真实龟山甬道 & 汉兵马俑坑「暗室提灯/聚光互动展窗」（零白块、零图重！）
+   3. 昼夜切换圆形光幕 View Transitions 涟漪动效
+   4. 全屏诗意收官大幕 (#epilogue)「彭城夜未央 · 带着长卷去徐州」
+   ========================================================================== */
+
+/* 1. 首屏纯净电影感：默认隐去散落圆点，移近任一地标才温柔唤醒金点与暗琉璃丝签 */
+html.theme-obsidian .hero[data-season="night"]:not(.pins-all) .pin2 .dot {
+  opacity: 0 !important;
+  transform: scale(0.6);
+  transition: opacity 0.45s ease, transform 0.5s var(--cm-ease) !important;
+}
+html.theme-obsidian .hero[data-season="night"]:not(.pins-all) .pin2:hover .dot,
+html.theme-obsidian .hero[data-season="night"]:not(.pins-all) .pin2:focus-visible .dot {
+  opacity: 1 !important;
+  transform: scale(1.1);
+}
+/* 扩大地标隐形热区，鼠标轻掠建筑附近即可唤醒微光 */
+.hero .pin2 {
+  padding: 18px !important;
+  margin: -18px !important;
+}
+
+/* 2. 03 汉代三绝左栏：暗室提灯窥甬道 / 暗室聚光阅军阵（真实原画 + 交互式暖金烛火） */
+html.theme-obsidian #sanjue {
+  overflow: clip !important; /* 启用 overflow: clip 激活右侧玄石拓印台 position: sticky 伴随滑动，彻底消除右侧空洞！ */
+}
+html.theme-obsidian #sanjue .sjl .sjc .im {
+  position: relative;
+  overflow: hidden !important;
+  background: #0D1016 !important;
+}
+html.theme-obsidian #sanjue .sjl .sjc .im img {
+  filter: sepia(0.28) contrast(1.16) brightness(0.76) saturate(0.86) !important;
+  transition: filter 0.6s ease, transform 0.7s var(--cm-ease) !important;
+}
+html.theme-obsidian #sanjue .sjl .sjc:hover .im img {
+  filter: sepia(0.18) contrast(1.18) brightness(0.88) saturate(0.95) !important;
+}
+/* 暗室提灯聚光幕（鼠标滑过实时照亮甬道岩壁与兵马俑军阵！） */
+.sj-lantern-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(
+    circle 155px at var(--lx, 50%) var(--ly, 50%),
+    rgba(246, 206, 126, 0.10) 0%,
+    rgba(16, 19, 26, 0.28) 46%,
+    rgba(12, 15, 22, 0.88) 100%
+  );
+  transition: opacity 0.4s ease;
+}
+.sj-lantern-cue {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 5;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #FAF3E3;
+  background: rgba(16, 20, 29, 0.72);
+  border: 1px solid rgba(226, 197, 138, 0.36);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: opacity 0.35s ease, transform 0.35s var(--cm-ease);
+}
+.sj-lantern-cue i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E5CA90;
+  box-shadow: 0 0 8px rgba(229, 202, 144, 0.9);
+}
+#sanjue .sjl .sjc:hover .sj-lantern-cue {
+  opacity: 0.35;
+  transform: translateY(4px);
+}
+html:not(.theme-obsidian) .sj-lantern-veil,
+html:not(.theme-obsidian) .sj-lantern-cue {
+  display: none !important;
+}
+
+/* 3. 昼夜切换圆形光幕涟漪 View Transitions API */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* 4. 全屏诗意收官大幕 (#epilogue)「彭城夜未央 · 带着长卷去徐州」 */
+.ed-epilogue {
+  position: relative;
+  min-height: 76vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px clamp(24px, 5vw, 64px);
+  overflow: hidden;
+  text-align: center;
+  isolation: isolate;
+  background: var(--iz-paper);
+  border-top: 1px solid var(--iz-hair);
+}
+html.theme-obsidian .ed-epilogue {
+  background: #0F1219;
+  border-top-color: rgba(230, 238, 252, 0.10);
+}
+.ed-epi-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("../img/art/pano.webp") center center / cover no-repeat;
+  opacity: 0.16;
+  filter: blur(2px) saturate(0.85);
+  transform: scale(1.04);
+  -webkit-mask-image: radial-gradient(72% 76% at 50% 50%, #000 32%, transparent 98%);
+  mask-image: radial-gradient(72% 76% at 50% 50%, #000 32%, transparent 98%);
+}
+html.theme-obsidian .ed-epi-bg {
+  background-image: url("../img/art/pano_night.webp");
+  opacity: 0.32;
+  filter: blur(1.5px) contrast(1.06);
+}
+.ed-epilogue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(62% 58% at 50% 50%, transparent 18%, rgba(244, 240, 232, 0.88) 92%);
+  pointer-events: none;
+}
+html.theme-obsidian .ed-epilogue::after {
+  background:
+    radial-gradient(60% 56% at 50% 50%, rgba(15, 18, 25, 0.32) 0%, rgba(15, 18, 25, 0.94) 86%),
+    linear-gradient(180deg, #12151C 0%, transparent 18%, transparent 82%, #0D1016 100%);
+}
+.ed-epi-in {
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.ed-epi-kicker {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.36em;
+  color: var(--iz-red);
+}
+html.theme-obsidian .ed-epi-kicker {
+  color: #D4B475;
+}
+.ed-epilogue h2 {
+  font-size: clamp(34px, 4.4vw, 56px);
+  font-weight: 500 !important;
+  line-height: 1.24;
+  letter-spacing: 0.22em;
+  margin: 0;
+  color: var(--iz-ink);
+}
+html.theme-obsidian .ed-epilogue h2 {
+  background: linear-gradient(180deg, rgba(252, 249, 242, 0.96) 0%, rgba(244, 240, 232, 0.78) 58%, rgba(216, 208, 192, 0.48) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55));
+}
+.ed-epilogue p {
+  font-size: 14.5px;
+  line-height: 2;
+  letter-spacing: 0.08em;
+  color: var(--iz-ink-2);
+  margin: 0;
+  max-width: 520px;
+}
+.ed-epi-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 12px;
+}
+.ed-epi-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  color: var(--iz-ink);
+  background: rgba(17, 16, 14, 0.04);
+  border: 1px solid var(--iz-hair);
+  backdrop-filter: blur(14px);
+  transition: transform 0.4s var(--cm-ease), background 0.35s ease, border-color 0.35s ease, color 0.3s ease, box-shadow 0.4s ease;
+}
+.ed-epi-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--iz-red);
+  color: var(--iz-red);
+}
+html.theme-obsidian .ed-epi-btn {
+  color: rgba(247, 245, 240, 0.90);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(230, 238, 252, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+html.theme-obsidian .ed-epi-btn.pri {
+  background: rgba(212, 180, 117, 0.20);
+  border-color: rgba(226, 197, 138, 0.56);
+  color: #FAF3E3;
+}
+html.theme-obsidian .ed-epi-btn:hover {
+  background: rgba(212, 180, 117, 0.32);
+  border-color: rgba(238, 214, 160, 0.82);
+  color: #FFFFFF;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 14px 32px -12px rgba(212, 180, 117, 0.38);
+}
+.ed-epi-coord {
+  margin-top: 24px;
+  font-family: monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  color: var(--iz-ink-3);
+}
+
+
+/* ==========================================================================
+   V33「收官五项像素级魔鬼细节封口」
+   1. 6px 暮夜鎏金暗黑定制滚动条（彻底告别刺眼 17px 纯白 Windows 系统滚动条）
+   2. 古泥金文本选中光晕 (::selection)
+   3. IZANAMI 00→100 暮夜丝幕向上轻揭开卷加载器
+   4. 04 彭城手艺 & 全站可信度微徽章 (.lv) + 交通方式圆标 (.g5 .m) 暗琉璃化
+   ========================================================================== */
+
+/* 1. 全站 & 详情页超细暮夜鎏金定制滚动条 */
+html.theme-obsidian,
+html.theme-obsidian .detail,
+html.theme-obsidian .gmsgs {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 180, 117, 0.34) #0E1118;
+}
+html.theme-obsidian::-webkit-scrollbar,
+html.theme-obsidian .detail::-webkit-scrollbar,
+html.theme-obsidian .gmsgs::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html.theme-obsidian::-webkit-scrollbar-track,
+html.theme-obsidian .detail::-webkit-scrollbar-track,
+html.theme-obsidian .gmsgs::-webkit-scrollbar-track {
+  background: #0E1118;
+}
+html.theme-obsidian::-webkit-scrollbar-thumb,
+html.theme-obsidian .detail::-webkit-scrollbar-thumb,
+html.theme-obsidian .gmsgs::-webkit-scrollbar-thumb {
+  background: rgba(212, 180, 117, 0.28);
+  border-radius: 999px;
+  border: 1px solid rgba(14, 17, 24, 0.6);
+}
+html.theme-obsidian::-webkit-scrollbar-thumb:hover,
+html.theme-obsidian .detail::-webkit-scrollbar-thumb:hover,
+html.theme-obsidian .gmsgs::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 202, 144, 0.62);
+}
+
+/* 2. 古泥金文本选中光晕 */
+html.theme-obsidian ::selection {
+  background: rgba(212, 180, 117, 0.32);
+  color: #FAF3E3;
+}
+
+/* 3. IZANAMI 00→100 暮夜丝幕轻揭开卷加载器 */
+html.theme-obsidian .ed-preloader {
+  background:
+    radial-gradient(56% 48% at 50% 42%, rgba(44, 72, 118, 0.28) 0%, transparent 70%),
+    #0E1118 !important;
+  transition: transform 0.92s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.65s ease 0.15s !important;
+}
+html.theme-obsidian .ed-preloader.done {
+  transform: translateY(-100%) !important;
+  opacity: 0.96 !important;
+  pointer-events: none;
+}
+.ed-pre-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+}
+.ed-pre-pct {
+  font-family: monospace;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  color: #E5CA90;
+}
+.ed-pre-meter .ed-pre-line {
+  width: 168px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  background: rgba(230, 238, 252, 0.14) !important;
+  overflow: hidden;
+}
+.ed-pre-meter .ed-pre-line i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(212, 180, 117, 0.4), #E5CA90) !important;
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: none !important;
+}
+.ed-pre-tag {
+  font-family: var(--serif);
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  color: rgba(214, 220, 234, 0.42);
+}
+
+/* 4. 全站可信度微徽章 (.lv) & 04 手艺底标 & 交通圆标统一暗琉璃化（彻底消除刺眼旧红标！） */
+html.theme-obsidian .lv,
+html.theme-obsidian #fy .fyc .lvl .lv,
+html.theme-obsidian .detail .i5 .lv,
+html.theme-obsidian .detail .s6c .lv,
+html.theme-obsidian #sanjue .lv {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 2px 10px !important;
+  margin-right: 8px;
+  border-radius: 999px !important;
+  font-size: 10.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  background: rgba(212, 180, 117, 0.11) !important;
+  border: 1px solid rgba(212, 180, 117, 0.30) !important;
+  color: #E5CA90 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+html.theme-obsidian .lv.a {
+  background: rgba(102, 163, 138, 0.14) !important;
+  border-color: rgba(122, 192, 162, 0.36) !important;
+  color: #96D6B9 !important;
+}
+html.theme-obsidian .lv.c {
+  background: rgba(216, 128, 116, 0.12) !important;
+  border-color: rgba(226, 146, 134, 0.34) !important;
+  color: #E8A69C !important;
+}
+html.theme-obsidian #fy .fyc .lvl {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  padding-top: 12px !important;
+  margin-top: 14px !important;
+  font-size: 11.5px !important;
+  color: rgba(214, 220, 234, 0.56) !important;
+}
+/* 详情页交通方式圆标统一通透暗琉璃环 */
+html.theme-obsidian .detail .g5 li .m {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(212, 180, 117, 0.42) !important;
+  color: #E5CA90 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+
+/* ==========================================================================
+   V34「高定几何金标 × 全站零突兀红块清零」
+   1. 顶栏新版「汉璧彭城阙」几何金标 + 粗黄圆点 → 1px 极细建筑竖线
+   2. 首屏「汉韵」实心红块 → 超薄暗琉璃鎏金细线竖签
+   3. 清理全站 4 处残留旧红块（长卷激活点 / 详情故事竖条 / 05 诗句线与红按钮）
+   ========================================================================== */
+
+/* 1. 顶栏与页脚几何金标微调（白昼素宣模式下自动反色为深墨古铜，昼夜皆清晰锐利） */
+.logo-seal {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+}
+html:not(.theme-obsidian) .logo-seal,
+html:not(.theme-obsidian) .foot-brand img,
+html:not(.theme-obsidian) .ed-pre-seal {
+  filter: brightness(0.32) sepia(0.35) contrast(1.15);
+}
+/* 顶栏「汉韵彭城 · 徐州汉文化数字导览」粗圆点 → 1px 纤细竖线 */
+.lg7 {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+.lg7 i {
+  display: inline-block !important;
+  width: 1px !important;
+  height: 11px !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  background: rgba(17, 16, 14, 0.22) !important;
+  margin: 0 !important;
+  overflow: hidden;
+}
+html.theme-obsidian .lg7 i {
+  background: rgba(230, 238, 252, 0.22) !important;
+}
+
+/* 2. 首屏左下角「汉韵」彻底告别突兀实心红块 → 极薄暗琉璃鎏金细线竖签 */
+html.theme-obsidian .hero[data-season="night"] .seal-s {
+  background: rgba(18, 22, 31, 0.52) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 197, 138, 0.46) !important;
+  color: #E5CA90 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.22em !important;
+  border-radius: 3px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 8px 22px -6px rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 3. 01 长卷底部激活站圆点：告别实心亮红 → 暖鎏金微光圆点 */
+html.theme-obsidian .sc-bar button.on {
+  background: #E5CA90 !important;
+  border-color: #FAF3E3 !important;
+  box-shadow: 0 0 0 4px rgba(229, 202, 144, 0.24), 0 0 14px rgba(229, 202, 144, 0.85) !important;
+}
+
+/* 4. 详情页「01 循迹细读」中间滚动指示竖条：告别亮红短棒 → 暖鎏金微光竖条 */
+html.theme-obsidian .detail .sdots button {
+  background: rgba(230, 238, 252, 0.20) !important;
+}
+html.theme-obsidian .detail .sdots button.on {
+  background: #E5CA90 !important;
+  box-shadow: 0 0 12px rgba(229, 202, 144, 0.78) !important;
+}
+
+/* 5. 05 彭城行旅路引诗句竖线 & 高德导航按钮：彻底统一为古泥金暗琉璃体系 */
+html.theme-obsidian #go .q7 {
+  border-left-color: #D4B475 !important;
+}
+html.theme-obsidian #go .btn.small.red,
+html.theme-obsidian .sc-card .acts .btn.red {
+  background: rgba(212, 180, 117, 0.22) !important;
+  border: 1px solid rgba(226, 197, 138, 0.58) !important;
+  color: #FAF3E3 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+html.theme-obsidian #go .btn.small.red:hover,
+html.theme-obsidian .sc-card .acts .btn.red:hover {
+  background: rgba(212, 180, 117, 0.36) !important;
+  border-color: rgba(238, 214, 160, 0.85) !important;
+  color: #FFFFFF !important;
+}
+
+
+/* ==========================================================================
+   V35「IZANAMI 极致减法 · 纯粹字标与零贴纸首屏」
+   1. 顶栏与页脚彻底隐藏冗余小图标 → 极简宽字距衬线纯字标「汉韵彭城 | 徐州汉文化数字导览」
+   2. 首屏彻底隐藏左下角「汉韵」方框 → 月光透明大字「彭城」纯粹悬浮于暮夜华灯之上
+   ========================================================================== */
+.nav .logo-seal,
+.foot-brand img {
+  display: none !important;
+}
+.nav .logo {
+  gap: 0 !important;
+}
+.nav .lg7 b {
+  font-size: 16.5px !important;
+  letter-spacing: 0.28em !important;
+  font-weight: 500 !important;
+}
+.nav .lg7 small {
+  font-size: 11px !important;
+  letter-spacing: 0.18em !important;
+  opacity: 0.78;
+}
+.hero .tv .seal-s {
+  display: none !important;
+}
+.ed-pre-seal {
+  display: none !important;
+}

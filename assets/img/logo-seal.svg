@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="汉韵彭城印章标志">
+  <rect x="2" y="2" width="60" height="60" rx="5" fill="#9A2C24"/>
+  <rect x="6" y="6" width="52" height="52" rx="2.5" fill="none" stroke="#F6EFE2" stroke-width="1.5" stroke-opacity="0.88"/>
+  <path d="M6 12 H12 V6 M58 12 H52 V6 M6 52 H12 V58 M58 52 H52 V58" fill="none" stroke="#F6EFE2" stroke-width="1.3" stroke-opacity="0.6"/>
+  <path d="M32 9 V55 M9 32 H55" stroke="#F6EFE2" stroke-width="0.65" stroke-opacity="0.25"/>
+  <g fill="#F6EFE2" font-family="'XZSerif','Noto Serif CJK SC','Source Han Serif SC','Songti SC',serif" font-weight="900" font-size="18.5" text-anchor="middle" dominant-baseline="central">
+    <text x="43" y="21">汉</text>
+    <text x="43" y="43.5">韵</text>
+    <text x="21" y="21">彭</text>
+    <text x="21" y="43.5">城</text>
+  </g>
+</svg>

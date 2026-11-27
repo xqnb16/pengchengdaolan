@@ -1,0 +1,587 @@
+/* ==========================================================================
+   汉韵彭城 · V16 SAKAZUKI 级翻页动态视觉层 + 高密度手绘图谱带
+   1. 3幕吸顶翻页策展剧场 (Sticky 3-Act Kinetic Morph Stage)
+   2. 双行反向视差风物画廊带 (Opposing Scroll-Linked 16-Plate Filmstrip)
+   3. 120fps 纯 GPU 滚动驱动字体/画幅动态缩放（绝不劫持原生滚轮，丝滑零卡顿）
+   ========================================================================== */
+
+/* ==========================================================================
+   1. SAKAZUKI 3 幕吸顶翻页动态剧场 (#skStage)
+   ========================================================================== */
+.sk-stage {
+  position: relative;
+  height: 270vh;
+  background: var(--iz-paper);
+  z-index: 3;
+}
+.sk-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--iz-paper);
+  border-top: 1px solid var(--iz-hair);
+  border-bottom: 1px solid var(--iz-hair);
+}
+
+/* 三幕全幅视觉层 */
+.sk-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.sk-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.sk-slide.on {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* 背景满幅画作：翻页时平滑缩放呼吸 */
+.sk-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.sk-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.86) contrast(1.03);
+  transform: scale(1.12);
+  transition: transform 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sk-slide.on .sk-bg img {
+  transform: scale(1.01);
+}
+/* 左侧柔雾遮罩：确保文案清晰，同时右侧满幅展现宋画山水/宫殿 */
+.sk-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(240, 238, 233, 0.96) 0%,
+    rgba(240, 238, 233, 0.84) 36%,
+    rgba(240, 238, 233, 0.18) 66%,
+    rgba(240, 238, 233, 0.04) 100%
+  );
+}
+
+/* 第三幕（两汉器物）多图视差浮雕构图：3 件手绘国宝错落呼应 */
+.sk-relic-comp {
+  position: absolute;
+  right: clamp(28px, 6vw, 96px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(52vw, 720px);
+  height: min(68vh, 540px);
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 18px;
+  z-index: 2;
+}
+.sk-rbox {
+  background: rgba(240, 238, 233, 0.45);
+  border: 1px solid var(--iz-hair);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(28px) scale(0.96);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s ease;
+}
+.sk-rbox.tall {
+  grid-row: span 2;
+}
+.sk-slide.on .sk-rbox {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+.sk-slide.on .sk-rbox:nth-child(2) { transition-delay: 0.12s; }
+.sk-slide.on .sk-rbox:nth-child(3) { transition-delay: 0.22s; }
+.sk-rbox img {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: contrast(1.07) brightness(1.04) saturate(0.92);
+  background: transparent;
+}
+.sk-rbox.cover img {
+  object-fit: cover;
+  mix-blend-mode: normal;
+}
+.sk-rbox span {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--iz-ink-2);
+  letter-spacing: 0.14em;
+  padding-top: 8px;
+  margin-top: 6px;
+  border-top: 1px solid var(--iz-hair-soft);
+  display: flex;
+  justify-content: space-between;
+}
+.sk-rbox span em {
+  font-style: normal;
+  font-family: monospace;
+  font-size: 10.5px;
+  color: var(--iz-ink-3);
+}
+
+/* 第二幕叠加辅图（增强扎实多图层次） */
+.sk-inset-plate {
+  position: absolute;
+  right: clamp(28px, 5vw, 72px);
+  bottom: clamp(44px, 7vh, 72px);
+  width: min(26vw, 330px);
+  background: var(--iz-surface);
+  border: 1px solid var(--iz-hair);
+  padding: 8px;
+  z-index: 3;
+  box-shadow: 0 24px 48px -24px rgba(17, 16, 14, 0.35);
+  transform: translateY(32px);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.18s, opacity 0.8s ease 0.18s;
+}
+.sk-slide.on .sk-inset-plate {
+  transform: translateY(0);
+  opacity: 1;
+}
+.sk-inset-plate img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+}
+.sk-inset-plate span {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--serif);
+  font-size: 11.5px;
+  color: var(--iz-ink-2);
+  letter-spacing: 0.12em;
+}
+
+/* 左侧动态变幻字体层（SAKAZUKI 翻页字距与位移变形） */
+.sk-copy {
+  position: relative;
+  z-index: 4;
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4.5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+.sk-copy-box {
+  max-width: 460px;
+}
+.sk-act-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.24em;
+  color: var(--iz-red);
+  margin-bottom: 18px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+}
+.sk-act-kicker::after {
+  content: "";
+  width: 32px;
+  height: 1px;
+  background: var(--iz-red);
+}
+.sk-copy-box h2 {
+  font-family: var(--serif);
+  font-weight: 600 !important;
+  font-size: clamp(38px, 4.6vw, 62px);
+  line-height: 1.16;
+  letter-spacing: 0.28em; /* 进场前宽字距 */
+  color: var(--iz-ink);
+  margin: 0 0 20px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.06s,
+              opacity 0.75s ease 0.06s,
+              letter-spacing 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.06s;
+}
+.sk-copy-box p {
+  font-size: 14.5px;
+  line-height: 2;
+  color: var(--iz-ink-2);
+  margin: 0 0 24px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.16s, opacity 0.75s ease 0.16s;
+}
+.sk-copy-meta {
+  display: flex;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--iz-hair);
+  opacity: 0;
+  transform: translateY(14px);
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.24s, opacity 0.75s ease 0.24s;
+}
+.sk-copy-meta div small {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--iz-ink-3);
+}
+.sk-copy-meta div b {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--iz-ink);
+  letter-spacing: 0.08em;
+}
+.sk-slide.on .sk-act-kicker,
+.sk-slide.on .sk-copy-box p,
+.sk-slide.on .sk-copy-meta {
+  opacity: 1;
+  transform: none;
+}
+.sk-slide.on .sk-copy-box h2 {
+  opacity: 1;
+  transform: none;
+  letter-spacing: 0.14em; /* 落定后收紧至完美字距 */
+}
+
+/* 底部 3 幕切换进度指示器 */
+.sk-pager {
+  position: absolute;
+  left: clamp(24px, 4.5vw, 64px);
+  bottom: 34px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.sk-pbtn {
+  background: transparent;
+  border: 0;
+  padding: 6px 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--iz-ink-3);
+  border-bottom: 1.5px solid transparent;
+  transition: color 0.25s, border-color 0.25s;
+}
+.sk-pbtn span {
+  font-family: monospace;
+  font-size: 11px;
+}
+.sk-pbtn.on {
+  color: var(--iz-ink);
+  border-bottom-color: var(--iz-red);
+}
+.sk-pbtn.on span {
+  color: var(--iz-red);
+}
+
+/* ==========================================================================
+   2. 双行反向视差风物画廊带 (#skFilmstrip · 释放 16 幅隐藏手绘与美食拓片)
+   ========================================================================== */
+.sk-strip-sec {
+  padding: 64px 0 72px;
+  background: var(--iz-paper);
+  overflow: hidden;
+  border-top: 1px solid var(--iz-hair);
+}
+.sk-strip-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 32px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.sk-strip-hd h3 {
+  font-family: var(--serif);
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 600 !important;
+  letter-spacing: 0.16em;
+  margin: 0;
+}
+.sk-strip-hd span {
+  font-family: monospace, var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  color: var(--iz-ink-3);
+}
+.sk-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.sk-row {
+  display: flex;
+  gap: 18px;
+  width: max-content;
+  will-change: transform;
+}
+.sk-tile {
+  flex: none;
+  width: clamp(210px, 19vw, 270px);
+  text-decoration: none;
+  color: inherit;
+  background: var(--iz-surface);
+  border: 1px solid var(--iz-hair);
+  padding: 8px 8px 10px;
+  transition: border-color 0.25s ease;
+}
+.sk-tile:hover {
+  border-color: var(--iz-red);
+}
+.sk-tile .tim {
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  background: var(--iz-paper-2);
+}
+.sk-tile .tim img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.88) contrast(1.03);
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sk-tile:hover .tim img {
+  transform: scale(1.06);
+}
+.sk-tile .sk-cap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.sk-tile .sk-cap b {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--iz-ink);
+  letter-spacing: 0.08em;
+}
+.sk-tile .sk-cap em {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--iz-ink-3);
+  letter-spacing: 0.08em;
+}
+
+/* ==========================================================================
+   3. 滚动驱动文字与画幅微动效（120fps 纯 GPU 合成，绝不卡顿）
+   ========================================================================== */
+.sc5 .im {
+  will-change: transform;
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sh5 h2 {
+  transition: letter-spacing 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease;
+}
+
+@media (max-width: 960px) {
+  .sk-stage { height: auto; }
+  .sk-sticky { position: static; height: auto; }
+  .sk-slide {
+    position: relative;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    min-height: 420px;
+    padding: 48px 0;
+    border-bottom: 1px solid var(--iz-hair);
+  }
+  .sk-slide .sk-act-kicker,
+  .sk-slide .sk-copy-box h2,
+  .sk-slide .sk-copy-box p,
+  .sk-slide .sk-copy-meta,
+  .sk-slide .sk-rbox,
+  .sk-slide .sk-inset-plate {
+    opacity: 1 !important;
+    transform: none !important;
+    letter-spacing: 0.1em !important;
+  }
+  .sk-relic-comp, .sk-inset-plate, .sk-pager { display: none; }
+}
+
+
+/* ==========================================================================
+   V16.2 精准打磨：还原博物馆清晰度、取消大红圆球光标、实装 IZANAMI 流体云雾互动与实时坐标
+   ========================================================================== */
+
+/* 1. 修复首屏底部过深白雾遮住「徐州博物馆」：羽化严格压缩在最底 46px 且层级在景点签之下 */
+.pano > img {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 92%, transparent 100%) !important;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 92%, transparent 100%) !important;
+}
+.hero.kai::after {
+  height: 46px !important;
+  z-index: 2 !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(240, 238, 233, 0) 0%,
+    rgba(240, 238, 233, 0.72) 65%,
+    #F0EEE9 100%
+  ) !important;
+}
+.hero .pins {
+  z-index: 9 !important;
+}
+.pin2:hover, .pin2:focus-visible, .pin2.ex {
+  z-index: 20 !important;
+}
+.pin2 .pv {
+  z-index: 22 !important;
+}
+
+/* 首屏流体云雾互动 Canvas 层（如 IZANAMI 实时烟雾水纹轻扰，不挡点击） */
+.ed-hero-fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 首屏左下角 IZANAMI 级实时彭城坐标时钟 */
+.ed-live-clock {
+  position: absolute;
+  left: clamp(24px, 4.5vw, 64px);
+  bottom: 28px;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  font-family: monospace, var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--iz-ink-2);
+  background: rgba(240, 238, 233, 0.76);
+  backdrop-filter: blur(8px);
+  padding: 5px 12px;
+  border-left: 1.5px solid var(--iz-red);
+}
+.ed-live-clock b {
+  font-weight: 700;
+  color: var(--iz-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 2. 彻底取消丑陋的 74px「大红印章圆球」光标 → 极克制微光墨点 + 极细圆环 */
+.ed-cursor-dot {
+  width: 5px !important;
+  height: 5px !important;
+  margin: -2.5px 0 0 -2.5px !important;
+  background: var(--iz-ink) !important;
+  opacity: 0.85;
+}
+.ed-cursor-ring {
+  width: 24px !important;
+  height: 24px !important;
+  margin: -12px 0 0 -12px !important;
+  border: 1px solid rgba(17, 16, 14, 0.24) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.ed-cursor-ring span {
+  display: none !important;
+}
+.ed-cursor-active .ed-cursor-dot,
+.ed-cursor-link .ed-cursor-dot {
+  opacity: 1 !important;
+  background: var(--iz-red) !important;
+  transform: scale(1.3);
+}
+.ed-cursor-active .ed-cursor-ring,
+.ed-cursor-link .ed-cursor-ring {
+  width: 34px !important;
+  height: 34px !important;
+  margin: -17px 0 0 -17px !important;
+  border-color: rgba(158, 42, 34, 0.45) !important;
+  background: rgba(158, 42, 34, 0.04) !important;
+  box-shadow: none !important;
+}
+
+/* 3. 修复 01 长卷顶部路线筛选换行问题（单行严丝合缝） */
+.sc-head {
+  flex-wrap: nowrap !important;
+}
+.sch6 p:not(.eye) {
+  display: none !important;
+}
+#scRoutes.chips {
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  gap: 18px !important;
+}
+.skipsc {
+  white-space: nowrap !important;
+  flex: none !important;
+}
+
+/* 4. 第三幕「两汉器物」去除硬灰边框盒子，让手绘器物无缝融纸漂浮（也随时可替换满幅器物长卷） */
+.sk-relic-comp {
+  gap: 24px !important;
+}
+.sk-rbox {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  mix-blend-mode: multiply;
+}
+.sk-rbox img {
+  mix-blend-mode: normal !important;
+  filter: contrast(1.06) brightness(1.03) saturate(0.92) !important;
+}
+.sk-rbox.cover img {
+  object-fit: contain !important;
+  mix-blend-mode: multiply !important;
+}
+.sk-rbox span {
+  border-top: 1px solid var(--iz-hair) !important;
+  padding-top: 6px !important;
+}
+
+.sk-bg-relic img {
+  object-fit: contain !important;
+  object-position: right bottom !important;
+  padding-top: 74px;
+  box-sizing: border-box;
+  mix-blend-mode: multiply;
+}
+.sk-bg-relic::after {
+  background: linear-gradient(90deg, rgba(240, 238, 233, 0.92) 0%, rgba(240, 238, 233, 0.55) 34%, transparent 56%) !important;
+}
+
+@media (max-width: 720px) {
+  .ed-live-clock { display: none; }
+}

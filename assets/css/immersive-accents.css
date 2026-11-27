@@ -1,0 +1,330 @@
+/* ==========================================================================
+   汉韵彭城 · V20「清透宣纸统一 · 彭城四时动态主视觉 · 古画手卷精修」
+   1. 首屏 Hero：大幅减薄顶部雾气（文庙与故黄河完全清晰），支持春/夏/秋/冬四时天光与生态微动态
+   2. 01 彭城七里长卷：清理重叠圆章、精简冗余横线、舒展引首、升级高低错落的古画手卷装裱构图
+   3. 03 汉代三绝：保留全站唯一深漆暗室高潮
+   ========================================================================== */
+
+/* 1. 导航栏浅色区墨字稳固 + 隐藏旧版悬浮白气泡 */
+html:not(.ed-dark-room) .nav.solid .links a.on,
+html:not(.ed-dark-room) .nav.solid .links a:hover,
+html:not(.ed-dark-room) .nav .links a.on {
+  color: var(--iz-ink) !important;
+}
+.hero .kai-zq,
+.pano-cloud,
+.mist10,
+.gbub {
+  display: none !important;
+}
+
+/* ==========================================================================
+   2. 首屏 Hero：减雾提清 + 四时水彩天光过渡 + 左下时钟/四时组合条
+   ========================================================================== */
+.hero.kai {
+  height: 100vh !important;
+  height: 100svh !important;
+  min-height: 680px;
+  background: var(--iz-paper) !important;
+}
+.kai-paper {
+  background: var(--iz-paper) !important;
+}
+.hero .pano-wrap {
+  inset: 0 !important;
+  height: 100% !important;
+}
+.hero .pano {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+}
+.hero .pano > img.pano-img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 72% !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  filter: contrast(1.02) saturate(1.01) !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.15s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  will-change: opacity;
+}
+/* 四季实绘全景丝滑叠化（零滤镜硬调，呈现真实植被、荷花、银杏红枫与白雪覆顶） */
+.hero .pano > img.pano-spring,
+.hero[data-season="spring"] .pano > img.pano-spring { opacity: 1; z-index: 1; }
+.hero[data-season="summer"] .pano > img.pano-summer { opacity: 1; z-index: 2; }
+.hero[data-season="autumn"] .pano > img.pano-autumn { opacity: 1; z-index: 2; }
+.hero[data-season="winter"] .pano > img.pano-winter { opacity: 1; z-index: 2; }
+.hero .pano .pins { z-index: 6 !important; }
+.hero .pano .river-tag { z-index: 5 !important; }
+
+/* 大幅收薄顶部雾气：仅保留顶部 14% 给导航栏 + 左上标题正背后极小柔和宣纸托底，文庙/故黄河完全清透！ */
+.hero.kai::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(240, 238, 233, 0.88) 0%,
+      rgba(240, 238, 233, 0.42) 10%,
+      rgba(240, 238, 233, 0) 20%
+    ),
+    radial-gradient(
+      34% 34% at 15% 24%,
+      rgba(240, 238, 233, 0.84) 0%,
+      rgba(240, 238, 233, 0.46) 54%,
+      rgba(240, 238, 233, 0) 100%
+    );
+}
+
+/* 底部 50px 柔和羽化融入 01 长卷，徐州博物馆完整清晰 */
+.hero.kai::after {
+  top: auto !important;
+  bottom: 0 !important;
+  height: 50px !important;
+  z-index: 4 !important;
+  background: linear-gradient(
+    to bottom,
+    rgba(240, 238, 233, 0) 0%,
+    rgba(240, 238, 233, 0.58) 64%,
+    #F0EEE9 100%
+  ) !important;
+}
+
+.hero .kai-title {
+  top: clamp(88px, 10.5vh, 122px) !important;
+  z-index: 9 !important;
+}
+.hero .tv h1 {
+  color: var(--iz-ink) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 2px 18px rgba(240, 238, 233, 0.85);
+}
+.hero .vline {
+  text-shadow: 0 1px 12px rgba(240, 238, 233, 0.9);
+}
+.hero .tdesc p,
+.hero.tight2 .tdesc > p {
+  display: block !important;
+  color: #35332F !important;
+  text-shadow: 0 1px 10px rgba(240, 238, 233, 0.92);
+}
+
+/* 左下角：实时彭城时钟 + 极克制「四时」切换条 */
+.ed-hero-meta-l {
+  position: absolute;
+  left: clamp(24px, 4.5vw, 64px);
+  bottom: 26px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.ed-hero-meta-l .ed-live-clock {
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+  background: rgba(244, 242, 237, 0.84);
+  border: 1px solid rgba(17, 16, 14, 0.08);
+  border-left: 1.5px solid var(--iz-red);
+}
+.ed-season-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(244, 242, 237, 0.84);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(17, 16, 14, 0.08);
+  padding: 3px 10px 3px 12px;
+  height: 29px;
+  box-sizing: border-box;
+}
+.ed-season-bar .ed-sb-lbl {
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--iz-ink-3);
+  margin-right: 6px;
+  padding-right: 8px;
+  border-right: 1px solid var(--iz-hair);
+}
+.ed-season-bar button {
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid transparent;
+  padding: 2px 7px;
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--iz-ink-2);
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s;
+}
+.ed-season-bar button:hover {
+  color: var(--iz-ink);
+}
+.ed-season-bar button.on {
+  color: var(--iz-red);
+  border-bottom-color: var(--iz-red);
+}
+
+/* ==========================================================================
+   3. 01 彭城七里长卷：清理重叠 + 精简冗余横线 + 高低错落古画手卷装裱
+   ========================================================================== */
+/* 精简顶栏多余线条（去掉 sc-head 底部的厚重分割线，只留轨道内极轻的一条手卷地平线） */
+.sc-head {
+  top: 78px !important;
+  padding: 0 0 12px 0 !important;
+  border-bottom: 0 !important;
+}
+.sc-track {
+  top: 138px !important;
+  bottom: 96px !important;
+}
+
+/* 左侧卷首引首（彭城七里）：舒展分行，不再和正文挤成一团 */
+.intro-panel {
+  padding-right: 48px !important;
+}
+.intro-panel .meta {
+  max-width: 265px !important;
+}
+.intro-panel .sc-cue-line {
+  display: block !important;
+  width: fit-content !important;
+  margin-top: 20px !important;
+}
+
+/* 彻底隐藏弃用的「已盖章」重叠圆章 */
+.stop .got {
+  display: none !important;
+}
+
+/* 去“PPT 盒式卡片感” → 博物馆古画手卷散点装裱：轻绫边 + 高低错落 + 重要地标视觉主次 */
+.stop {
+  padding: 12px 30px !important;
+}
+.stop-frame {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+/* 8/9 处古迹呈自然古画高低起伏韵律，同时确保全部画下题签稳居底部地平线之上，零压线 */
+.stop[data-i="0"] .stop-frame { transform: translateY(-30px) scale(0.94); }
+.stop[data-i="1"] .stop-frame { transform: translateY(-2px)  scale(0.91); }
+.stop[data-i="2"] .stop-frame { transform: translateY(-24px) scale(0.91); }
+.stop[data-i="3"] .stop-frame { transform: translateY(-4px)  scale(0.94); }
+.stop[data-i="4"] .stop-frame { transform: translateY(-32px) scale(1.01); } /* 戏马台重点放大 */
+.stop[data-i="5"] .stop-frame { transform: translateY(-8px)  scale(1.01); } /* 徐州博物馆重点放大 */
+.stop[data-i="6"] .stop-frame { transform: translateY(-28px) scale(0.93); }
+.stop[data-i="7"] .stop-frame { transform: translateY(-4px)  scale(0.94); }
+.stop[data-i="8"] .stop-frame { transform: translateY(-26px) scale(1.00); } /* 云龙湖收卷舒展 */
+
+.stop.cur .stop-frame,
+.stop:hover .stop-frame {
+  transform: translateY(-22px) scale(1.03) !important;
+}
+
+/* 画幅本体：8px 温润宣纸浅绫托底 + 1px 极细墨框，悬停微微浮起 */
+.stop .vg {
+  background-color: var(--iz-surface);
+  padding: 8px;
+  box-sizing: border-box;
+  background-origin: content-box !important;
+  background-clip: content-box !important;
+  border: 1px solid rgba(17, 16, 14, 0.14);
+  box-shadow: 0 22px 44px -30px rgba(17, 16, 14, 0.34);
+  transition: border-color 0.35s ease, box-shadow 0.45s ease, filter 0.4s ease !important;
+}
+.stop.cur .vg,
+.stop:hover .vg {
+  border-color: rgba(158, 42, 34, 0.42);
+  box-shadow: 0 28px 54px -28px rgba(17, 16, 14, 0.42);
+}
+
+/* 画下题签：干净悬浮于手卷底纸之上，零遮挡、清晰分栏 */
+.stop-meta {
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+  gap: 3px 14px !important;
+}
+.stop-no {
+  font-family: monospace, var(--sans) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.22em !important;
+  color: var(--iz-red) !important;
+  opacity: 0.85;
+}
+.stop-meta strong {
+  font-size: 18px !important;
+  letter-spacing: 0.14em !important;
+  color: var(--iz-ink) !important;
+}
+.stop-meta em {
+  font-size: 12px !important;
+  letter-spacing: 0.06em;
+  color: var(--iz-ink-3) !important;
+}
+
+/* ==========================================================================
+   4. 三幕翻页 (#skStage) 与 03 汉代三绝 (#sanjue) 保持清透统一 + 暗室高潮
+   ========================================================================== */
+.sk-slide[data-act="0"] .sk-bg img,
+.sk-slide[data-act="1"] .sk-bg img {
+  filter: saturate(0.94) contrast(1.03) !important;
+}
+.sk-slide[data-act="0"] .sk-bg::after,
+.sk-slide[data-act="1"] .sk-bg::after {
+  background: linear-gradient(
+    94deg,
+    rgba(240, 238, 233, 0.92) 0%,
+    rgba(240, 238, 233, 0.72) 32%,
+    rgba(240, 238, 233, 0.14) 56%,
+    rgba(240, 238, 233, 0) 76%
+  ) !important;
+}
+
+#sanjue {
+  background-color: #0B0A08 !important;
+}
+#sanjue .sh5 h2,
+#sanjue .sj3 h3 {
+  font-weight: 500 !important;
+  color: #F5F1E8 !important;
+}
+#sanjue .sh5 .eye {
+  color: #C8A86B !important;
+}
+#sanjue .sh5 .eye::after {
+  background: #C8A86B !important;
+}
+#sanjue .sj-rub-promo {
+  border-color: rgba(200, 168, 107, 0.34) !important;
+  color: #E4CFA0 !important;
+}
+#sanjue .sj-rub-promo:hover {
+  background: rgba(200, 168, 107, 0.14) !important;
+  border-color: #E4CFA0 !important;
+  color: #FFFFFF !important;
+}
+
+@media (max-width: 720px) {
+  .ed-hero-meta-l { left: 16px; bottom: 18px; }
+  .ed-hero-meta-l .ed-live-clock { display: none; }
+  .stop .stop-frame { transform: none !important; }
+}

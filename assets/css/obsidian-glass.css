@@ -1,0 +1,2321 @@
+/* ==========================================================================
+   汉韵彭城 · V24「玄漆暗馆 · 琉璃光字 · 彭城夜韵」
+   完全对标 IZANAMI (izanami-official.com) × SAKAZUKI (sakazuki.io)：
+   1. 深邃博物馆玄漆暗馆 (#0A0908) + 4 阶半透明宣白光字 + 自上而下琉璃渐变透明标题
+   2. IZANAMI「夜雾凝字」柔焦显影动效 + 超薄暗琉璃磨砂交互层 + 镂空描边水印大字
+   3. 首屏原生「彭城夜韵华灯」高清全景 (零脏滤镜!) + 保留夜/春/夏/秋/冬五景一键切换
+   4. 63 幅钢笔手绘绝不压暗发脏 → 改为黑漆展厅中的「射灯发光宣纸画幅」装裱陈列
+   5. 顶栏支持「玄 · 夜 / 素 · 宣」双模式一键平滑切换
+   ========================================================================== */
+
+/* 顶栏主题切换按钮基础样式（昼/夜双模式通用） */
+.nav-theme-btn {
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--iz-hair);
+  padding: 2px 0 2px 14px;
+  font-family: var(--serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--iz-ink-2);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+.nav-theme-btn:hover {
+  color: var(--iz-red);
+}
+
+/* 首屏五景（夜/春/夏/秋/冬）叠化支持（昼夜模式通用） */
+.hero[data-season="night"] .pano > img.pano-night { opacity: 1; z-index: 2; }
+.hero:not([data-season="night"]) .pano > img.pano-night { opacity: 0; z-index: 0; }
+
+/* ==========================================================================
+   以下全部严格作用域在 html.theme-obsidian（玄夜暗馆模式）下
+   ========================================================================== */
+html.theme-obsidian {
+  --ob-bg: #0A0908;
+  --ob-bg-2: #12110F;
+  --ob-bg-3: #1A1815;
+  --ob-glass: rgba(14, 13, 12, 0.44);
+  --ob-glass-s: rgba(14, 13, 12, 0.72);
+  --ob-text-1: rgba(246, 242, 234, 0.92);
+  --ob-text-2: rgba(241, 237, 228, 0.64);
+  --ob-text-3: rgba(241, 237, 228, 0.36);
+  --ob-gold: #C8A86B;
+  --ob-gold-soft: rgba(200, 168, 107, 0.26);
+  --ob-red: #C84337;
+  --ob-jade: #66A38A;
+  --ob-hair: rgba(244, 240, 232, 0.13);
+  --ob-hair-soft: rgba(244, 240, 232, 0.07);
+  --ob-paper-mat: #ECE6DA;
+
+  /* 统一覆盖全站基础令牌 */
+  --iz-paper: var(--ob-bg);
+  --iz-paper-2: var(--ob-bg-2);
+  --iz-surface: var(--ob-bg-2);
+  --iz-ink: var(--ob-text-1);
+  --iz-ink-2: var(--ob-text-2);
+  --iz-ink-3: var(--ob-text-3);
+  --iz-red: var(--ob-red);
+  --iz-gold: var(--ob-gold);
+  --iz-jade: var(--ob-jade);
+  --iz-hair: var(--ob-hair);
+  --iz-hair-soft: var(--ob-hair-soft);
+  --ed-paper: var(--ob-bg);
+  --ed-surface: var(--ob-bg-2);
+  --ed-ink: var(--ob-text-1);
+  --ed-ink-2: var(--ob-text-2);
+  --ed-ink-3: var(--ob-text-3);
+  --ed-hair: var(--ob-hair);
+  --ed-hair-soft: var(--ob-hair-soft);
+  --paper: var(--ob-bg);
+  --cream: var(--ob-bg-2);
+  --ink: var(--ob-text-1);
+  --ink2: var(--ob-text-2);
+  --ink3: var(--ob-text-3);
+  --red: var(--ob-red);
+}
+
+html.theme-obsidian,
+html.theme-obsidian body {
+  background-color: var(--ob-bg) !important;
+  color: var(--ob-text-1) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html.theme-obsidian body::after {
+  opacity: 0.12 !important;
+  mix-blend-mode: overlay !important;
+}
+
+/* 极淡 4% 建筑光丝竖线贯穿暗馆展厅 */
+html.theme-obsidian #sites,
+html.theme-obsidian #fy,
+html.theme-obsidian #go,
+html.theme-obsidian .sc-sticky,
+html.theme-obsidian .sk-strip-sec {
+  background-color: var(--ob-bg) !important;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    transparent calc(25% - 0.5px),
+    rgba(244, 240, 232, 0.036) calc(25% - 0.5px),
+    rgba(244, 240, 232, 0.036) 25%,
+    transparent 25%,
+    transparent calc(50% - 0.5px),
+    rgba(244, 240, 232, 0.036) calc(50% - 0.5px),
+    rgba(244, 240, 232, 0.036) 50%,
+    transparent 50%,
+    transparent calc(75% - 0.5px),
+    rgba(244, 240, 232, 0.036) calc(75% - 0.5px),
+    rgba(244, 240, 232, 0.036) 75%,
+    transparent 75%
+  ) !important;
+}
+
+/* 开卷暗馆幕帘 & 温润微光光标 */
+html.theme-obsidian .ed-preloader { background: #070605 !important; }
+html.theme-obsidian .ed-pre-vert { color: var(--ob-text-1) !important; border-left-color: var(--ob-hair) !important; }
+html.theme-obsidian .ed-pre-line { background: rgba(244, 240, 232, 0.14) !important; }
+html.theme-obsidian .ed-pre-line i { background: var(--ob-gold) !important; }
+html.theme-obsidian .ed-cursor-dot { background: rgba(246, 242, 234, 0.88) !important; }
+html.theme-obsidian .ed-cursor-ring { border-color: rgba(244, 240, 232, 0.28) !important; }
+html.theme-obsidian.ed-cursor-active .ed-cursor-dot,
+html.theme-obsidian.ed-cursor-link .ed-cursor-dot { background: var(--ob-gold) !important; }
+html.theme-obsidian.ed-cursor-active .ed-cursor-ring,
+html.theme-obsidian.ed-cursor-link .ed-cursor-ring {
+  border-color: rgba(200, 168, 107, 0.58) !important;
+  background: rgba(200, 168, 107, 0.06) !important;
+}
+
+/* ==========================================================================
+   1. 「琉璃透明光字」系统 + IZANAMI「夜雾凝字」柔焦浮现
+   ========================================================================== */
+/* 自上而下微透明消融渐变光字（月光琉璃感，绝不刺眼死白！） */
+html.theme-obsidian .sh5 h2,
+html.theme-obsidian .sh5 h2 .cm-line,
+html.theme-obsidian .sk-copy-box h2,
+html.theme-obsidian .ed-interlude h3,
+html.theme-obsidian .ed-interlude h3 .cm-line,
+html.theme-obsidian .intro-panel .big,
+html.theme-obsidian .hero[data-season="night"] .tv h1 {
+  background: linear-gradient(
+    180deg,
+    rgba(252, 249, 242, 0.96) 0%,
+    rgba(244, 240, 232, 0.80) 56%,
+    rgba(216, 208, 192, 0.46) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2em !important;
+  filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.45));
+}
+
+/* 章节大号水印字（壹/贰/叁）：极轻幽微透明描边镂空，如暗玉阴刻 */
+html.theme-obsidian .chap .chn {
+  color: transparent !important;
+  -webkit-text-stroke: 1px rgba(244, 240, 232, 0.22);
+  opacity: 0.85 !important;
+}
+
+/* IZANAMI 标志性「夜雾凝字」柔焦显影动效 */
+html.theme-obsidian .cm-line {
+  filter: blur(6px);
+  opacity: 0;
+  transform: translateY(24px);
+  transition: transform 1.1s var(--cm-ease), opacity 0.95s ease, filter 1.05s var(--cm-ease) !important;
+}
+html.theme-obsidian .cm-in .cm-line {
+  filter: blur(0);
+  opacity: 1;
+  transform: translateY(0);
+}
+html.theme-obsidian .sh5.cm-hair-wait::before {
+  background: linear-gradient(90deg, rgba(200, 168, 107, 0.52), rgba(244, 240, 232, 0.12)) !important;
+  opacity: 1 !important;
+}
+
+/* ==========================================================================
+   2. 顶部超薄暗琉璃导航栏（未激活轻隐，悬停透亮如灯芯）
+   ========================================================================== */
+html.theme-obsidian .nav {
+  background: linear-gradient(180deg, rgba(10, 11, 14, 0.64) 0%, transparent 100%) !important;
+}
+html.theme-obsidian .nav.solid {
+  background: rgba(10, 9, 8, 0.78) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: var(--ob-hair) !important;
+}
+html.theme-obsidian .lg7 b { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .lg7 small { color: var(--ob-text-3) !important; }
+html.theme-obsidian .lg7 i { color: var(--ob-gold) !important; }
+html.theme-obsidian .nav .links a,
+html.theme-obsidian .nav-guide-btn {
+  color: rgba(244, 240, 232, 0.48) !important;
+  font-weight: 500 !important;
+}
+html.theme-obsidian .nav .links a:hover,
+html.theme-obsidian .nav .links a.on,
+html.theme-obsidian .nav-guide-btn:hover {
+  color: rgba(252, 249, 242, 0.96) !important;
+}
+html.theme-obsidian .nav .links a::after { background: var(--ob-gold) !important; }
+html.theme-obsidian .nav-sound-btn,
+html.theme-obsidian .nav-theme-btn {
+  color: rgba(244, 240, 232, 0.46) !important;
+  border-left-color: var(--ob-hair) !important;
+}
+html.theme-obsidian .nav-sound-btn:hover,
+html.theme-obsidian .nav-sound-btn[aria-pressed="true"],
+html.theme-obsidian .nav-theme-btn:hover {
+  color: var(--ob-gold) !important;
+}
+html.theme-obsidian .nav-ds-link {
+  color: var(--ob-gold) !important;
+  border-left-color: var(--ob-hair) !important;
+}
+html.theme-obsidian .ed-progress i { background: var(--ob-gold) !important; }
+
+/* ==========================================================================
+   3. 首屏「彭城夜韵 · 暮夜华灯」（原生高清夜景图零压脏 + 琉璃浮字 + 暗玻璃控件）
+   ========================================================================== */
+html.theme-obsidian .hero.kai,
+html.theme-obsidian .kai-paper {
+  background: var(--ob-bg) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .pano > img.pano-night {
+  filter: contrast(1.03) saturate(1.04) !important; /* 原生夜景直出，绝不压暗发脏！ */
+}
+/* 夜景模式：顶部极轻夜空收边 + 底部无缝溶入玄漆暗馆，徐州博物馆灯火通透清晰 */
+html.theme-obsidian .hero[data-season="night"].kai::before {
+  background:
+    linear-gradient(180deg, rgba(8, 12, 20, 0.56) 0%, rgba(8, 12, 20, 0) 20%),
+    radial-gradient(36% 36% at 15% 24%, rgba(8, 12, 20, 0.48) 0%, rgba(8, 12, 20, 0) 100%) !important;
+}
+html.theme-obsidian .hero.kai::after {
+  height: 68px !important;
+  background: linear-gradient(to bottom, rgba(10, 9, 8, 0) 0%, rgba(10, 9, 8, 0.68) 65%, #0A0908 100%) !important;
+}
+
+/* 夜景琉璃浅字浮于深蓝夜空之上 */
+html.theme-obsidian .hero[data-season="night"] .seal-s {
+  background: var(--ob-red) !important;
+  color: #FAF7F0 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.48) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .vline {
+  color: #E2C58A !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .tdesc p,
+html.theme-obsidian .hero[data-season="night"].tight2 .tdesc > p {
+  color: rgba(244, 240, 232, 0.74) !important;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.65) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .cta {
+  border-top-color: rgba(244, 240, 232, 0.22) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .cta .lnk,
+html.theme-obsidian .hero[data-season="night"] .cta .lnk.ghost,
+html.theme-obsidian .hero[data-season="night"] .cta .lnk.subtle-ink {
+  color: rgba(246, 242, 234, 0.86) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+}
+html.theme-obsidian .hero[data-season="night"] .cta .lnk:first-child { color: #FAF7F0 !important; }
+html.theme-obsidian .hero[data-season="night"] .cta .lnk:first-child::after,
+html.theme-obsidian .hero[data-season="night"] .cta .lnk:hover::after { background: var(--ob-gold) !important; }
+html.theme-obsidian .hero[data-season="night"] .cta .lnk:hover { color: #E2C58A !important; }
+html.theme-obsidian .hero[data-season="night"] .cta .lnk.ghost::after,
+html.theme-obsidian .hero[data-season="night"] .cta .lnk.subtle-ink::after { background: rgba(244, 240, 232, 0.28) !important; }
+html.theme-obsidian .hero[data-season="night"] .ed-scroll-cue span { color: rgba(244, 240, 232, 0.52) !important; }
+html.theme-obsidian .hero[data-season="night"] .ed-scroll-cue i { background: rgba(244, 240, 232, 0.2) !important; }
+html.theme-obsidian .hero[data-season="night"] .ed-scroll-cue i::after { background: var(--ob-gold) !important; }
+html.theme-obsidian .hero[data-season="night"] .river-tag { color: rgba(244, 240, 232, 0.44) !important; }
+
+/* 若用户在暗馆下手动点击「春/夏/秋/冬」白昼全景：自动切为深墨清晰读字，绝不白字撞白纸！ */
+html.theme-obsidian .hero:not([data-season="night"]) .tv h1 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  color: #141311 !important;
+  filter: none !important;
+}
+html.theme-obsidian .hero:not([data-season="night"]) .vline { color: #9E2A22 !important; text-shadow: none !important; }
+html.theme-obsidian .hero:not([data-season="night"]) .tdesc p { color: #36342F !important; }
+html.theme-obsidian .hero:not([data-season="night"]) .cta .lnk { color: #1A1918 !important; }
+html.theme-obsidian .hero:not([data-season="night"]) .ed-scroll-cue span { color: rgba(26, 25, 24, 0.65) !important; }
+html.theme-obsidian .hero:not([data-season="night"]) .ed-scroll-cue i { background: rgba(26, 25, 24, 0.22) !important; }
+
+/* 首屏超薄暗琉璃磨砂底部条（时钟 + 昼夜四时 + 地标开关 + 悬停暗玻璃丝签） */
+html.theme-obsidian .ed-hero-meta-l .ed-live-clock,
+html.theme-obsidian .ed-season-bar,
+html.theme-obsidian .ed-pins-toggle {
+  background: rgba(12, 11, 10, 0.54) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(244, 240, 232, 0.14) !important;
+  color: rgba(244, 240, 232, 0.64) !important;
+}
+html.theme-obsidian .ed-hero-meta-l .ed-live-clock { border-left: 1.5px solid var(--ob-gold) !important; }
+html.theme-obsidian .ed-live-clock b { color: var(--ob-text-1) !important; }
+html.theme-obsidian #edSeasonPoet { color: #E2C58A !important; border-right-color: var(--ob-hair) !important; }
+html.theme-obsidian .ed-season-bar button { color: rgba(244, 240, 232, 0.48) !important; }
+html.theme-obsidian .ed-season-bar button:hover,
+html.theme-obsidian .ed-season-bar button.on { color: var(--ob-text-1) !important; }
+html.theme-obsidian .ed-sb-ink { background: var(--ob-gold) !important; }
+html.theme-obsidian .ed-pins-toggle { padding: 5px 12px !important; }
+html.theme-obsidian .ed-pins-toggle i { background: var(--ob-gold) !important; }
+html.theme-obsidian .ed-pins-toggle:hover { color: #E2C58A !important; border-color: rgba(200, 168, 107, 0.45) !important; }
+
+/* 首屏呼吸微光点与暗玻璃地标丝签 */
+html.theme-obsidian .hero[data-season="night"] .pin2 .dot {
+  background: #E2C58A !important;
+  box-shadow: 0 0 0 3px rgba(10, 14, 22, 0.72), 0 0 14px rgba(226, 197, 138, 0.75) !important;
+}
+html.theme-obsidian .hero[data-season="night"] .pin2 .dot::before,
+html.theme-obsidian .hero[data-season="night"] .pin2 .dot::after {
+  border-color: rgba(226, 197, 138, 0.58) !important;
+}
+html.theme-obsidian .pin2 .tag {
+  background: rgba(12, 11, 10, 0.80) !important;
+  border-color: rgba(244, 240, 232, 0.18) !important;
+  border-left-color: var(--ob-gold) !important;
+}
+html.theme-obsidian .pin2 .tag b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .pin2 .tag small { color: var(--ob-text-2) !important; }
+
+/* ==========================================================================
+   4. 01 彭城七里长卷：玄漆展厅 + 射灯发光宣纸画幅 + 暗琉璃悬浮策展条
+   ========================================================================== */
+html.theme-obsidian .scrollsec,
+html.theme-obsidian .sc-sticky {
+  background-color: var(--ob-bg) !important;
+}
+html.theme-obsidian .sch6 .eye { color: var(--ob-gold) !important; }
+html.theme-obsidian .sch6 h2 { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian #scRoutes .chip { color: var(--ob-text-3) !important; }
+html.theme-obsidian #scRoutes .chip:hover,
+html.theme-obsidian #scRoutes .chip[aria-pressed="true"] { color: var(--ob-text-1) !important; }
+html.theme-obsidian #scRoutes .chip[aria-pressed="true"] { border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian .skipsc { color: var(--ob-text-2) !important; border-left-color: var(--ob-hair) !important; }
+html.theme-obsidian .skipsc:hover { color: var(--ob-gold) !important; }
+
+/* 长卷 SVG 暗馆自适应（零 JS 重绘，瞬间反色清晰） */
+html.theme-obsidian .sc-bg path[fill*="26,25,24"] { fill: rgba(244, 240, 232, 0.035); }
+html.theme-obsidian .sc-bg line[stroke*="26,25,24"] { stroke: rgba(244, 240, 232, 0.14); }
+html.theme-obsidian .sc-bg line[stroke="#9E2A22"] { stroke: var(--ob-gold); }
+html.theme-obsidian .sc-bg circle[fill="#9E2A22"] { fill: var(--ob-gold); }
+html.theme-obsidian .sc-bg text[fill="#9E2A22"] { fill: var(--ob-gold); }
+html.theme-obsidian .sc-bg text[fill="#8A867E"] { fill: rgba(244, 240, 232, 0.44); }
+html.theme-obsidian .sc-bg text[fill="#3A6454"] { fill: var(--ob-jade); }
+
+html.theme-obsidian .intro-panel .big { border-left-color: var(--ob-gold) !important; }
+html.theme-obsidian .intro-panel .meta { color: var(--ob-text-2) !important; }
+html.theme-obsidian .intro-panel .meta b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .sc-coord { color: var(--ob-text-3) !important; }
+html.theme-obsidian .sc-cue-line { color: var(--ob-gold) !important; border-bottom-color: var(--ob-gold) !important; }
+
+/* 暗夜发光手卷装裱：彻底告别白纸垫底 → 玄墨深框 + 1px 古泥金极细光边，9 处夜景华灯浑然一体 */
+html.theme-obsidian .stop .vg {
+  background-color: #0D0C0A !important;
+  padding: 5px !important;
+  border-color: rgba(200, 168, 107, 0.22) !important;
+  filter: contrast(1.04) saturate(1.03) brightness(1.01) !important;
+  box-shadow: 0 28px 64px -18px rgba(0, 0, 0, 0.94), 0 0 42px -18px rgba(200, 168, 107, 0.16) !important;
+}
+html.theme-obsidian .stop.cur .vg,
+html.theme-obsidian .stop:hover .vg {
+  border-color: rgba(200, 168, 107, 0.62) !important;
+  box-shadow: 0 34px 72px -16px rgba(0, 0, 0, 0.96), 0 0 54px -12px rgba(200, 168, 107, 0.28) !important;
+}
+html.theme-obsidian .stop-no { color: var(--ob-gold) !important; }
+html.theme-obsidian .stop-meta strong { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .stop-meta em { color: var(--ob-text-3) !important; }
+html.theme-obsidian .outro-panel h3 { color: var(--ob-text-1) !important; }
+html.theme-obsidian .outro-panel p { color: var(--ob-text-2) !important; }
+html.theme-obsidian .outro-lnk { color: var(--ob-gold) !important; border-bottom-color: var(--ob-gold) !important; }
+
+/* 长卷底部暗琉璃悬浮策展条 */
+html.theme-obsidian .sc-card {
+  background: rgba(16, 15, 13, 0.72) !important;
+  border-color: rgba(244, 240, 232, 0.16) !important;
+  box-shadow: 0 28px 64px -20px rgba(0, 0, 0, 0.85) !important;
+}
+html.theme-obsidian .sc-card .k { color: var(--ob-gold) !important; }
+html.theme-obsidian .sc-card h3 { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .sc-card h3 small,
+html.theme-obsidian .sc-card .leg { color: var(--ob-text-2) !important; }
+html.theme-obsidian .sc-card .leg b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .sc-card .nav2 button { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian .sc-card .nav2 button:hover:not(:disabled) { border-color: var(--ob-gold) !important; color: var(--ob-gold) !important; }
+html.theme-obsidian .sc-card .acts .btn { border-color: var(--ob-gold) !important; color: #E2C58A !important; }
+html.theme-obsidian .sc-card .acts .btn:hover { background: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian .sc-bar .rail { background: var(--ob-hair) !important; }
+html.theme-obsidian .sc-bar .fill { background: var(--ob-gold) !important; }
+html.theme-obsidian .sc-bar button { color: var(--ob-text-3) !important; }
+html.theme-obsidian .sc-bar button::before { background: var(--ob-bg) !important; border-color: rgba(244, 240, 232, 0.28) !important; }
+html.theme-obsidian .sc-bar button.on { color: var(--ob-gold) !important; }
+html.theme-obsidian .sc-bar button.on::before { background: var(--ob-gold) !important; border-color: var(--ob-gold) !important; }
+
+/* ==========================================================================
+   5. 三幕吸顶翻页 (#skStage)：100% 全屏无界暗夜电影（3 张原生黑底暗夜大图直出 + 琉璃光字浮于夜雾）
+   ========================================================================== */
+html.theme-obsidian .sk-stage,
+html.theme-obsidian .sk-sticky {
+  background: #0A0908 !important;
+  border-top-color: var(--ob-hair) !important;
+  border-bottom-color: var(--ob-hair) !important;
+}
+html.theme-obsidian .sk-bg {
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  background: #0A0908 !important;
+  box-shadow: none !important;
+}
+html.theme-obsidian .sk-bg img,
+html.theme-obsidian .sk-slide[data-act="0"] .sk-bg img,
+html.theme-obsidian .sk-slide[data-act="1"] .sk-bg img {
+  object-fit: cover !important;
+  object-position: center center !important;
+  filter: contrast(1.03) saturate(1.04) !important;
+}
+html.theme-obsidian .sk-slide[data-act="2"] .sk-bg {
+  background: #0A0908 !important;
+}
+html.theme-obsidian .sk-bg-relic img {
+  object-fit: cover !important;
+  object-position: right center !important;
+  padding-top: 0 !important;
+  mix-blend-mode: normal !important;
+}
+/* 极轻的左侧与上下边缘玄墨羽化，确保琉璃透明字在全屏暗夜里清晰悬浮、绝无硬边界 */
+html.theme-obsidian .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="0"] .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="1"] .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="2"] .sk-bg::after,
+html.theme-obsidian .sk-bg-relic::after {
+  display: block !important;
+  background:
+    linear-gradient(
+      92deg,
+      rgba(10, 9, 8, 0.90) 0%,
+      rgba(10, 9, 8, 0.56) 30%,
+      rgba(10, 9, 8, 0.08) 54%,
+      rgba(10, 9, 8, 0) 76%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(10, 9, 8, 0.52) 0%,
+      rgba(10, 9, 8, 0) 16%,
+      rgba(10, 9, 8, 0) 84%,
+      rgba(10, 9, 8, 0.72) 100%
+    ) !important;
+}
+html.theme-obsidian .sk-copy-box {
+  max-width: min(40vw, 480px) !important;
+}
+html.theme-obsidian .sk-inset-plate {
+  right: clamp(28px, 4.8vw, 68px) !important;
+  bottom: clamp(44px, 7vh, 72px) !important;
+  width: min(22vw, 290px) !important;
+  background: rgba(12, 11, 10, 0.76) !important;
+  backdrop-filter: blur(14px);
+  border-color: rgba(200, 168, 107, 0.34) !important;
+  box-shadow: 0 28px 64px -20px rgba(0, 0, 0, 0.92) !important;
+}
+html.theme-obsidian .sk-inset-plate span {
+  color: rgba(244, 240, 232, 0.78) !important;
+}
+html.theme-obsidian .sk-act-kicker { color: var(--ob-gold) !important; }
+html.theme-obsidian .sk-act-kicker::after { background: var(--ob-gold) !important; }
+html.theme-obsidian .sk-copy-box p { color: var(--ob-text-2) !important; }
+html.theme-obsidian .sk-copy-meta { border-top-color: var(--ob-hair) !important; }
+html.theme-obsidian .sk-copy-meta div small { color: var(--ob-text-3) !important; }
+html.theme-obsidian .sk-copy-meta div b { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .sk-pbtn { color: rgba(244, 240, 232, 0.42) !important; }
+html.theme-obsidian .sk-pbtn:hover { color: rgba(244, 240, 232, 0.78) !important; }
+html.theme-obsidian .sk-pbtn.on { color: var(--ob-text-1) !important; }
+html.theme-obsidian .sk-pbtn.on span { color: var(--ob-gold) !important; }
+html.theme-obsidian .sk-pbar { background: rgba(244, 240, 232, 0.14) !important; }
+html.theme-obsidian .sk-pbar b { background: var(--ob-gold) !important; }
+
+/* ==========================================================================
+   6. 02 九处彭城 & 16 图双行画廊：暗馆画册聚光装裱
+   ========================================================================== */
+html.theme-obsidian .stamp10 { color: var(--ob-gold) !important; }
+html.theme-obsidian .stamp10::after { background: var(--ob-gold) !important; }
+html.theme-obsidian .sh5 > p:not(.eye),
+html.theme-obsidian .chap .chh p,
+html.theme-obsidian .sc5 .tx p,
+html.theme-obsidian .sc5 .ln { color: var(--ob-text-2) !important; }
+html.theme-obsidian .ed-sec-meta { border-left-color: var(--ob-hair) !important; }
+html.theme-obsidian .ed-meta-row span { color: var(--ob-text-3) !important; }
+html.theme-obsidian .ed-meta-row b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .ed-chap-nav { border-top-color: var(--ob-hair-soft) !important; }
+html.theme-obsidian .ed-chap-nav a { color: var(--ob-text-2) !important; }
+html.theme-obsidian .ed-chap-nav a:hover { color: var(--ob-gold) !important; }
+html.theme-obsidian .chap { border-top-color: var(--ob-hair) !important; }
+html.theme-obsidian .chap .chh h3,
+html.theme-obsidian .sc5 h3 { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .chap .chh p small { color: var(--ob-gold) !important; }
+html.theme-obsidian .q7 { border-left-color: var(--ob-gold) !important; }
+html.theme-obsidian .q7 blockquote { color: rgba(244, 240, 232, 0.84) !important; }
+html.theme-obsidian .q7 figcaption { color: var(--ob-text-3) !important; }
+
+/* 九处景点暗夜华灯画幅：彻底去除白纸底，深黑展框 + 极微四周暗角羽化融黑 */
+html.theme-obsidian .sc5 .im {
+  border: 1px solid rgba(200, 168, 107, 0.18) !important;
+  box-shadow: 0 30px 64px -26px rgba(0, 0, 0, 0.96) !important;
+  background: #0D0C0A !important;
+  position: relative;
+}
+html.theme-obsidian .sc5 .im::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 34px rgba(10, 9, 8, 0.45);
+}
+html.theme-obsidian .sc5:hover .im {
+  border-color: rgba(200, 168, 107, 0.56) !important;
+}
+html.theme-obsidian .sc5 .im img {
+  filter: contrast(1.04) saturate(1.04) !important;
+}
+html.theme-obsidian .sc5 .tx .ft { border-top-color: var(--ob-hair-soft) !important; }
+html.theme-obsidian .sc5 .st { color: var(--ob-text-2) !important; }
+html.theme-obsidian .sc5 .feat { color: var(--ob-gold) !important; }
+html.theme-obsidian .sc5 .arr { color: var(--ob-text-3) !important; }
+html.theme-obsidian .sc5:hover .arr { color: var(--ob-gold) !important; }
+
+/* 暗夜模式下隐藏零碎白底美食画廊带，保持「九处彭城 → 步入汉宫暗室 → 汉代三绝」的极致克制电影节奏 */
+html.theme-obsidian .sk-strip-sec {
+  display: none !important;
+}
+
+/* 步入暗室诗意过场 */
+html.theme-obsidian .ed-interlude {
+  background: #070605 !important;
+  border-top: 1px solid var(--ob-hair-soft);
+}
+html.theme-obsidian .ed-interlude::before {
+  opacity: 0.14 !important;
+  filter: invert(0.92) contrast(1.1);
+}
+html.theme-obsidian .ed-int-en { color: var(--ob-gold) !important; }
+html.theme-obsidian .ed-interlude p { color: var(--ob-text-2) !important; }
+html.theme-obsidian .ed-int-line { background: var(--ob-gold) !important; }
+
+/* ==========================================================================
+   7. 04 彭城手艺：纯黑玄漆无界陈列（4 件非遗器物如珠宝直接浮于黑漆之上，彻底零白块零硬框！）
+   ========================================================================== */
+html.theme-obsidian .fyg { border-top-color: var(--ob-hair) !important; border-bottom-color: var(--ob-hair) !important; }
+html.theme-obsidian .fyc { border-right-color: var(--ob-hair) !important; }
+html.theme-obsidian .fyc:hover { background: rgba(244, 240, 232, 0.022) !important; }
+html.theme-obsidian #fy .fyc .im {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+html.theme-obsidian #fy .fyc .im img {
+  mix-blend-mode: lighten !important;
+  -webkit-mask-image:
+    radial-gradient(ellipse 80% 74% at 50% 54%, #000 48%, transparent 96%),
+    linear-gradient(180deg, transparent 0%, #000 18%, #000 84%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 80% 74% at 50% 54%, #000 48%, transparent 96%),
+    linear-gradient(180deg, transparent 0%, #000 18%, #000 84%, transparent 100%);
+  mask-composite: intersect;
+  filter: contrast(1.06) saturate(1.04) brightness(1.02) !important;
+}
+html.theme-obsidian .fyc small { color: var(--ob-gold) !important; }
+html.theme-obsidian .fyc h3 { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .fyc p,
+html.theme-obsidian .fyc .lvl { color: var(--ob-text-2) !important; border-top-color: var(--ob-hair-soft) !important; }
+
+/* 05 彭城行旅路引暗馆化 */
+html.theme-obsidian #go .go-tabs { border-bottom-color: var(--ob-hair) !important; }
+html.theme-obsidian #go .go-tabs button { color: var(--ob-text-3) !important; }
+html.theme-obsidian #go .go-tabs button:hover,
+html.theme-obsidian #go .go-tabs button.on { color: var(--ob-text-1) !important; }
+html.theme-obsidian #go .go-tabs button.on span { color: var(--ob-gold) !important; }
+html.theme-obsidian .go-tab-ink { background: var(--ob-gold) !important; }
+html.theme-obsidian #go .panel,
+html.theme-obsidian #go .go-pane.on .panel {
+  background: rgba(18, 17, 15, 0.86) !important;
+  border-color: var(--ob-hair) !important;
+}
+html.theme-obsidian #go .panel h3 { color: var(--ob-text-1) !important; border-bottom-color: var(--ob-hair-soft); }
+html.theme-obsidian #go .ft label,
+html.theme-obsidian #go .bstart,
+html.theme-obsidian #go .hint,
+html.theme-obsidian #go .note { color: var(--ob-text-3) !important; }
+html.theme-obsidian #go select {
+  color: var(--ob-text-1) !important;
+  border-bottom-color: rgba(244, 240, 232, 0.28) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.25L6 7.75l3.5-3.5' fill='none' stroke='%23C8A86B' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+}
+html.theme-obsidian #go select option { background: #141311; color: #F4F0E8; }
+html.theme-obsidian #go select:focus { border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian #go .swap { border-color: var(--ob-hair) !important; color: var(--ob-gold) !important; }
+html.theme-obsidian #go #bPool .chip { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian #go #bPool .chip.in { background: var(--ob-gold) !important; border-color: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian #go .ticket .pt b,
+html.theme-obsidian #go .ticket .leg b,
+html.theme-obsidian #go .blist li b,
+html.theme-obsidian #go .tfoot .sum,
+html.theme-obsidian #go .bsum { color: var(--ob-text-1) !important; }
+html.theme-obsidian #go .ticket small,
+html.theme-obsidian #go .ticket .min,
+html.theme-obsidian #go .blist .lg { color: var(--ob-text-2) !important; }
+html.theme-obsidian #go .ticket .dot {
+  background: var(--ob-bg-2) !important;
+  border-color: rgba(244, 240, 232, 0.36) !important;
+  color: var(--ob-text-1) !important;
+}
+html.theme-obsidian #go .ticket .leg .dot {
+  border-color: var(--ob-gold) !important;
+  color: #E2C58A !important;
+}
+html.theme-obsidian #go .blist .n { border-color: var(--ob-gold) !important; color: var(--ob-gold) !important; }
+html.theme-obsidian #go .blist .ops button { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian #go .btn.small:not(.ghost):not(.red) { background: var(--ob-gold) !important; border-color: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian #go .btn.small.ghost.dark { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian #go .btn.small.ghost.dark:hover { border-color: var(--ob-gold) !important; color: var(--ob-gold) !important; }
+
+/* 地铁图暗馆高亮矿物色 */
+html.theme-obsidian #metro svg text { fill: rgba(244, 240, 232, 0.78); }
+html.theme-obsidian #metro svg text[fill="#B23A2E"] { fill: var(--ob-gold); }
+html.theme-obsidian #metro svg text[fill="#3B5B78"] { fill: #7CA7CC; }
+html.theme-obsidian #metro svg text[fill="#3F6B5A"] { fill: #75B59B; }
+html.theme-obsidian #metro svg text[fill="#7D7971"] { fill: rgba(244, 240, 232, 0.42); }
+html.theme-obsidian #metro svg path[stroke="#3B5B78"] { stroke: #6392BA; }
+html.theme-obsidian #metro svg path[stroke="#3F6B5A"] { stroke: #629B84; }
+html.theme-obsidian #metro svg circle { fill: #0A0908; stroke: #F4F0E8; }
+
+/* 页脚极暗漆底 */
+html.theme-obsidian .foot.ed-foot { background: #060605 !important; border-top-color: var(--ob-hair) !important; }
+html.theme-obsidian .foot.ed-foot::before { opacity: 0.08 !important; filter: invert(0.92); }
+html.theme-obsidian .ed-foot-brand .foot-brand span { color: var(--ob-text-1) !important; }
+html.theme-obsidian .ed-foot-poet,
+html.theme-obsidian .ed-foot-links a { color: var(--ob-text-2) !important; }
+html.theme-obsidian .ed-foot-links a:hover { color: var(--ob-gold) !important; }
+html.theme-obsidian .ed-qr-card { background: var(--ob-bg-2) !important; border-color: var(--ob-hair) !important; }
+html.theme-obsidian .ed-qr-card b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .ed-qr-card img { background: #F7F4EC; padding: 4px; }
+html.theme-obsidian .ed-foot-bottom { border-top-color: var(--ob-hair-soft) !important; color: var(--ob-text-3) !important; }
+html.theme-obsidian .ed-foot-bottom a { color: var(--ob-gold) !important; }
+
+/* ==========================================================================
+   8. 问导览暗琉璃抽屉 (#gpanel) + 景点详情页暗馆 (#detail) + 关于弹窗 (#about)
+   ========================================================================== */
+html.theme-obsidian .gpanel,
+html.theme-obsidian .abdlg {
+  background: rgba(14, 13, 12, 0.92) !important;
+  border-color: rgba(244, 240, 232, 0.16) !important;
+  color: var(--ob-text-1) !important;
+}
+html.theme-obsidian .gwho button { color: var(--ob-text-3) !important; }
+html.theme-obsidian .gwho button[aria-selected="true"] { color: var(--ob-text-1) !important; border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian .gx,
+html.theme-obsidian .abdx { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian .gmsgs .gm p {
+  background: rgba(244, 240, 232, 0.05) !important;
+  border-color: var(--ob-hair) !important;
+  border-left-color: var(--ob-gold) !important;
+  color: var(--ob-text-1) !important;
+}
+html.theme-obsidian .gmsgs .gm.me p { background: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian .gchips button { border-color: var(--ob-hair) !important; color: var(--ob-text-2) !important; }
+html.theme-obsidian .gchips button:hover { border-color: var(--ob-gold) !important; color: var(--ob-gold) !important; }
+html.theme-obsidian .gform input { color: var(--ob-text-1) !important; border-bottom-color: var(--ob-hair) !important; }
+html.theme-obsidian .gform input:focus { border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian .gform .btn { background: var(--ob-gold) !important; border-color: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian .abdh { background: #12110F !important; border-bottom-color: var(--ob-hair) !important; }
+
+/* 景点详情暗馆 */
+html.theme-obsidian .detail { background: var(--ob-bg) !important; color: var(--ob-text-1) !important; }
+html.theme-obsidian .detail .v5bar { background: rgba(10, 9, 8, 0.88) !important; border-bottom-color: var(--ob-hair) !important; }
+html.theme-obsidian .detail .v5bar .bk,
+html.theme-obsidian .detail .v5bar .bt { color: var(--ob-text-1) !important; }
+html.theme-obsidian .detail .v5bar .bk:focus-visible { outline: 1px solid rgba(200, 168, 107, 0.45) !important; outline-offset: 4px; }
+html.theme-obsidian .detail .d-toc button { color: var(--ob-text-3) !important; }
+html.theme-obsidian .detail .d-toc button.on,
+html.theme-obsidian .detail .d-toc button:hover { color: var(--ob-text-1) !important; }
+html.theme-obsidian .detail .d-toc button.on { border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian .detail .v5bar .bnav { color: var(--ob-gold) !important; border-bottom-color: var(--ob-gold) !important; }
+html.theme-obsidian .detail .h5 .eye { color: var(--ob-gold) !important; }
+html.theme-obsidian .detail .h5 h1,
+html.theme-obsidian .detail .sh h2,
+html.theme-obsidian .detail .must h3,
+html.theme-obsidian .detail .f5 h3,
+html.theme-obsidian .detail .step h3,
+html.theme-obsidian .detail .sc b { color: var(--ob-text-1) !important; font-weight: 500 !important; }
+html.theme-obsidian .detail .h5 .sub,
+html.theme-obsidian .detail .lead5,
+html.theme-obsidian .detail .step p,
+html.theme-obsidian .detail .sh p,
+html.theme-obsidian .detail .tl5 p,
+html.theme-obsidian .detail .f5 p,
+html.theme-obsidian .detail .s6c p { color: var(--ob-text-2) !important; }
+html.theme-obsidian .detail .i5 { border-top-color: var(--ob-hair) !important; border-bottom-color: var(--ob-hair) !important; }
+html.theme-obsidian .detail .i5 b,
+html.theme-obsidian .detail .intro5 dd,
+html.theme-obsidian .detail .tl5 b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .detail .i5 small,
+html.theme-obsidian .detail .intro5 dt { color: var(--ob-text-3) !important; }
+html.theme-obsidian .detail .sc,
+html.theme-obsidian .detail .s6c,
+html.theme-obsidian .detail .f5,
+html.theme-obsidian .detail .g5,
+html.theme-obsidian .detail .must,
+html.theme-obsidian .detail .dnext a {
+  background: var(--ob-bg-2) !important;
+  border-color: var(--ob-hair) !important;
+  color: var(--ob-text-1) !important;
+}
+html.theme-obsidian .detail .pcbtn,
+html.theme-obsidian .detail .b5 { border-color: var(--ob-hair) !important; color: var(--ob-text-1) !important; background: transparent !important; }
+html.theme-obsidian .detail .b5.pri,
+html.theme-obsidian .detail .pcbtn:hover { background: var(--ob-gold) !important; border-color: var(--ob-gold) !important; color: #0A0908 !important; }
+html.theme-obsidian .detail .board .ci figcaption b { color: var(--ob-text-1) !important; }
+html.theme-obsidian .detail .board .ci figcaption span { color: var(--ob-text-3) !important; border-color: var(--ob-hair) !important; }
+html.theme-obsidian .detail .board .ci.cut .im,
+html.theme-obsidian .detail .board .ci.stamp .im,
+html.theme-obsidian .detail .board .ci.wood .im { background: var(--ob-paper-mat) !important; }
+
+html.theme-obsidian .tabbar { background: rgba(10, 9, 8, 0.94) !important; border-top-color: var(--ob-hair) !important; }
+html.theme-obsidian .tabbar a { color: var(--ob-text-3) !important; }
+html.theme-obsidian .tabbar a.on { color: var(--ob-gold) !important; }
+
+
+/* ==========================================================================
+   V26「严整建筑对齐网格 × 暗琉璃透感灵动 UI × 玄石拓印台 × 窄屏防裁切」
+   彻底消除错落歪斜黑洞、白纸块与死板硬框，全面对标 IZANAMI × SAKAZUKI 灵动通透感
+   ========================================================================== */
+
+/* 1. 顶部导航栏：中屏/分屏自适应收拢，保证右侧「设计规范」永不裁切 */
+.nav .wrap,
+.nav {
+  box-sizing: border-box;
+}
+.nav .links {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+@media (max-width: 1380px) {
+  .nav {
+    padding: 0 clamp(16px, 2.4vw, 32px) !important;
+  }
+  .nav .links {
+    gap: 16px !important;
+  }
+  .nav .links a {
+    letter-spacing: 0.14em !important;
+    font-size: 12px !important;
+  }
+  .nav-sound-btn,
+  .nav-theme-btn,
+  .nav-ds-link {
+    padding-left: 12px !important;
+    margin-left: 0 !important;
+    letter-spacing: 0.12em !important;
+  }
+}
+@media (max-width: 1180px) {
+  .lg7 small {
+    display: none !important;
+  }
+  .nav .links {
+    gap: 13px !important;
+  }
+}
+
+/* 2. 02 九处彭城：彻底告别高低歪斜与竖图硬裁 → 建筑级严整对齐网格（昼夜双模式通用） */
+#sites .cgrid {
+  display: grid !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: 32px 24px !important;
+  align-items: stretch !important;
+}
+#sites .cgrid .sc5 {
+  min-width: 0 !important;
+  margin-top: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.55s var(--cm-ease), border-color 0.4s ease, box-shadow 0.55s var(--cm-ease) !important;
+}
+#sites .cgrid .sc5 .im {
+  aspect-ratio: 16 / 10 !important;
+  width: 100% !important;
+  flex: none !important;
+  overflow: hidden !important;
+  border-radius: 6px;
+}
+#sites .cgrid .sc5 .tx {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 16px 4px 2px !important;
+  gap: 6px !important;
+}
+#sites .cgrid .sc5 .sc5-foot {
+  margin-top: auto !important;
+  padding-top: 12px !important;
+}
+#sites .cgrid .sc5 h3 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: 2px 0 4px !important;
+}
+#sites .cgrid .sc5 p {
+  margin: 0 !important;
+}
+#sites .cgrid .sc5 .ld6 {
+  display: none !important;
+}
+
+/* 壹 · 楚汉风云（1景）：黄金 58% / 42% 横卷主展位，严格约束内边距防裁切 */
+#sites .cgrid.n1 .sc5 {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.38fr) minmax(0, 1fr) !important;
+  gap: clamp(24px, 3.6vw, 52px) !important;
+  align-items: center !important;
+}
+#sites .cgrid.n1 .sc5 .tx {
+  padding: 8px 10px 8px 0 !important;
+  gap: 10px !important;
+}
+#sites .cgrid.n1 .sc5 .ld6 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 6px !important;
+  line-height: 1.9 !important;
+}
+#sites .cgrid.n1 .sc5 .sc5-foot {
+  margin-top: 18px !important;
+}
+
+/* 贰 · 两汉遗珍（3景）：三列等宽等高齐平一字排开，三座皇家地标完整呈现 */
+#sites .cgrid.n3 .sc5:nth-child(1) {
+  grid-column: 1 / span 4 !important;
+}
+#sites .cgrid.n3 .sc5:nth-child(2) {
+  grid-column: 5 / span 4 !important;
+}
+#sites .cgrid.n3 .sc5:nth-child(3) {
+  grid-column: 9 / span 4 !important;
+  display: flex !important;
+  grid-template-columns: none !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+}
+#sites .cgrid.n3 .sc5:nth-child(3) .tx {
+  padding: 16px 4px 2px !important;
+}
+
+/* 叁 · 千年彭城（5景）：上排 2 幅等高巨幅 + 下排 3 幅等高均分，严丝合缝 */
+#sites .cgrid.n5 .sc5:nth-child(1) {
+  grid-column: 1 / span 6 !important;
+}
+#sites .cgrid.n5 .sc5:nth-child(2) {
+  grid-column: 7 / span 6 !important;
+}
+#sites .cgrid.n5 .sc5:nth-child(3) {
+  grid-column: 1 / span 4 !important;
+}
+#sites .cgrid.n5 .sc5:nth-child(4) {
+  grid-column: 5 / span 4 !important;
+}
+#sites .cgrid.n5 .sc5:nth-child(5) {
+  grid-column: 9 / span 4 !important;
+}
+
+@media (max-width: 1024px) {
+  #sites .cgrid.n1 .sc5 {
+    grid-template-columns: 1fr !important;
+  }
+  #sites .cgrid.n3 .sc5:nth-child(1),
+  #sites .cgrid.n3 .sc5:nth-child(2),
+  #sites .cgrid.n5 .sc5:nth-child(1),
+  #sites .cgrid.n5 .sc5:nth-child(2),
+  #sites .cgrid.n5 .sc5:nth-child(3),
+  #sites .cgrid.n5 .sc5:nth-child(4) {
+    grid-column: span 6 !important;
+  }
+  #sites .cgrid.n3 .sc5:nth-child(3),
+  #sites .cgrid.n5 .sc5:nth-child(5) {
+    grid-column: 1 / -1 !important;
+  }
+}
+@media (max-width: 720px) {
+  #sites .cgrid .sc5 {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* ==========================================================================
+   3. 玄夜暗馆「灵动琉璃透感 UI」系统（鼠标跟手柔光 + 1px 顶光折射 + 磨砂胶囊）
+   ========================================================================== */
+
+/* 通用暗琉璃卡片跟手微光伪元素 */
+html.theme-obsidian #sites .sc5::before,
+html.theme-obsidian #sanjue .sjc::before,
+html.theme-obsidian #sanjue .sjr::before,
+html.theme-obsidian #sanjue .lfl li::before,
+html.theme-obsidian #fy .fyc::before,
+html.theme-obsidian #go .panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    360px circle at var(--gx, 50%) var(--gy, 50%),
+    rgba(214, 182, 118, 0.13) 0%,
+    rgba(214, 182, 118, 0.03) 44%,
+    transparent 70%
+  );
+  transition: opacity 0.45s ease;
+  z-index: 1;
+}
+html.theme-obsidian #sites .sc5:hover::before,
+html.theme-obsidian #sanjue .sjc:hover::before,
+html.theme-obsidian #sanjue .sjr:hover::before,
+html.theme-obsidian #sanjue .lfl li:hover::before,
+html.theme-obsidian #fy .fyc:hover::before,
+html.theme-obsidian #go .panel:hover::before {
+  opacity: 1;
+}
+
+/* 02 九处彭城：暗琉璃画框卡片 + 呼吸微光圆形箭头按钮 + 磨砂胶囊标签 */
+html.theme-obsidian #sites .cgrid .sc5 {
+  padding: 14px 14px 16px !important;
+  border-radius: 12px !important;
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.044) 0%, rgba(255, 255, 255, 0.012) 100%) !important;
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  border: 1px solid rgba(244, 240, 232, 0.095) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 24px 54px -30px rgba(0, 0, 0, 0.92) !important;
+}
+html.theme-obsidian #sites .cgrid.n1 .sc5 {
+  padding: 18px 26px 18px 18px !important;
+}
+html.theme-obsidian #sites .cgrid .sc5:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(214, 182, 118, 0.36) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 214, 0.22),
+    0 32px 64px -26px rgba(0, 0, 0, 0.96),
+    0 0 36px -16px rgba(200, 168, 107, 0.22) !important;
+}
+html.theme-obsidian #sites .cgrid .sc5 > * {
+  position: relative;
+  z-index: 2;
+}
+html.theme-obsidian #sites .cgrid .sc5 .im {
+  border: 1px solid rgba(244, 240, 232, 0.10) !important;
+  box-shadow: none !important;
+  border-radius: 7px !important;
+}
+html.theme-obsidian #sites .cgrid .sc5:hover .im {
+  border-color: rgba(214, 182, 118, 0.42) !important;
+}
+html.theme-obsidian #sites .cgrid .sc5 h3 {
+  font-size: clamp(19px, 1.55vw, 23px) !important;
+  letter-spacing: 0.12em !important;
+}
+html.theme-obsidian #sites .cgrid.n1 .sc5 h3 {
+  font-size: clamp(26px, 2.5vw, 34px) !important;
+}
+/* 圆形琉璃光圈箭头微按钮（绝不裁切，悬停亮起暖金光晕） */
+html.theme-obsidian #sites .cgrid .sc5 h3::after {
+  content: "→" !important;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  letter-spacing: 0 !important;
+  font-size: 13px !important;
+  color: rgba(244, 240, 232, 0.62) !important;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(244, 240, 232, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.45s var(--cm-ease), background 0.35s ease, border-color 0.35s ease, color 0.35s ease, box-shadow 0.4s ease !important;
+}
+html.theme-obsidian #sites .cgrid .sc5:hover h3::after {
+  transform: translateX(3px) scale(1.06) !important;
+  color: #FAF3E3 !important;
+  background: rgba(200, 168, 107, 0.18);
+  border-color: rgba(226, 197, 138, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 0 18px rgba(200, 168, 107, 0.28);
+}
+html.theme-obsidian #sites .sc5-foot {
+  border-top: 1px solid rgba(244, 240, 232, 0.08) !important;
+}
+html.theme-obsidian #sites .sc5-foot .st {
+  color: rgba(241, 237, 228, 0.52) !important;
+  font-size: 11px !important;
+}
+/* 互动标签升级为通透磨砂金丝琉璃胶囊 */
+html.theme-obsidian #sites .sc5-foot .feat-tag,
+html.theme-obsidian #sites .sc5-foot .feat-tag.jade {
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(200, 168, 107, 0.085) !important;
+  border: 1px solid rgba(200, 168, 107, 0.26) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #E5CA90 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease !important;
+}
+html.theme-obsidian #sites .sc5:hover .sc5-foot .feat-tag {
+  background: rgba(200, 168, 107, 0.18) !important;
+  border-color: rgba(226, 197, 138, 0.55) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 16px rgba(200, 168, 107, 0.22);
+}
+
+/* ==========================================================================
+   4. 03 汉代三绝：暗琉璃透感展柜 + 玄石幽光拓印台（彻底消灭白纸块与硬黑框）
+   ========================================================================== */
+html.theme-obsidian #sanjue .lfl {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 240, 232, 0.10) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.036) 0%, rgba(255, 255, 255, 0.01) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+html.theme-obsidian #sanjue .lfl li {
+  position: relative;
+  border-right-color: rgba(244, 240, 232, 0.08) !important;
+}
+html.theme-obsidian #sanjue .lfn {
+  border-radius: 50% !important;
+  background: rgba(200, 168, 107, 0.08) !important;
+  border: 1px solid rgba(200, 168, 107, 0.36) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+html.theme-obsidian #sanjue .sjg {
+  display: grid !important;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr) !important;
+  gap: 24px !important;
+  align-items: start !important;
+}
+@media (max-width: 960px) {
+  html.theme-obsidian #sanjue .sjg {
+    grid-template-columns: 1fr !important;
+  }
+}
+html.theme-obsidian #sanjue .sjl {
+  display: flex;
+  flex-direction: column;
+  gap: 24px !important;
+}
+html.theme-obsidian #sanjue .sjc,
+html.theme-obsidian #sanjue .sjr {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.048) 0%, rgba(16, 15, 13, 0.68) 100%) !important;
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  border: 1px solid rgba(244, 240, 232, 0.11) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 28px 60px -28px rgba(0, 0, 0, 0.92) !important;
+  padding: 18px !important;
+  transition: transform 0.5s var(--cm-ease), border-color 0.4s ease, box-shadow 0.5s var(--cm-ease);
+}
+html.theme-obsidian #sanjue .sjr {
+  padding: 26px !important;
+  display: flex;
+  flex-direction: column;
+  align-self: start !important;
+  position: sticky;
+  top: 96px;
+}
+html.theme-obsidian #sanjue .sjc:hover {
+  transform: translateY(-3px);
+  border-color: rgba(214, 182, 118, 0.40) !important;
+}
+html.theme-obsidian #sanjue .sjc > *,
+html.theme-obsidian #sanjue .sjr > * {
+  position: relative;
+  z-index: 2;
+}
+html.theme-obsidian #sanjue .sjc .im {
+  aspect-ratio: 16 / 10 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(244, 240, 232, 0.10) !important;
+  background: #0D0C0A !important;
+}
+html.theme-obsidian #sanjue .sjc .im img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+}
+html.theme-obsidian #sanjue .sjc .more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(200, 168, 107, 0.09);
+  border: 1px solid rgba(200, 168, 107, 0.28);
+  color: #E5CA90 !important;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.35s var(--cm-ease);
+}
+html.theme-obsidian #sanjue .sjc:hover .more {
+  background: rgba(200, 168, 107, 0.20);
+  border-color: rgba(226, 197, 138, 0.62);
+  transform: translateX(3px);
+}
+
+/* 玄石幽光拓印台：告别亮白方框，改用深黑玄石画框 + 悬浮琉璃呼吸提示胶囊 */
+html.theme-obsidian #sanjue .rub {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: #100E0C !important;
+  border: 1px solid rgba(200, 168, 107, 0.28) !important;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.72), 0 18px 40px -18px rgba(0, 0, 0, 0.85) !important;
+}
+html.theme-obsidian #sanjue .rubtip {
+  background: rgba(14, 13, 12, 0.72) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 197, 138, 0.38) !important;
+  border-radius: 999px !important;
+  padding: 11px 22px !important;
+  color: rgba(246, 242, 234, 0.86) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.12em !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 12px 32px rgba(0, 0, 0, 0.68) !important;
+  text-shadow: none !important;
+  max-width: 86%;
+}
+html.theme-obsidian #sanjue .rubtip span {
+  display: block;
+  color: #E5CA90 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.24em !important;
+  margin-bottom: 3px;
+}
+
+/* 三绝交互按钮：灵动琉璃磨砂胶囊（一键拓完 / 重新拓 / 隔空拓印入口） */
+html.theme-obsidian #sanjue .rubact {
+  gap: 12px !important;
+}
+html.theme-obsidian #sanjue .rubact .b5 {
+  border-radius: 999px !important;
+  padding: 10px 20px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(244, 240, 232, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  color: rgba(246, 242, 234, 0.90) !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0.16em !important;
+  transition: transform 0.35s var(--cm-ease), background 0.35s ease, border-color 0.35s ease, color 0.3s ease, box-shadow 0.35s ease !important;
+}
+html.theme-obsidian #sanjue .rubact #rubAll {
+  background: rgba(200, 168, 107, 0.14) !important;
+  border-color: rgba(226, 197, 138, 0.44) !important;
+  color: #FAF3E3 !important;
+}
+html.theme-obsidian #sanjue .rubact .b5:hover {
+  transform: translateY(-2px);
+  background: rgba(200, 168, 107, 0.28) !important;
+  border-color: rgba(236, 210, 154, 0.78) !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 10px 24px -10px rgba(200, 168, 107, 0.42);
+}
+html.theme-obsidian #sanjue .rub-air-tip {
+  border-radius: 10px !important;
+  padding: 12px 16px !important;
+  background: linear-gradient(95deg, rgba(200, 168, 107, 0.12) 0%, rgba(255, 255, 255, 0.025) 100%) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(200, 168, 107, 0.28) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #E5CA90 !important;
+  font-size: 12.5px !important;
+  line-height: 1.7 !important;
+  transition: transform 0.35s var(--cm-ease), background 0.35s ease, border-color 0.35s ease !important;
+}
+html.theme-obsidian #sanjue .rub-air-tip:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(95deg, rgba(200, 168, 107, 0.22) 0%, rgba(255, 255, 255, 0.05) 100%) !important;
+  border-color: rgba(226, 197, 138, 0.62) !important;
+  color: #FAF3E3 !important;
+}
+
+/* ==========================================================================
+   5. 全站其余控件统一「灵动暗琉璃透感」（首屏浮条 / 长卷条 / 05 行旅 / 问导览）
+   ========================================================================== */
+html.theme-obsidian .ed-hero-meta-l .ed-live-clock,
+html.theme-obsidian .ed-season-bar,
+html.theme-obsidian .ed-pins-toggle {
+  border-radius: 999px !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  background: rgba(14, 13, 12, 0.46) !important;
+  border: 1px solid rgba(244, 240, 232, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 12px 32px -12px rgba(0, 0, 0, 0.65);
+}
+html.theme-obsidian .ed-hero-meta-l .ed-live-clock {
+  border-left: 1px solid rgba(244, 240, 232, 0.16) !important;
+}
+html.theme-obsidian .sc-card {
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(24, 22, 20, 0.72) 0%, rgba(12, 11, 10, 0.80) 100%) !important;
+  backdrop-filter: blur(24px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.15) !important;
+  border: 1px solid rgba(244, 240, 232, 0.15) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 28px 64px -20px rgba(0, 0, 0, 0.90) !important;
+}
+html.theme-obsidian .sc-card .nav2 button {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+html.theme-obsidian .sc-card .acts .btn {
+  border-radius: 999px !important;
+  background: rgba(200, 168, 107, 0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+html.theme-obsidian #go .panel,
+html.theme-obsidian #go .go-pane.on .panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.045) 0%, rgba(16, 15, 13, 0.74) 100%) !important;
+  backdrop-filter: blur(20px) saturate(1.12);
+  -webkit-backdrop-filter: blur(20px) saturate(1.12);
+  border: 1px solid rgba(244, 240, 232, 0.11) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 24px 56px -28px rgba(0, 0, 0, 0.90) !important;
+}
+html.theme-obsidian #go #bPool .chip,
+html.theme-obsidian #go .btn.small {
+  border-radius: 999px !important;
+  backdrop-filter: blur(12px);
+}
+html.theme-obsidian #go #bPool .chip {
+  background: rgba(255, 255, 255, 0.03) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html.theme-obsidian #go #bPool .chip.in {
+  background: rgba(200, 168, 107, 0.20) !important;
+  border-color: rgba(226, 197, 138, 0.58) !important;
+  color: #FAF3E3 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 0 16px rgba(200, 168, 107, 0.16);
+}
+html.theme-obsidian #go .btn.small:not(.ghost):not(.red) {
+  background: rgba(200, 168, 107, 0.20) !important;
+  border: 1px solid rgba(226, 197, 138, 0.54) !important;
+  color: #FAF3E3 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+html.theme-obsidian #go .btn.small:not(.ghost):not(.red):hover {
+  background: rgba(200, 168, 107, 0.34) !important;
+  border-color: rgba(238, 214, 160, 0.82) !important;
+  color: #FFFFFF !important;
+}
+html.theme-obsidian #go .swap {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+html.theme-obsidian #fy .fyc {
+  position: relative;
+  overflow: hidden;
+}
+html.theme-obsidian .gpanel {
+  border-radius: 14px !important;
+  background: linear-gradient(160deg, rgba(22, 20, 18, 0.86) 0%, rgba(12, 11, 10, 0.92) 100%) !important;
+  backdrop-filter: blur(24px) saturate(1.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 32px 72px -20px rgba(0, 0, 0, 0.94) !important;
+}
+html.theme-obsidian .gchips button,
+html.theme-obsidian .gform .btn {
+  border-radius: 999px !important;
+}
+
+
+/* ==========================================================================
+   V27「暮夜黛墨 · 月雾透感」(#12151C → #161B24 + 月蓝/暖金空气氛围光场)
+   告别死黑沉闷：从 17 幅暗夜重绘原画夜空直接取色，并激活全站毛玻璃折射透感！
+   ========================================================================== */
+html.theme-obsidian {
+  --ob-bg: #12151C;
+  --ob-bg-2: #181D27;
+  --ob-bg-3: #202634;
+  --ob-glass: rgba(24, 30, 42, 0.50);
+  --ob-glass-s: rgba(20, 25, 36, 0.74);
+  --ob-text-1: rgba(247, 245, 240, 0.94);
+  --ob-text-2: rgba(232, 235, 242, 0.68);
+  --ob-text-3: rgba(214, 220, 234, 0.42);
+  --ob-gold: #D4B475;
+  --ob-gold-soft: rgba(212, 180, 117, 0.30);
+  --ob-hair: rgba(230, 236, 248, 0.14);
+  --ob-hair-soft: rgba(230, 236, 248, 0.08);
+}
+
+html.theme-obsidian,
+html.theme-obsidian body {
+  background-color: #12151C !important;
+}
+
+/* 展厅背景：深黛墨底 + 大面积柔和「月蓝 & 暖金华灯」空气氛围光场 + 4% 建筑光丝 */
+html.theme-obsidian #sites,
+html.theme-obsidian #go,
+html.theme-obsidian .sc-sticky {
+  background-color: #12151C !important;
+  background-image:
+    radial-gradient(62% 46% at 16% 10%, rgba(44, 72, 118, 0.34) 0%, transparent 66%),
+    radial-gradient(52% 40% at 86% 36%, rgba(198, 152, 82, 0.12) 0%, transparent 64%),
+    radial-gradient(58% 44% at 48% 90%, rgba(38, 62, 102, 0.28) 0%, transparent 68%),
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(25% - 0.5px),
+      rgba(232, 238, 248, 0.04) calc(25% - 0.5px),
+      rgba(232, 238, 248, 0.04) 25%,
+      transparent 25%,
+      transparent calc(50% - 0.5px),
+      rgba(232, 238, 248, 0.04) calc(50% - 0.5px),
+      rgba(232, 238, 248, 0.04) 50%,
+      transparent 50%,
+      transparent calc(75% - 0.5px),
+      rgba(232, 238, 248, 0.04) calc(75% - 0.5px),
+      rgba(232, 238, 248, 0.04) 75%,
+      transparent 75%
+    ) !important;
+}
+
+/* 04 彭城手艺：暮夜黛墨 + 极柔和中央暖月光雾（纯黑底非遗图经 lighten 混合 100% 无缝溶入黛墨！） */
+html.theme-obsidian #fy {
+  background-color: #12151C !important;
+  background-image:
+    radial-gradient(64% 48% at 50% 24%, rgba(42, 66, 108, 0.30) 0%, transparent 68%),
+    radial-gradient(52% 42% at 80% 78%, rgba(196, 150, 82, 0.10) 0%, transparent 64%),
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(25% - 0.5px),
+      rgba(232, 238, 248, 0.038) calc(25% - 0.5px),
+      rgba(232, 238, 248, 0.038) 25%,
+      transparent 25%,
+      transparent calc(50% - 0.5px),
+      rgba(232, 238, 248, 0.038) calc(50% - 0.5px),
+      rgba(232, 238, 248, 0.038) 50%,
+      transparent 50%,
+      transparent calc(75% - 0.5px),
+      rgba(232, 238, 248, 0.038) calc(75% - 0.5px),
+      rgba(232, 238, 248, 0.038) 75%,
+      transparent 75%
+    ) !important;
+}
+html.theme-obsidian #fy .fyc {
+  overflow: visible !important;
+  isolation: auto !important;
+}
+html.theme-obsidian #fy .fyc.cm-in {
+  transform: none !important;
+  will-change: auto !important;
+}
+html.theme-obsidian #fy .fyc .im {
+  mix-blend-mode: lighten !important;
+  background: transparent !important;
+  isolation: auto !important;
+  overflow: visible !important;
+}
+html.theme-obsidian #fy .fyc .im img {
+  mix-blend-mode: normal !important;
+  -webkit-mask-image:
+    radial-gradient(ellipse 76% 70% at 50% 52%, #000 36%, transparent 94%),
+    linear-gradient(180deg, transparent 0%, #000 22%, #000 82%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(ellipse 76% 70% at 50% 52%, #000 36%, transparent 94%),
+    linear-gradient(180deg, transparent 0%, #000 22%, #000 82%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* 顶栏暗琉璃：深黛蓝磨砂玻璃，轻盈通透 */
+html.theme-obsidian .nav {
+  background: linear-gradient(180deg, rgba(16, 20, 29, 0.62) 0%, transparent 100%) !important;
+}
+html.theme-obsidian .nav.solid {
+  background: rgba(18, 22, 31, 0.72) !important;
+  backdrop-filter: blur(22px) saturate(1.18);
+  -webkit-backdrop-filter: blur(22px) saturate(1.18);
+  border-bottom-color: rgba(230, 236, 248, 0.13) !important;
+}
+
+/* 首屏底部无缝溶入 #12151C 暮夜黛墨 */
+html.theme-obsidian .hero.kai,
+html.theme-obsidian .kai-paper,
+html.theme-obsidian .scrollsec {
+  background-color: #12151C !important;
+}
+html.theme-obsidian .hero.kai::after {
+  background: linear-gradient(to bottom, rgba(18, 21, 28, 0) 0%, rgba(18, 21, 28, 0.70) 64%, #12151C 100%) !important;
+}
+
+/* 01 长卷展框：深黛墨底 + 轻盈微光边框 */
+html.theme-obsidian .stop .vg {
+  background-color: #151922 !important;
+  border-color: rgba(212, 180, 117, 0.28) !important;
+  box-shadow: 0 28px 64px -20px rgba(6, 8, 14, 0.85), 0 0 44px -16px rgba(212, 180, 117, 0.18) !important;
+}
+html.theme-obsidian .sc-card {
+  background: linear-gradient(160deg, rgba(30, 36, 49, 0.68) 0%, rgba(18, 22, 31, 0.78) 100%) !important;
+  border-color: rgba(230, 236, 248, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 28px 64px -20px rgba(4, 6, 12, 0.82) !important;
+}
+
+/* 三幕电影 (#skStage)：全幅羽化过渡色同步为 #12151C 暮夜黛墨，丝滑通透不死黑 */
+html.theme-obsidian .sk-stage,
+html.theme-obsidian .sk-sticky,
+html.theme-obsidian .sk-bg,
+html.theme-obsidian .sk-slide[data-act="2"] .sk-bg {
+  background: #12151C !important;
+}
+html.theme-obsidian .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="0"] .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="1"] .sk-bg::after,
+html.theme-obsidian .sk-slide[data-act="2"] .sk-bg::after,
+html.theme-obsidian .sk-bg-relic::after {
+  background:
+    linear-gradient(
+      92deg,
+      rgba(18, 21, 28, 0.90) 0%,
+      rgba(18, 21, 28, 0.56) 30%,
+      rgba(18, 21, 28, 0.08) 54%,
+      rgba(18, 21, 28, 0) 76%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(18, 21, 28, 0.48) 0%,
+      rgba(18, 21, 28, 0) 16%,
+      rgba(18, 21, 28, 0) 84%,
+      rgba(18, 21, 28, 0.76) 100%
+    ) !important;
+}
+html.theme-obsidian .sk-inset-plate {
+  background: rgba(22, 27, 38, 0.72) !important;
+  border-color: rgba(212, 180, 117, 0.36) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 24px 56px -18px rgba(4, 6, 12, 0.85) !important;
+}
+
+/* 步入汉宫暗室过场 & 03 汉代三绝：深邃暮夜黛墨 + 暖金微光场（有层次不沉闷） */
+html.theme-obsidian .ed-interlude {
+  background:
+    radial-gradient(56% 70% at 50% 50%, rgba(42, 66, 108, 0.26) 0%, transparent 72%),
+    #10131A !important;
+}
+html.theme-obsidian #sanjue {
+  background-color: #10131A !important;
+  background-image:
+    radial-gradient(60% 42% at 18% 28%, rgba(44, 70, 114, 0.30) 0%, transparent 68%),
+    radial-gradient(52% 40% at 82% 72%, rgba(202, 156, 84, 0.13) 0%, transparent 66%) !important;
+}
+html.theme-obsidian #sanjue .sh5::before {
+  background:
+    linear-gradient(90deg, rgba(16, 19, 26, 0.06) 0%, rgba(16, 19, 26, 0.38) 38%, rgba(16, 19, 26, 0.90) 58%, #10131A 78%),
+    linear-gradient(180deg, #10131A 0%, transparent 16%, transparent 82%, #10131A 100%),
+    url("../img/ed/lacquer.jpg") left center / min(64vw, 920px) auto no-repeat !important;
+}
+
+/* 激活真正“烟熏月雾琉璃透感”的卡片材质（折射背后的月蓝与暖金微光！） */
+html.theme-obsidian #sites .cgrid .sc5,
+html.theme-obsidian #sanjue .sjc,
+html.theme-obsidian #sanjue .sjr,
+html.theme-obsidian #go .panel,
+html.theme-obsidian #go .go-pane.on .panel {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.064) 0%, rgba(26, 33, 48, 0.34) 55%, rgba(18, 22, 32, 0.48) 100%) !important;
+  backdrop-filter: blur(22px) saturate(1.22) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.22) !important;
+  border: 1px solid rgba(230, 238, 252, 0.13) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.17),
+    0 24px 54px -26px rgba(4, 7, 14, 0.78) !important;
+}
+html.theme-obsidian #sites .cgrid .sc5:hover,
+html.theme-obsidian #sanjue .sjc:hover {
+  border-color: rgba(226, 197, 138, 0.44) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 228, 0.28),
+    0 30px 64px -24px rgba(4, 7, 14, 0.86),
+    0 0 40px -14px rgba(212, 180, 117, 0.24) !important;
+}
+html.theme-obsidian #sites .cgrid .sc5 .im,
+html.theme-obsidian #sanjue .sjc .im {
+  background: #141822 !important;
+  border-color: rgba(230, 238, 252, 0.12) !important;
+}
+html.theme-obsidian #sanjue .rub {
+  background: #141822 !important;
+  border-color: rgba(212, 180, 117, 0.32) !important;
+}
+html.theme-obsidian #sanjue .rubtip {
+  background: rgba(22, 27, 38, 0.68) !important;
+  border-color: rgba(226, 197, 138, 0.44) !important;
+}
+
+/* 首屏玻璃胶囊 & 问导览抽屉 & 页脚统一暮夜黛墨 */
+html.theme-obsidian .ed-hero-meta-l .ed-live-clock,
+html.theme-obsidian .ed-season-bar,
+html.theme-obsidian .ed-pins-toggle {
+  background: rgba(20, 26, 38, 0.52) !important;
+  border-color: rgba(230, 238, 252, 0.18) !important;
+}
+html.theme-obsidian .gpanel,
+html.theme-obsidian .abdlg {
+  background: linear-gradient(160deg, rgba(28, 34, 48, 0.84) 0%, rgba(18, 22, 31, 0.90) 100%) !important;
+  border-color: rgba(230, 238, 252, 0.16) !important;
+}
+html.theme-obsidian .detail {
+  background:
+    radial-gradient(60% 40% at 20% 8%, rgba(44, 72, 118, 0.28) 0%, transparent 65%),
+    #12151C !important;
+}
+html.theme-obsidian .detail .v5bar {
+  background: rgba(18, 22, 31, 0.80) !important;
+}
+html.theme-obsidian .foot.ed-foot {
+  background: #0D1016 !important;
+}
+html.theme-obsidian .ed-preloader {
+  background: #0E1118 !important;
+}
+
+
+/* ==========================================================================
+   V28「极简四章顶栏 × 暗琉璃三图标微胶囊」
+   彻底告别 9 项拥挤排布、竖线与红点 → IZANAMI 级一望而清的克制顶栏
+   ========================================================================== */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.nav .links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 32px !important;
+}
+.nav .links li {
+  display: flex;
+  align-items: center;
+}
+.nav-pill-wrap {
+  margin-left: 6px;
+}
+
+/* 暗琉璃三图标组合胶囊（昼夜双模式皆通透精致） */
+.nav-glass-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(17, 16, 14, 0.045);
+  border: 1px solid rgba(17, 16, 14, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+html.theme-obsidian .nav-glass-pill {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(230, 238, 252, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 8px 24px -10px rgba(4, 7, 14, 0.65);
+}
+
+.nav-ico-btn {
+  position: relative;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-left: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--iz-ink-2) !important;
+  cursor: pointer;
+  transition: color 0.28s ease, background 0.28s ease, transform 0.3s var(--cm-ease);
+}
+.nav-ico-btn::before {
+  display: none !important; /* 彻底清除旧版红点或短横线伪元素 */
+}
+.nav-ico-btn:hover {
+  background: rgba(17, 16, 14, 0.07) !important;
+  color: var(--iz-ink) !important;
+}
+html.theme-obsidian .nav-ico-btn {
+  color: rgba(236, 240, 248, 0.64) !important;
+}
+html.theme-obsidian .nav-ico-btn:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  color: #FAF3E3 !important;
+}
+html.theme-obsidian .nav-ico-btn[aria-pressed="true"].nav-sound-btn {
+  color: #E5CA90 !important;
+  background: rgba(212, 180, 117, 0.16) !important;
+}
+
+/* 昼夜图标精准切换：玄夜显示弯月，素宣显示微阳 */
+.nav-theme-btn .ico-sun { display: none; }
+.nav-theme-btn .ico-moon { display: block; }
+html:not(.theme-obsidian) .nav-theme-btn .ico-sun { display: block; }
+html:not(.theme-obsidian) .nav-theme-btn .ico-moon { display: none; }
+
+/* 古琴声景开启时的微幅呼吸声波动画 */
+@keyframes navWave {
+  0%, 100% { transform: scaleY(0.55); }
+  50% { transform: scaleY(1.15); }
+}
+.nav-sound-btn[aria-pressed="true"] .ico-snd line {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: navWave 1.15s ease-in-out infinite;
+}
+.nav-sound-btn[aria-pressed="true"] .ico-snd .b2 { animation-delay: 0.18s; }
+.nav-sound-btn[aria-pressed="true"] .ico-snd .b3 { animation-delay: 0.36s; }
+.nav-sound-btn[aria-pressed="true"] .ico-snd .b4 { animation-delay: 0.54s; }
+
+/* 图标悬停精微暗琉璃提示签 */
+.nav-ico-btn::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-family: var(--serif);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(20, 24, 34, 0.88);
+  color: rgba(247, 245, 240, 0.92);
+  border: 1px solid rgba(230, 238, 252, 0.16);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.65);
+  transition: opacity 0.25s ease, transform 0.3s var(--cm-ease);
+}
+.nav-ico-btn:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/* ==========================================================================
+   V29「全站内页与细节零破绽终极打磨」
+   修复：长卷激活色 / 暗室衔接间距 / 生死观四柱胶囊 / 轨道发光 / 问导览抽屉 / 详情页全暗琉璃化
+   ========================================================================== */
+
+/* 1. 01 彭城七里长卷底部时间轴：激活站点改用通透暖鎏金，告别暗红低对比 */
+html.theme-obsidian .sc-bar button.on,
+html.theme-obsidian .sc-bar button.on em {
+  color: #E5CA90 !important;
+  font-weight: 600 !important;
+}
+html.theme-obsidian .sc-bar button.on::before {
+  background: #E5CA90 !important;
+  border-color: #FAF3E3 !important;
+  box-shadow: 0 0 12px rgba(229, 202, 144, 0.72) !important;
+}
+
+/* 2. 步入汉宫暗室 → 03 汉代三绝：收紧过长过渡空白 + 微微提亮汉漆云气壶鎏金光泽 */
+html.theme-obsidian .ed-interlude {
+  padding: 84px 24px 56px !important;
+}
+html.theme-obsidian #sanjue .sh5 {
+  min-height: 340px !important;
+  padding: 58px 0 46px 42% !important;
+  margin-bottom: 36px !important;
+}
+html.theme-obsidian #sanjue .sh5::before {
+  background:
+    linear-gradient(90deg, rgba(16, 19, 26, 0.0) 0%, rgba(16, 19, 26, 0.22) 34%, rgba(16, 19, 26, 0.88) 58%, #10131A 78%),
+    linear-gradient(180deg, #10131A 0%, transparent 16%, transparent 82%, #10131A 100%),
+    url("../img/ed/lacquer.jpg") left center / min(62vw, 880px) auto no-repeat !important;
+}
+
+/* 3. 03 生死观四柱底部入口：去生硬下划线 → 灵动暗琉璃微光胶囊 */
+html.theme-obsidian #sanjue .lfl .lfa {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 5px 14px !important;
+  border-radius: 999px !important;
+  text-decoration: none !important;
+  border: 1px solid rgba(212, 180, 117, 0.28) !important;
+  background: rgba(212, 180, 117, 0.085) !important;
+  color: #E5CA90 !important;
+  font-size: 12px !important;
+  letter-spacing: 0.1em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.35s var(--cm-ease), background 0.3s ease, border-color 0.3s ease !important;
+}
+html.theme-obsidian #sanjue .lfl .lfa:hover {
+  transform: translateX(3px);
+  background: rgba(212, 180, 117, 0.20) !important;
+  border-color: rgba(232, 204, 146, 0.62) !important;
+  color: #FAF3E3 !important;
+}
+
+/* 4. 05 轨道交通简图：柔和美术馆级霓虹微光线路 */
+html.theme-obsidian #metro svg path {
+  filter: drop-shadow(0 0 6px rgba(212, 180, 117, 0.26));
+}
+html.theme-obsidian #metro svg circle {
+  fill: #12151C !important;
+  stroke: #F4F0E8 !important;
+  filter: drop-shadow(0 0 4px rgba(244, 240, 232, 0.35));
+}
+
+/* 5. 问导览抽屉 (#gpanel)：柔化气泡圆角与半透明鎏金发送键 */
+html.theme-obsidian .gmsgs .gm p {
+  border-radius: 12px 12px 12px 4px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(230, 238, 252, 0.13) !important;
+  border-left: 2px solid #D4B475 !important;
+  line-height: 1.75 !important;
+  text-wrap: pretty;
+}
+html.theme-obsidian .gmsgs .gm.me p {
+  border-radius: 12px 12px 4px 12px !important;
+  background: rgba(212, 180, 117, 0.24) !important;
+  border: 1px solid rgba(226, 197, 138, 0.48) !important;
+  color: #FAF3E3 !important;
+}
+html.theme-obsidian .gform .btn {
+  background: rgba(212, 180, 117, 0.22) !important;
+  border: 1px solid rgba(226, 197, 138, 0.56) !important;
+  color: #FAF3E3 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+html.theme-obsidian .gform .btn:hover {
+  background: rgba(212, 180, 117, 0.36) !important;
+  color: #FFFFFF !important;
+}
+html.theme-obsidian .gx {
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 6. 景点详情页 (#detail)：全套暗琉璃透感化 + 修复白底白字标点与孤字换行 */
+html.theme-obsidian .detail .v5bar {
+  backdrop-filter: blur(22px) saturate(1.18);
+  -webkit-backdrop-filter: blur(22px) saturate(1.18);
+  border-bottom-color: rgba(230, 238, 252, 0.12) !important;
+}
+html.theme-obsidian .detail .v5bar .bk {
+  border-radius: 999px !important;
+  padding: 6px 16px !important;
+  background: rgba(255, 255, 255, 0.055) !important;
+  border: 1px solid rgba(230, 238, 252, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+html.theme-obsidian .detail .v5bar .bk:hover {
+  background: rgba(212, 180, 117, 0.16) !important;
+  border-color: rgba(226, 197, 138, 0.52) !important;
+}
+html.theme-obsidian .detail .h5 h1 {
+  background: linear-gradient(
+    180deg,
+    rgba(252, 249, 242, 0.96) 0%,
+    rgba(244, 240, 232, 0.80) 58%,
+    rgba(216, 208, 192, 0.48) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  letter-spacing: 0.2em !important;
+}
+html.theme-obsidian .detail .h5img,
+html.theme-obsidian .detail .story .frame {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(230, 238, 252, 0.14) !important;
+  box-shadow: 0 28px 64px -24px rgba(4, 7, 14, 0.86) !important;
+  background: #141822 !important;
+}
+/* 彻底修复详情页故事图上白底白字的标点胶囊 → 深邃暗琉璃鎏金胶囊 */
+html.theme-obsidian .detail .spin {
+  background: rgba(18, 22, 31, 0.84) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 197, 138, 0.52) !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 28px rgba(0, 0, 0, 0.65) !important;
+}
+html.theme-obsidian .detail .spin span {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  color: #FAF3E3 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.12em;
+}
+/* 彻底修复旧版 v4.css 遗留的 1.3s 延迟导致回顶时首屏「彭城」大字停留在顶栏下方的问题 */
+.hero.open .kai-title {
+  transition: none !important;
+}
+html.theme-obsidian .detail .spin i {
+  background: #E5CA90 !important;
+  box-shadow: 0 0 10px rgba(229, 202, 144, 0.85) !important;
+}
+html.theme-obsidian .detail .sc,
+html.theme-obsidian .detail .s6c,
+html.theme-obsidian .detail .f5,
+html.theme-obsidian .detail .g5,
+html.theme-obsidian .detail .must,
+html.theme-obsidian .detail .dnext a {
+  border-radius: 12px !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, rgba(22, 28, 40, 0.44) 100%) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(230, 238, 252, 0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 20px 48px -24px rgba(4, 7, 14, 0.8) !important;
+}
+html.theme-obsidian .detail .step h3 {
+  text-wrap: balance;
+  font-size: clamp(22px, 2.2vw, 28px) !important;
+  line-height: 1.38 !important;
+}
+html.theme-obsidian .detail .pcbtn,
+html.theme-obsidian .detail .b5 {
+  border-radius: 999px !important;
+  padding: 8px 18px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(230, 238, 252, 0.18) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+html.theme-obsidian .detail .b5.pri,
+html.theme-obsidian .detail .pcbtn:hover {
+  background: rgba(212, 180, 117, 0.22) !important;
+  border-color: rgba(226, 197, 138, 0.58) !important;
+  color: #FAF3E3 !important;
+}
+/* 详情页内隔空拓印台 (v8.js) 同步玄石幽光与悬浮琉璃提示胶囊 */
+html.theme-obsidian .detail .rb8 {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: #141822 !important;
+  border: 1px solid rgba(212, 180, 117, 0.30) !important;
+}
+html.theme-obsidian .detail .rt8 {
+  background: rgba(20, 25, 36, 0.78) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 197, 138, 0.44) !important;
+  border-radius: 999px !important;
+  padding: 10px 22px !important;
+  color: rgba(247, 245, 240, 0.90) !important;
+}
+html.theme-obsidian .detail .rt8 span {
+  color: #E5CA90 !important;
+}
+
+/* 7. 页脚二维码暗琉璃卡片柔化 */
+html.theme-obsidian .ed-qr-card {
+  border-radius: 12px !important;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.055) 0%, rgba(20, 25, 36, 0.55) 100%) !important;
+  border: 1px solid rgba(230, 238, 252, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+html.theme-obsidian .ed-qr-card img {
+  border-radius: 6px !important;
+  background: #F4EFE6 !important;
+}
+
+
+/* ==========================================================================
+   V30「景点详情页重构：一屏完整策展主视觉 × 紧致画卷叙事 × 规整文物图录」
+   彻底消除图一看不见整图、图二大面积黑洞断层、图三排版错乱，同时大幅提升内容信息密度
+   ========================================================================== */
+
+/* 1. 详情页主容器与首屏 46/54 双栏策展主视觉（昼夜双模式通用，一屏看清完整画幅+核心导览信息！） */
+.detail .dv5 {
+  max-width: 1220px !important;
+  padding: 28px clamp(20px, 3.6vw, 44px) 96px !important;
+}
+.detail .dv5-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.24fr);
+  gap: clamp(24px, 3.6vw, 48px);
+  align-items: center;
+  margin-top: 8px;
+}
+.detail .dv5-hero .h5 {
+  text-align: left !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+.detail .dv5-hero .h5 .eye {
+  margin-bottom: 10px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.22em !important;
+}
+.detail .dv5-hero .h5 h1 {
+  font-size: clamp(36px, 3.8vw, 52px) !important;
+  line-height: 1.14 !important;
+  margin: 0 0 10px !important;
+}
+.detail .dv5-hero .h5 .sub {
+  font-size: 15.5px !important;
+  margin: 0 0 16px !important;
+  letter-spacing: 0.12em !important;
+}
+.detail .dv5-hero .h5-lead {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--iz-ink-2);
+  margin: 0 0 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--iz-hair);
+}
+.detail .dv5-hero .h5act {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px !important;
+  justify-content: flex-start !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+}
+.detail .dv5-hero .h5 .st {
+  margin-top: 0 !important;
+}
+.detail .dv5-hero .h5img {
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+.detail .dv5-hero .h5img img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 10 !important;
+  object-fit: cover !important;
+}
+
+/* 2. 首屏直达「五项精要信息条」：开放 / 门票 / 停留 / 闭馆 / 交通 一眼扫尽 */
+.detail .i5 {
+  max-width: none !important;
+  margin: 26px 0 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  border-radius: 12px !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+.detail .i5 > div {
+  padding: 16px 20px !important;
+}
+.detail .i5 .i5-go {
+  grid-column: 1 / -1;
+  border-right: 0 !important;
+  border-top: 1px solid var(--iz-hair);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 13px 20px !important;
+}
+.detail .i5 .i5-go small {
+  margin-bottom: 0 !important;
+  flex: none;
+}
+.detail .i5 .i5-go b {
+  font-size: 14px !important;
+}
+.detail .i5 .i5-tip {
+  font-size: 12.5px;
+  color: var(--iz-ink-3);
+}
+.detail .i5 .src {
+  padding: 11px 20px !important;
+  font-size: 11.5px !important;
+}
+
+/* 3. 紧致「01 循迹细读」叙事区：彻底消除 70vh 巨大黑洞断层，点选/滚动丝滑联动 */
+.detail .story-wrap {
+  margin: 68px 0 0 !important;
+}
+.detail .story-wrap .sh {
+  margin-bottom: 28px !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+.detail .story {
+  margin: 0 !important;
+  max-width: none !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.92fr) !important;
+  gap: clamp(24px, 3.2vw, 44px) !important;
+  align-items: start !important;
+}
+.detail .story .stk {
+  position: sticky !important;
+  top: 92px !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+.detail .story .steps {
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+.detail .story .step {
+  min-height: 0 !important;
+  display: block !important;
+  cursor: pointer;
+}
+.detail .story .step .sc {
+  padding: 20px 22px !important;
+  opacity: 0.68 !important;
+  transform: none !important;
+  transition: opacity 0.35s ease, border-color 0.35s ease, transform 0.35s var(--cm-ease), box-shadow 0.35s ease !important;
+}
+.detail .story .step:hover .sc {
+  opacity: 0.92 !important;
+}
+.detail .story .step.on .sc {
+  opacity: 1 !important;
+  border-color: rgba(226, 197, 138, 0.56) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 248, 224, 0.24), 0 18px 42px -18px rgba(4, 7, 14, 0.85), 0 0 28px -12px rgba(212, 180, 117, 0.24) !important;
+}
+.detail .story .step .sc .eye {
+  font-size: 11px !important;
+  letter-spacing: 0.2em !important;
+  color: var(--ob-gold, var(--iz-red)) !important;
+  margin: 0 0 6px !important;
+}
+.detail .story .step h3 {
+  font-size: clamp(18px, 1.65vw, 22px) !important;
+  margin: 0 0 8px !important;
+}
+.detail .story .step p:not(.eye) {
+  font-size: 13.5px !important;
+  line-height: 1.8 !important;
+  margin: 0 !important;
+}
+
+/* 4. 规整丰富的「02 文化图录」：取消高低错位拼接 → 统一 3 列博物馆文物展柜网格（零裁剪 + 完整图文解说！） */
+.detail .d5 {
+  margin: 76px 0 0 !important;
+  max-width: none !important;
+}
+.detail .d5 .sh {
+  margin-bottom: 28px !important;
+}
+.detail .d5 .sh h2 {
+  font-size: clamp(26px, 2.8vw, 36px) !important;
+  margin: 6px 0 10px !important;
+}
+.detail .d5 .sh p {
+  font-size: 14px !important;
+  line-height: 1.85 !important;
+}
+.detail .board {
+  position: static !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  margin-top: 28px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+.detail .board .ci,
+.detail .board .ci:nth-child(1),
+.detail .board .ci:nth-child(2),
+.detail .board .ci:nth-child(3),
+.detail .board .ci:nth-child(4),
+.detail .board .ci:nth-child(5),
+.detail .board .ci:nth-child(6),
+.detail .board .ci:nth-child(7),
+.detail .board .ci:nth-child(8) {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  grid-column: span 1 !important;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  cursor: pointer;
+  transition: transform 0.4s var(--cm-ease), border-color 0.35s ease, box-shadow 0.4s ease !important;
+}
+html.theme-obsidian .detail .board .ci {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.058) 0%, rgba(22, 28, 40, 0.44) 100%) !important;
+  border: 1px solid rgba(230, 238, 252, 0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 18px 42px -22px rgba(4, 7, 14, 0.82) !important;
+}
+html.theme-obsidian .detail .board .ci:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(226, 197, 138, 0.48) !important;
+}
+.detail .board .ci .im,
+.detail .board .ci:nth-child(1) .im {
+  aspect-ratio: 4 / 3 !important;
+  width: 100% !important;
+  height: auto !important;
+  padding: 10px !important;
+  box-sizing: border-box !important;
+  border-radius: 7px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: none !important;
+}
+html.theme-obsidian .detail .board .ci .im {
+  background: rgba(242, 236, 224, 0.94) !important; /* 统一精装宣纸卡纸托底，完整展示每件线稿/拓片/剪纸/木刻，绝不裁切！ */
+  border: 1px solid rgba(212, 180, 117, 0.22) !important;
+}
+html.theme-obsidian .detail .board .ci.rub .im {
+  background: #141822 !important;
+}
+.detail .board .ci .im img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  border-radius: 3px;
+}
+.detail .board .ci figcaption {
+  padding: 14px 2px 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  gap: 8px !important;
+  flex: 1 1 auto !important;
+}
+.detail .board .ci .ci-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.detail .board .ci figcaption b {
+  font-family: var(--serif);
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.08em;
+}
+.detail .board .ci figcaption span {
+  font-size: 11px !important;
+  padding: 2px 9px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--iz-hair) !important;
+  white-space: nowrap;
+}
+html.theme-obsidian .detail .board .ci figcaption span {
+  background: rgba(212, 180, 117, 0.10) !important;
+  border-color: rgba(212, 180, 117, 0.30) !important;
+  color: #E5CA90 !important;
+}
+.detail .board .ci .ci-desc {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--iz-ink-2);
+}
+.detail .board .ci .ci-rel {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--iz-hair-soft);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--iz-ink-3);
+}
+
+/* 5. 03 历史年表：改水平溢出条 → 规整多列齐平暗琉璃卡片网格 */
+.detail .tl5 {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+  gap: 16px !important;
+  overflow: visible !important;
+  padding: 8px 0 0 !important;
+}
+.detail .tl5 li {
+  flex: none !important;
+  padding: 20px 22px !important;
+  border-radius: 12px !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+html.theme-obsidian .detail .tl5 li {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.055) 0%, rgba(22, 28, 40, 0.42) 100%) !important;
+  border: 1px solid rgba(230, 238, 252, 0.13) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+.detail .tl5 b {
+  font-size: 20px !important;
+  color: #E5CA90 !important;
+  margin-bottom: 8px !important;
+}
+.detail .tl5 p {
+  font-size: 13.5px !important;
+  line-height: 1.8 !important;
+}
+/* 04 风物寻味美食卡：收紧为精致 220px 圆形玉盘 + 优雅解说排版 */
+.detail .f5 {
+  display: grid !important;
+  grid-template-columns: 220px minmax(0, 1fr) !important;
+  gap: 36px !important;
+  padding: 26px 34px !important;
+  margin-top: 24px !important;
+  align-items: center !important;
+}
+.detail .f5 img {
+  width: 220px !important;
+  height: 220px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(212, 180, 117, 0.30) !important;
+  padding: 6px;
+  background: rgba(242, 236, 224, 0.94);
+}
+.detail .f5 h3 {
+  font-size: clamp(24px, 2.4vw, 32px) !important;
+  margin: 6px 0 10px !important;
+}
+.detail .f5 p {
+  font-size: 14.5px !important;
+  line-height: 1.85 !important;
+  margin: 0 !important;
+}
+@media (max-width: 640px) {
+  .detail .f5 {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    justify-items: center;
+  }
+}
+.detail .dv5 .dnext {
+  margin-top: 72px !important;
+}
+
+@media (max-width: 960px) {
+  .detail .dv5-hero,
+  .detail .story {
+    grid-template-columns: 1fr !important;
+  }
+  .detail .story .stk {
+    position: static !important;
+  }
+  .detail .i5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .detail .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 640px) {
+  .detail .board,
+  .detail .i5 {
+    grid-template-columns: 1fr !important;
+  }
+}

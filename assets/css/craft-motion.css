@@ -1,0 +1,948 @@
+/* ==========================================================================
+   汉韵彭城 · V22「精微动效与策展质感拉满层」
+   深度对标 IZANAMI × SAKAZUKI 的物理细腻度、排印仪式感与全站材质统一：
+   1. 首屏开卷逐层基线浮现 + 四时滑动朱砂游标 + 诗意四时题签 + 博物馆级地标丝签
+   2. 全站大标题遮罩浮现 (.cm-mask) + 1px 细线绘制 + 画幅内缩放呼吸进场
+   3. 三幕翻页 (#skStage) 连续滚动擦除遮罩与实时进度细线 (.sk-pbar)
+   4. 长卷底部悬浮题签条 (.sc-card) 彻底去灰框/黑块 → 宣纸玻璃策展条
+   5. 景点详情页 (#detail) 宣纸幕帘转场与内容错峰进场
+   6. 05 彭城行旅路引 (#go) 彻底去学生表单感 → 博物馆双栏折页 + 2 Tab 切换
+   7. 方向性细线悬停 + 箭头接力滑动 + 暗室光标自动反色
+   ========================================================================== */
+
+:root {
+  --cm-ease: cubic-bezier(0.19, 1, 0.22, 1);
+  --cm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   1. 首屏开卷入场仪式 + 四时滑动游标 + 诗意题签 + 精致地标丝签
+   ========================================================================== */
+#edSeasonPoet {
+  display: inline-block;
+  min-width: 84px;
+  color: var(--iz-ink-2);
+  font-weight: 600;
+  transition: opacity 0.28s ease, transform 0.36s var(--cm-ease);
+}
+#edSeasonPoet.swap {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+/* 开卷首屏错峰浮现（幕帘揭开后优雅落定） */
+html.ed-anim-hero .hero .tv h1,
+html.ed-anim-hero .hero .seal-s,
+html.ed-anim-hero .hero .tside,
+html.ed-anim-hero .hero .tdesc p,
+html.ed-anim-hero .hero .cta,
+html.ed-anim-hero .ed-hero-meta-l,
+html.ed-anim-hero .ed-pins-toggle {
+  opacity: 0;
+  transform: translateY(18px);
+}
+html.ed-ready .hero .tv h1 {
+  opacity: 1; transform: none;
+  transition: opacity 0.95s var(--cm-ease) 0.05s, transform 1.05s var(--cm-ease) 0.05s;
+}
+html.ed-ready .hero .seal-s {
+  opacity: 1; transform: none;
+  transition: opacity 0.75s var(--cm-ease) 0.16s, transform 0.85s var(--cm-ease) 0.16s;
+}
+html.ed-ready .hero .tside {
+  opacity: 1; transform: none;
+  transition: opacity 0.85s var(--cm-ease) 0.22s, transform 0.95s var(--cm-ease) 0.22s;
+}
+html.ed-ready .hero .tdesc p {
+  opacity: 1; transform: none;
+  transition: opacity 0.85s var(--cm-ease) 0.30s, transform 0.95s var(--cm-ease) 0.30s;
+}
+html.ed-ready .hero .cta {
+  opacity: 1; transform: none;
+  transition: opacity 0.85s var(--cm-ease) 0.38s, transform 0.95s var(--cm-ease) 0.38s;
+}
+html.ed-ready .ed-hero-meta-l,
+html.ed-ready .ed-pins-toggle {
+  opacity: 1; transform: none;
+  transition: opacity 0.85s var(--cm-ease) 0.46s, transform 0.95s var(--cm-ease) 0.46s;
+}
+
+/* 四时切换条：GPU 滑动朱砂细线游标 */
+.ed-sb-btns {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.ed-season-bar button {
+  border-bottom: 0 !important;
+  position: relative;
+  z-index: 2;
+  padding: 2px 8px !important;
+}
+.ed-sb-ink {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1.5px;
+  width: 24px;
+  background: var(--iz-red);
+  pointer-events: none;
+  transition: transform 0.45s var(--cm-ease-out), width 0.35s var(--cm-ease-out);
+  will-change: transform, width;
+}
+
+/* 首屏红点悬停弹出的地标丝签：告别旧版厚白木框 → 极克制宣纸透明展签 */
+.pin2 .tag {
+  background: rgba(247, 246, 242, 0.92) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(17, 16, 14, 0.16) !important;
+  border-left: 2px solid var(--iz-red) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 14px 32px -18px rgba(17, 16, 14, 0.34) !important;
+  padding: 6px 12px !important;
+}
+.pin2 .tag b {
+  font-family: var(--serif) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.14em !important;
+  color: var(--iz-ink) !important;
+}
+.pin2 .tag small {
+  font-size: 10.5px !important;
+  letter-spacing: 0.08em !important;
+  color: var(--iz-ink-3) !important;
+}
+.pin2 .seal {
+  display: none !important;
+}
+
+/* ==========================================================================
+   2. 全站文字基线遮罩浮现 + 1px 细线生长 + 画幅柔和内缩进场 (IZANAMI 呼吸感)
+   ========================================================================== */
+.cm-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.cm-line {
+  display: inline-block;
+  transform: translateY(108%);
+  opacity: 0;
+  transition: transform 0.95s var(--cm-ease), opacity 0.7s ease;
+  will-change: transform, opacity;
+}
+.cm-in .cm-line {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* 1px 水平细线从左至右“一笔画出” */
+.cm-hair-wait {
+  position: relative;
+}
+.cm-hair-wait::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.18;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1.15s var(--cm-ease);
+  pointer-events: none;
+}
+.cm-hair-wait.cm-in::before {
+  transform: scaleX(1);
+}
+#sites .sh5.cm-hair-wait,
+#sanjue .sh5.cm-hair-wait,
+#fy .sh5.cm-hair-wait,
+#go .sh5.cm-hair-wait {
+  border-top-color: transparent !important;
+}
+#sites .sh5.cm-hair-wait::before,
+#fy .sh5.cm-hair-wait::before,
+#go .sh5.cm-hair-wait::before {
+  background: var(--iz-ink);
+  opacity: 0.78;
+}
+#sanjue .sh5.cm-hair-wait::before {
+  background: var(--iz-gold);
+  opacity: 0.45;
+}
+
+/* 插画进入视口时的平静内缩放呼吸 (1.09 -> 1.00) */
+.sc5.ed-wait .im img,
+.fyc.cm-wait .im img,
+.sjc.cm-wait .im img {
+  transform: scale(1.09);
+  opacity: 0.35;
+}
+.sc5.ed-in .im img,
+.fyc.cm-in .im img,
+.sjc.cm-in .im img {
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 1.35s var(--cm-ease), opacity 0.85s ease, filter 0.45s ease !important;
+}
+.sc5:hover .im img,
+.fyc:hover .im img,
+.sjc:hover .im img {
+  transform: scale(1.035) !important;
+  transition: transform 0.75s var(--cm-ease-out), filter 0.4s ease !important;
+}
+
+/* ==========================================================================
+   3. 方向性细线悬停 + 箭头接力滑出 + 暗室光标自动反色
+   ========================================================================== */
+.nav .links a::after,
+.hero .cta .lnk::after,
+.ed-chap-nav a::after,
+.ed-foot-links a::after {
+  transform-origin: right center !important;
+  transition: transform 0.45s var(--cm-ease) !important;
+}
+.nav .links a:hover::after,
+.nav .links a.on::after,
+.hero .cta .lnk:hover::after,
+.hero .cta .lnk:first-child::after,
+.ed-chap-nav a:hover::after,
+.ed-foot-links a:hover::after {
+  transform-origin: left center !important;
+}
+.hero .cta .lnk i,
+.sc5 .arr,
+.outro-lnk {
+  display: inline-block;
+  transition: transform 0.4s var(--cm-ease-out);
+}
+.hero .cta .lnk:hover i {
+  transform: translateX(5px);
+}
+.sc5:hover .arr {
+  transform: translateX(6px);
+  color: var(--iz-red);
+}
+
+/* 光标在暗室 (#sanjue) 下自动切换为温润浅宣与古泥金，保持全站统一精密感 */
+html.ed-dark-room .ed-cursor-dot {
+  background: #F4F0E8 !important;
+}
+html.ed-dark-room .ed-cursor-ring {
+  border-color: rgba(244, 240, 232, 0.32) !important;
+}
+html.ed-dark-room.ed-cursor-active .ed-cursor-dot,
+html.ed-dark-room.ed-cursor-link .ed-cursor-dot {
+  background: var(--iz-gold) !important;
+}
+html.ed-dark-room.ed-cursor-active .ed-cursor-ring,
+html.ed-dark-room.ed-cursor-link .ed-cursor-ring {
+  border-color: rgba(200, 168, 107, 0.65) !important;
+  background: rgba(200, 168, 107, 0.08) !important;
+}
+
+/* ==========================================================================
+   4. SAKAZUKI 连续滚动驱动三幕剧场 (#skStage)：实时擦除遮罩与动态进度条
+   ========================================================================== */
+.sk-stage.sk-scrub .sk-slide {
+  transition: none !important;
+  opacity: 1 !important;
+}
+.sk-stage.sk-scrub .sk-slide[data-act="2"] .sk-bg {
+  background: var(--iz-paper) !important;
+}
+.sk-stage.sk-scrub .sk-act-kicker,
+.sk-stage.sk-scrub .sk-copy-box h2,
+.sk-stage.sk-scrub .sk-copy-box p,
+.sk-stage.sk-scrub .sk-copy-meta {
+  opacity: 1 !important;
+  transform: none !important;
+}
+.sk-stage.sk-scrub .sk-bg img,
+.sk-stage.sk-scrub .sk-copy-box h2,
+.sk-stage.sk-scrub .sk-copy-box p,
+.sk-stage.sk-scrub .sk-act-kicker,
+.sk-stage.sk-scrub .sk-copy-meta,
+.sk-stage.sk-scrub .sk-inset-plate {
+  transition: none !important;
+  will-change: transform, opacity, clip-path;
+}
+.sk-pbtn {
+  border-bottom: 0 !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  gap: 5px !important;
+  padding: 6px 0 !important;
+  min-width: 96px;
+}
+.sk-pbtn em {
+  font-style: normal;
+  display: inline;
+}
+.sk-pbtn > span {
+  display: inline-block;
+  margin-right: 6px;
+}
+.sk-pbtn {
+  display: grid !important;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  column-gap: 7px;
+  row-gap: 6px;
+}
+.sk-pbar {
+  grid-column: 1 / -1;
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: rgba(17, 16, 14, 0.14);
+  overflow: hidden;
+  position: relative;
+}
+.sk-pbar b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--iz-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* ==========================================================================
+   5. 长卷底部悬浮条 (.sc-card) 彻底去廉价灰白盒/黑块 → 宣纸玻璃策展条
+   ========================================================================== */
+.sc-card {
+  bottom: 58px !important;
+  max-width: min(760px, calc(100vw - 48px)) !important;
+  background: rgba(247, 246, 242, 0.88) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(17, 16, 14, 0.14) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 22px 48px -28px rgba(17, 16, 14, 0.28) !important;
+  padding: 12px 18px 12px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 20px !important;
+  transition: opacity 0.45s var(--cm-ease), transform 0.55s var(--cm-ease) !important;
+}
+.sc-card.cswap {
+  animation: cmCardIn 0.45s var(--cm-ease) both !important;
+}
+@keyframes cmCardIn {
+  from { opacity: 0.4; transform: translateY(6px); }
+  to   { opacity: 1;   transform: translateY(0); }
+}
+.sc-card .cl {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.sc-card .k {
+  font-family: monospace, var(--sans) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.2em !important;
+  color: var(--iz-red) !important;
+}
+.sc-card h3 {
+  font-family: var(--serif) !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  letter-spacing: 0.12em !important;
+  color: var(--iz-ink) !important;
+  margin: 0 !important;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sc-card h3 small {
+  font-family: var(--sans) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--iz-ink-3) !important;
+  letter-spacing: 0.04em !important;
+}
+.sc-card .leg {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin-top: 2px !important;
+  font-size: 11.5px !important;
+  color: var(--iz-ink-2) !important;
+  letter-spacing: 0.04em;
+}
+.sc-card .leg b {
+  color: var(--iz-ink) !important;
+  font-weight: 600 !important;
+}
+.sc-card .cr {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  flex: none;
+}
+.sc-card .nav2 {
+  display: inline-flex;
+  gap: 6px;
+}
+.sc-card .nav2 button {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 0 !important;
+  border: 1px solid rgba(17, 16, 14, 0.16) !important;
+  background: transparent !important;
+  color: var(--iz-ink) !important;
+  font-size: 16px !important;
+  line-height: 1;
+  transition: border-color 0.25s, color 0.25s, background 0.25s;
+}
+.sc-card .nav2 button:hover:not(:disabled) {
+  border-color: var(--iz-red) !important;
+  color: var(--iz-red) !important;
+  background: rgba(158, 42, 34, 0.04) !important;
+}
+.sc-card .acts {
+  display: inline-flex;
+  gap: 8px;
+}
+.sc-card .acts .btn {
+  background: transparent !important;
+  color: var(--iz-ink) !important;
+  border: 1px solid var(--iz-ink) !important;
+  border-radius: 0 !important;
+  padding: 7px 16px !important;
+  font-family: var(--serif) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
+  box-shadow: none !important;
+  transition: background 0.3s var(--cm-ease), color 0.3s ease, border-color 0.3s ease !important;
+}
+.sc-card .acts .btn:hover {
+  background: var(--iz-red) !important;
+  border-color: var(--iz-red) !important;
+  color: #FAF8F3 !important;
+}
+
+/* ==========================================================================
+   6. 景点详情页 (#detail) 电影级宣纸幕帘转场与错峰进场
+   ========================================================================== */
+.detail.cm-det-open {
+  animation: cmDetVeil 0.55s var(--cm-ease) both;
+}
+@keyframes cmDetVeil {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.detail.cm-det-open .v5bar {
+  animation: cmDetFade 0.5s var(--cm-ease) 0.05s both;
+}
+.detail.cm-det-open .h5 {
+  animation: cmDetRise 0.65s var(--cm-ease) 0.12s both;
+}
+.detail.cm-det-open .i5,
+.detail.cm-det-open .intro5,
+.detail.cm-det-open .st5,
+.detail.cm-det-open .tun {
+  animation: cmDetRise 0.72s var(--cm-ease) 0.22s both;
+}
+@keyframes cmDetFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cmDetRise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   7. 05 彭城行旅路引 (#go) 博物馆折页级彻底重构（告别学生表单感！）
+   ========================================================================== */
+#go .go-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid var(--iz-hair);
+  margin: 0 0 36px;
+}
+#go .go-tabs button {
+  background: transparent;
+  border: 0;
+  padding: 10px 0 14px;
+  font-family: var(--serif);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--iz-ink-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.3s ease;
+}
+#go .go-tabs button span {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--iz-ink-3);
+  transition: color 0.3s ease;
+}
+#go .go-tabs button:hover,
+#go .go-tabs button.on {
+  color: var(--iz-ink);
+}
+#go .go-tabs button.on span {
+  color: var(--iz-red);
+}
+.go-tab-ink {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1.5px;
+  width: 120px;
+  background: var(--iz-red);
+  transition: transform 0.48s var(--cm-ease), width 0.38s var(--cm-ease);
+  pointer-events: none;
+}
+
+.go-pane {
+  display: none;
+}
+.go-pane.on {
+  display: block;
+  animation: cmPaneIn 0.55s var(--cm-ease) both;
+}
+@keyframes cmPaneIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#go .go-grid {
+  gap: 28px !important;
+}
+#go .panel,
+#go .go-pane.on .panel,
+#go .panel.rv10 {
+  opacity: 1 !important;
+  translate: none !important;
+  transform: none !important;
+  background: var(--iz-surface) !important;
+  border: 1px solid var(--iz-hair) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: clamp(24px, 3vw, 36px) !important;
+}
+#go .panel h3 {
+  font-family: var(--serif) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
+  padding-bottom: 16px;
+  margin: 0 0 22px !important;
+  border-bottom: 1px solid var(--iz-hair-soft);
+}
+
+/* 彻底干掉浏览器原生灰白下拉框 → 1px 极细底线定制选择器 */
+#go .ft {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  gap: 16px !important;
+  align-items: end !important;
+  margin-bottom: 26px !important;
+}
+#go .ft label,
+#go .bstart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--serif);
+  font-size: 11px !important;
+  letter-spacing: 0.2em;
+  color: var(--iz-ink-3) !important;
+}
+#go .bstart {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin: 18px 0 14px !important;
+}
+#go select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.25L6 7.75l3.5-3.5' fill='none' stroke='%2358554F' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 4px center !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(17, 16, 14, 0.28) !important;
+  border-radius: 0 !important;
+  padding: 8px 26px 8px 2px !important;
+  font-family: var(--serif) !important;
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  color: var(--iz-ink) !important;
+  cursor: pointer;
+  transition: border-color 0.25s ease;
+}
+#go select:hover,
+#go select:focus {
+  outline: none !important;
+  border-bottom-color: var(--iz-red) !important;
+}
+#go .swap {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 0 !important;
+  border: 1px solid var(--iz-hair) !important;
+  background: transparent !important;
+  color: var(--iz-ink-2) !important;
+  transition: border-color 0.25s, color 0.25s, transform 0.4s var(--cm-ease) !important;
+}
+#go .swap:hover {
+  border-color: var(--iz-red) !important;
+  color: var(--iz-red) !important;
+  transform: rotate(180deg);
+}
+
+/* 行程池标签：告别圆角灰胶囊 → 0px 锐利细线博物馆印签 */
+#go #bPool.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px !important;
+}
+#go #bPool .chip {
+  background: transparent !important;
+  border: 1px solid var(--iz-hair) !important;
+  border-radius: 0 !important;
+  padding: 5px 11px !important;
+  font-family: var(--serif) !important;
+  font-size: 12px !important;
+  letter-spacing: 0.1em !important;
+  color: var(--iz-ink-2) !important;
+  transition: border-color 0.25s, background 0.25s, color 0.25s !important;
+}
+#go #bPool .chip:hover {
+  border-color: var(--iz-ink) !important;
+  color: var(--iz-ink) !important;
+}
+#go #bPool .chip.in {
+  background: var(--iz-ink) !important;
+  border-color: var(--iz-ink) !important;
+  color: #FAF8F3 !important;
+}
+
+/* 路引单 (#ticket) 与拼程列表 (#bList)：古籍折页票券质感 */
+#go .ticket li,
+#go .blist li {
+  border-radius: 0 !important;
+}
+#go .blist li {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--iz-hair-soft) !important;
+  padding: 12px 2px !important;
+}
+#go .blist .n {
+  background: transparent !important;
+  border: 1px solid var(--iz-red) !important;
+  color: var(--iz-red) !important;
+  border-radius: 0 !important;
+  font-family: monospace !important;
+}
+#go .blist .ops button {
+  border-radius: 0 !important;
+  border: 1px solid var(--iz-hair) !important;
+  background: transparent !important;
+}
+#go .btn.small {
+  border-radius: 0 !important;
+  font-family: var(--serif) !important;
+  letter-spacing: 0.14em !important;
+  padding: 8px 18px !important;
+  box-shadow: none !important;
+}
+#go .btn.small:not(.ghost):not(.red) {
+  background: var(--iz-ink) !important;
+  color: #FAF8F3 !important;
+  border: 1px solid var(--iz-ink) !important;
+}
+#go .btn.small:not(.ghost):not(.red):hover {
+  background: var(--iz-red) !important;
+  border-color: var(--iz-red) !important;
+}
+#go .btn.small.red {
+  background: var(--iz-red) !important;
+  border: 1px solid var(--iz-red) !important;
+  color: #FAF8F3 !important;
+}
+#go .btn.small.ghost.dark {
+  background: transparent !important;
+  border: 1px solid var(--iz-hair) !important;
+  color: var(--iz-ink-2) !important;
+}
+#go .btn.small.ghost.dark:hover {
+  border-color: var(--iz-ink) !important;
+  color: var(--iz-ink) !important;
+}
+
+/* 16 图双行画廊微交互增强 + SAKAZUKI 悬停聚焦其余退淡 + 标题对比度与融纸修复 */
+#skFilmstrip .sk-strip-hd h3,
+#skFilmstrip .sk-strip-hd h3 .cm-line {
+  color: var(--iz-ink) !important;
+  opacity: 1 !important;
+}
+.ed-sa {
+  display: inline-block;
+  letter-spacing: -0.09em;
+  margin-right: 0.04em;
+}
+#skRowB .tim {
+  background: var(--iz-paper-2) !important;
+}
+#skRowB .tim img {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.05) brightness(1.02) !important;
+}
+.sk-tile {
+  transition: transform 0.55s var(--cm-ease), opacity 0.45s ease, filter 0.45s ease, border-color 0.35s ease !important;
+}
+.sk-rows:has(.sk-tile:hover) .sk-tile:not(:hover) {
+  opacity: 0.42 !important;
+  filter: saturate(0.62);
+}
+.sk-tile:hover {
+  transform: translateY(-5px) scale(1.02);
+  opacity: 1 !important;
+  filter: none !important;
+  border-color: rgba(158, 42, 34, 0.44) !important;
+}
+.sk-tile .tim img {
+  transition: transform 0.85s var(--cm-ease), filter 0.45s ease !important;
+}
+.sk-tile:hover .tim img {
+  transform: scale(1.06);
+}
+
+/* ==========================================================================
+   8. 04 彭城手艺：彻底消除 4 块白矩形贴纸底，非遗手绘正片叠底真融宣纸
+   ========================================================================== */
+#fy .fyc {
+  background: transparent !important;
+  isolation: auto !important;
+}
+#fy .fyc .im {
+  background: var(--iz-paper) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 6px 0 !important;
+  mix-blend-mode: normal !important;
+}
+#fy .fyc .im img {
+  mix-blend-mode: multiply !important;
+  filter: contrast(1.09) brightness(1.06) saturate(0.95) !important;
+}
+
+/* ==========================================================================
+   9. 问导览弹窗 (#gpanel) 彻底博物馆卷宗抽屉重塑（去旧版黑胶囊/大圆角/裁字）
+   ========================================================================== */
+.gpanel {
+  width: min(396px, calc(100vw - 32px)) !important;
+  background: rgba(247, 246, 242, 0.96) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(17, 16, 14, 0.16) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 32px 64px -26px rgba(17, 16, 14, 0.32) !important;
+  animation: cmGuideIn 0.42s var(--cm-ease) both;
+}
+@keyframes cmGuideIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ghead {
+  padding: 14px 18px !important;
+  border-bottom: 1px solid var(--iz-hair) !important;
+  background: transparent !important;
+}
+.gwho {
+  display: inline-flex !important;
+  gap: 18px !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+.gwho button {
+  background: transparent !important;
+  color: var(--iz-ink-3) !important;
+  border: 0 !important;
+  border-bottom: 1.5px solid transparent !important;
+  border-radius: 0 !important;
+  padding: 4px 2px 6px !important;
+  font-family: var(--serif) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
+  transition: color 0.25s, border-color 0.25s !important;
+}
+.gwho button[aria-selected="true"] {
+  background: transparent !important;
+  color: var(--iz-ink) !important;
+  border-bottom-color: var(--iz-red) !important;
+}
+.gx {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 0 !important;
+  border: 1px solid var(--iz-hair) !important;
+  background: transparent !important;
+  color: var(--iz-ink-2) !important;
+  font-size: 16px !important;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.25s, color 0.25s;
+}
+.gx:hover {
+  border-color: var(--iz-red) !important;
+  color: var(--iz-red) !important;
+}
+.gmsgs {
+  padding: 16px 18px !important;
+}
+.gmsgs .gm p,
+.gmsgs .m .b,
+.gmsgs .msg {
+  border-radius: 0 !important;
+  border: 1px solid rgba(17, 16, 14, 0.1) !important;
+  border-left: 2px solid var(--iz-red) !important;
+  background: #FAF9F6 !important;
+  color: var(--iz-ink) !important;
+  font-size: 13px !important;
+  line-height: 1.75 !important;
+  box-shadow: none !important;
+  padding: 10px 14px !important;
+}
+.gmsgs .gm.me p,
+.gmsgs .m.me .b,
+.gmsgs .msg.me {
+  border-left: 1px solid var(--iz-ink) !important;
+  background: var(--iz-ink) !important;
+  color: #FAF8F3 !important;
+}
+.gchips {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  overflow: visible !important;
+  gap: 6px !important;
+  padding: 10px 18px !important;
+  border-top: 1px solid var(--iz-hair-soft);
+}
+.gchips button {
+  background: transparent !important;
+  border: 1px solid var(--iz-hair) !important;
+  border-radius: 0 !important;
+  padding: 5px 10px !important;
+  font-family: var(--serif) !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.06em !important;
+  color: var(--iz-ink-2) !important;
+  white-space: nowrap;
+  transition: border-color 0.25s, color 0.25s, background 0.25s !important;
+}
+.gchips button:hover {
+  border-color: var(--iz-red) !important;
+  color: var(--iz-red) !important;
+  background: rgba(158, 42, 34, 0.04) !important;
+}
+.gform {
+  padding: 12px 18px 16px !important;
+  gap: 10px !important;
+  border-top: 1px solid var(--iz-hair-soft) !important;
+}
+.gform input {
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(17, 16, 14, 0.26) !important;
+  border-radius: 0 !important;
+  padding: 7px 2px !important;
+  font-family: var(--sans) !important;
+  font-size: 13px !important;
+  color: var(--iz-ink) !important;
+  box-shadow: none !important;
+}
+.gform input:focus {
+  outline: none !important;
+  border-bottom-color: var(--iz-red) !important;
+}
+.gform .btn {
+  border-radius: 0 !important;
+  background: var(--iz-ink) !important;
+  border: 1px solid var(--iz-ink) !important;
+  color: #FAF8F3 !important;
+  font-family: var(--serif) !important;
+  letter-spacing: 0.14em !important;
+  padding: 7px 16px !important;
+  box-shadow: none !important;
+}
+.gform .btn:hover {
+  background: var(--iz-red) !important;
+  border-color: var(--iz-red) !important;
+}
+
+/* ==========================================================================
+   10. 页脚二维码网址零折行 + 03 汉代三绝暗室暖金聚光微晕
+   ========================================================================== */
+.ed-qr-card {
+  padding: 14px 16px !important;
+}
+.ed-qr-card span {
+  font-size: 11px !important;
+  line-height: 1.65 !important;
+  white-space: nowrap !important;
+}
+#sanjue {
+  position: relative !important;
+  overflow: hidden;
+}
+#sanjue .wrap {
+  position: relative;
+  z-index: 2;
+}
+.sj-spot {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.65s ease;
+  will-change: background;
+}
+#sanjue:hover .sj-spot {
+  opacity: 1;
+}
+
+@media (max-width: 720px) {
+  .sc-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    bottom: 66px !important;
+  }
+  #go .ft {
+    grid-template-columns: 1fr !important;
+  }
+  .ed-season-poet { display: none; }
+}

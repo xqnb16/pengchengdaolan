@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="zh-CN" class="theme-obsidian">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>彭城问策 · 朱雀白虎 AI 数字导览厅 · 汉韵彭城</title>
+<meta name="description" content="汉韵彭城全屏 AI 对话导览网页：朱雀行旅交通官与白虎文博史官双神陪伴，支持智能路线演算、行程定制与两汉文物问答。">
+<link rel="stylesheet" href="assets/css/style.css?v=11">
+<style>
+:root{
+  --bg:#090C11; --panel:rgba(13,17,26,.72); --panel2:rgba(18,24,36,.82);
+  --line:rgba(212,180,117,.22); --line2:rgba(255,255,255,.09);
+  --gold:#E2BE78; --gold-hi:#F6DFA8; --red:#C84B3E;
+  --ink:#F0ECE2; --muted:rgba(210,216,228,.66);
+  --serif:"Source Han Serif SC","Noto Serif CJK SC","Noto Serif SC","Songti SC","STSong","STZhongsong","SimSun",Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overflow:hidden}
+.ai-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ai-bg img{position:absolute;inset:-4%;width:108%;height:108%;object-fit:cover;opacity:.34;filter:blur(4px) brightness(.55) saturate(.92)}
+.ai-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 72% 68% at 62% 40%,rgba(14,19,30,.52),rgba(9,12,17,.92) 72%,#090C11 100%)}
+
+.ai-app{position:relative;z-index:2;height:100vh;height:100dvh;display:grid;grid-template-rows:60px 1fr}
+.ai-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 24px;border-bottom:1px solid var(--line2);background:rgba(9,12,17,.78);backdrop-filter:blur(16px)}
+.ai-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);white-space:nowrap;flex-shrink:0}
+.ai-brand b{font-family:var(--serif);font-size:19px;font-weight:500;letter-spacing:.18em;white-space:nowrap}
+.ai-brand i{width:1px;height:14px;background:rgba(212,180,117,.45)}
+.ai-brand small{font-size:11.5px;letter-spacing:.14em;color:var(--muted);white-space:nowrap}
+.ai-top-acts{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.ai-tbtn{appearance:none;display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line2);color:rgba(232,236,244,.86);font-size:12px;letter-spacing:.08em;text-decoration:none;cursor:pointer;transition:.25s;white-space:nowrap;flex-shrink:0}
+.ai-tbtn:hover{border-color:rgba(226,196,134,.55);color:var(--gold-hi);background:rgba(212,180,117,.12)}
+.ai-tbtn.pri{border-color:rgba(226,196,134,.42);color:var(--gold-hi)}
+
+/* 手机端快捷神兽切换 + 一键排程条（桌面端隐藏） */
+.ai-mbar{display:none}
+
+.ai-body{display:grid;grid-template-columns:316px minmax(0,1fr);min-height:0}
+.ai-side{border-right:1px solid var(--line2);background:rgba(10,13,20,.64);backdrop-filter:blur(20px);padding:18px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
+.ai-side h4{margin:0 0 10px;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.24em;color:rgba(226,196,134,.78);font-weight:500}
+
+.ai-gods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ai-god{appearance:none;padding:12px 10px;border-radius:6px;background:rgba(255,255,255,.03);border:1px solid var(--line2);color:var(--ink);text-align:center;cursor:pointer;transition:.3s}
+.ai-god img{width:50px;height:50px;object-fit:contain;display:block;margin:0 auto 6px;filter:sepia(.32) saturate(.78) contrast(1.06) brightness(.94) drop-shadow(0 8px 18px rgba(0,0,0,.65));transition:filter .3s ease}
+.ai-god.on img,.ai-god:hover img{filter:sepia(.16) saturate(.92) contrast(1.06) brightness(1.02) drop-shadow(0 8px 20px rgba(212,180,117,.24))}
+.ai-god b{display:block;font-family:var(--serif);font-size:15px;letter-spacing:.12em}
+.ai-god small{display:block;margin-top:2px;font-size:10.5px;color:var(--muted)}
+.ai-god.on{background:rgba(212,180,117,.11);border-color:rgba(232,200,134,.58);box-shadow:none}
+
+.ai-ctx{display:flex;flex-wrap:wrap;gap:6px}
+.ai-ctx button{appearance:none;padding:5px 10px;border-radius:999px;background:transparent;border:1px solid var(--line2);color:rgba(218,224,236,.78);font-size:11.5px;cursor:pointer;transition:.25s}
+.ai-ctx button.on,.ai-ctx button:hover{background:rgba(212,180,117,.14);border-color:rgba(226,196,134,.56);color:var(--gold-hi)}
+
+.ai-gen{padding:14px 0 0;border-radius:0;background:transparent;border:none;border-top:1px solid var(--line2)}
+.ai-gen-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ai-gen label{font-size:11px;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+.ai-gen select{appearance:none;-webkit-appearance:none;width:100%;padding:7px 26px 7px 10px;border-radius:4px;background:#0D111A url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23D4B475' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center / 11px 11px;border:1px solid var(--line2);color:var(--ink);font-size:12px;cursor:pointer}
+.ai-gen-go{width:100%;padding:9px 14px;border-radius:999px;background:rgba(212,180,117,.08);border:1px solid rgba(226,196,134,.56);color:var(--gold-hi);font-size:12.5px;letter-spacing:.14em;cursor:pointer;transition:.28s}
+.ai-gen-go:hover{background:rgba(212,180,117,.20);border-color:rgba(244,218,158,.92);color:#FFF9EB}
+
+.ai-main{display:flex;flex-direction:column;min-height:0;position:relative}
+.ai-feed{flex:1;overflow-y:auto;padding:28px clamp(20px,5vw,72px) 24px;scroll-behavior:smooth}
+.ai-welcome{max-width:800px;margin:clamp(22px,5.5vh,64px) auto 0;text-align:center}
+.ai-w-avs{display:inline-flex;align-items:center;gap:16px;margin-bottom:16px}
+.ai-w-avs img{width:60px;height:60px;object-fit:contain;filter:sepia(.30) saturate(.80) contrast(1.06) brightness(.95) drop-shadow(0 12px 24px rgba(0,0,0,.72))}
+.ai-welcome h1{margin:0 0 10px;font-family:var(--serif);font-size:clamp(30px,3.6vw,44px);font-weight:400;letter-spacing:.2em;background:linear-gradient(180deg,#FAF8F3,#D6DCE8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ai-welcome p{margin:0 auto 30px;max-width:520px;font-size:13.5px;line-height:1.9;color:var(--muted)}
+/* 发丝线分隔提示列表（去重卡片框，极简博物馆目录质感） */
+.ai-prompts{display:grid;grid-template-columns:repeat(2,1fr);gap:0 36px;text-align:left;border-top:1px solid var(--line2)}
+.ai-pcard{appearance:none;padding:16px 4px;border:none;border-bottom:1px solid var(--line2);border-radius:0;background:transparent;color:var(--ink);cursor:pointer;transition:.28s;display:flex;flex-direction:column;gap:5px;position:relative}
+.ai-pcard::after{content:"→";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:13px;color:rgba(226,196,134,.42);transition:transform .28s ease,color .28s ease}
+.ai-pcard small{font-size:10.5px;letter-spacing:.16em;color:rgba(226,196,134,.74)}
+.ai-pcard b{font-family:var(--serif);font-size:14.5px;font-weight:400;line-height:1.55;padding-right:24px;color:rgba(244,238,226,.92)}
+.ai-pcard:hover{border-bottom-color:rgba(226,196,134,.62)}
+.ai-pcard:hover b{color:#FFF9EB}
+.ai-pcard:hover::after{transform:translate(4px,-50%);color:var(--gold-hi)}
+
+.ai-msgs{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.ai-msg{display:flex;gap:14px;align-items:flex-start;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ai-msg.me{flex-direction:row-reverse}
+.ai-av{width:42px;height:42px;border-radius:50%;background:rgba(212,180,117,.10);border:1px solid rgba(212,180,117,.32);display:grid;place-items:center;flex-shrink:0;overflow:hidden}
+.ai-av img{width:36px;height:36px;object-fit:contain}
+.ai-msg.me .ai-av{background:rgba(200,75,62,.22);border-color:rgba(232,164,132,.42);font-family:var(--serif);font-size:14px;color:#FAF2DF}
+.ai-bub{max-width:min(680px,86%);padding:16px 18px;border-radius:6px;background:var(--panel);border:1px solid var(--line2);line-height:1.85;font-size:14px}
+.ai-msg.me .ai-bub{background:rgba(212,180,117,.14);border-color:rgba(226,196,134,.38);color:#FAF4E6}
+.ai-who{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:11.5px;color:var(--gold);letter-spacing:.1em}
+.ai-speak{appearance:none;background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:3px}
+.ai-speak:hover{color:var(--gold-hi);background:rgba(255,255,255,.06)}
+
+/* 富媒体景点卡 & 路线卡 */
+.ai-rcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:12px}
+.ai-scard{display:grid;grid-template-columns:76px 1fr;gap:10px;padding:10px;border-radius:4px;background:rgba(9,12,18,.78);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:.25s}
+.ai-scard:hover{border-color:var(--gold)}
+.ai-scard img{width:76px;height:60px;object-fit:cover;border-radius:2px}
+.ai-scard b{display:block;font-family:var(--serif);font-size:14px;margin-bottom:2px}
+.ai-scard small{display:block;font-size:11px;color:var(--muted);line-height:1.45}
+.ai-scard em{display:inline-block;margin-top:4px;font-style:normal;font-size:10.5px;color:var(--gold)}
+
+.ai-route-card{margin-top:12px;padding:14px;border-radius:4px;background:rgba(9,12,18,.82);border:1px solid rgba(212,180,117,.32)}
+.ai-route-hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line2);font-size:12.5px}
+.ai-route-hd b{font-family:var(--serif);font-size:15px;color:var(--gold-hi)}
+.ai-route-legs{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.ai-route-legs li{display:flex;gap:10px;font-size:12.5px;line-height:1.6}
+.ai-route-legs span{padding:1px 7px;border-radius:999px;background:rgba(212,180,117,.2);color:var(--gold-hi);font-size:11px;height:fit-content;white-space:nowrap}
+.ai-route-acts{display:flex;gap:10px;flex-wrap:wrap}
+.ai-route-acts a{padding:6px 15px;border-radius:999px;background:rgba(212,180,117,.08);border:1px solid rgba(226,196,134,.56);color:var(--gold-hi);font-size:12px;letter-spacing:.08em;text-decoration:none;transition:.25s}
+.ai-route-acts a:hover{background:rgba(212,180,117,.20);border-color:rgba(244,218,158,.9)}
+
+/* 底部输入区 */
+.ai-comp-wrap{padding:14px clamp(20px,5vw,72px) 18px;border-top:1px solid var(--line2);background:rgba(9,12,17,.82);backdrop-filter:blur(18px)}
+.ai-comp{max-width:860px;margin:0 auto;display:flex;gap:10px;align-items:center;padding:6px 8px 6px 18px;border-radius:999px;background:rgba(16,21,32,.76);border:1px solid rgba(212,180,117,.28)}
+.ai-comp input{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-size:14px}
+.ai-comp button{appearance:none;padding:8px 18px;border-radius:999px;background:rgba(212,180,117,.10);border:1px solid rgba(226,196,134,.62);color:var(--gold-hi);font-weight:500;font-size:13px;letter-spacing:.14em;cursor:pointer;transition:.25s}
+.ai-comp button:hover{background:rgba(212,180,117,.22);border-color:rgba(246,223,168,.95);color:#FFF9EB}
+.ai-comp-hint{max-width:860px;margin:7px auto 0;font-size:11px;color:rgba(196,204,218,.52);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+/* 可选真实大模型 API 配置弹窗 */
+.ai-dlg{position:fixed;inset:0;z-index:50;background:rgba(5,7,12,.78);backdrop-filter:blur(12px);display:grid;place-items:center;padding:20px}
+.ai-dlg[hidden]{display:none}
+.ai-dlg-box{width:min(460px,100%);padding:24px;border-radius:6px;background:#10141F;border:1px solid var(--line);color:var(--ink)}
+.ai-dlg-box h3{margin:0 0 8px;font-family:var(--serif);font-size:20px;font-weight:400}
+.ai-dlg-box p{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.7}
+.ai-dlg-box label{display:block;font-size:11.5px;color:var(--gold);margin-bottom:12px}
+.ai-dlg-box input{width:100%;margin-top:5px;padding:9px 10px;border-radius:4px;background:#090C12;border:1px solid var(--line2);color:var(--ink);font-size:13px}
+.ai-dlg-acts{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+
+@media (max-width:900px){
+  .ai-app{grid-template-rows:54px auto 1fr}
+  .ai-top{padding:0 14px;gap:8px}
+  .ai-brand b{font-size:16px;letter-spacing:.14em}
+  .ai-brand i,.ai-brand small,#aiExport{display:none}
+  .ai-top-acts{gap:6px}
+  .ai-tbtn{padding:6px 10px;font-size:11.5px;letter-spacing:.04em}
+  .ai-mbar{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line2);background:rgba(10,13,20,.82);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .ai-mbar::-webkit-scrollbar{display:none}
+  .ai-mseg{display:inline-flex;border-radius:999px;padding:2px;background:rgba(255,255,255,.05);border:1px solid var(--line2);flex-shrink:0}
+  .ai-mseg button{appearance:none;border:0;background:transparent;color:var(--muted);padding:4px 11px;border-radius:999px;font-size:11.5px;white-space:nowrap;cursor:pointer}
+  .ai-mseg button.on{background:rgba(212,180,117,.22);color:var(--gold-hi)}
+  .ai-mbtn{appearance:none;padding:5px 11px;border-radius:999px;background:rgba(212,180,117,.10);border:1px solid rgba(226,196,134,.52);color:var(--gold-hi);font-size:11.5px;white-space:nowrap;flex-shrink:0;cursor:pointer}
+  .ai-mchips{display:flex;gap:6px;flex-shrink:0}
+  .ai-mchips button{appearance:none;padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line2);color:rgba(222,228,238,.78);font-size:11px;white-space:nowrap;cursor:pointer}
+  .ai-body{grid-template-columns:1fr}
+  .ai-side{display:none}
+  .ai-feed{padding:18px 14px 16px}
+  .ai-welcome{margin:10px auto 0}
+  .ai-w-avs img{width:50px;height:50px}
+  .ai-welcome h1{font-size:26px;letter-spacing:.14em}
+  .ai-welcome p{font-size:12.5px;line-height:1.75;margin-bottom:18px}
+  .ai-prompts{grid-template-columns:1fr;gap:9px}
+  .ai-pcard{padding:12px 14px}
+  .ai-pcard b{font-size:13px}
+  .ai-bub{max-width:88%;padding:12px 14px;font-size:13.5px}
+  .ai-av{width:34px;height:34px}
+  .ai-av img{width:28px;height:28px}
+  .ai-comp-wrap{padding:10px 12px calc(12px + env(safe-area-inset-bottom, 0px))}
+  .ai-comp{padding:5px 6px 5px 14px}
+  .ai-comp input{font-size:16px}
+  .ai-comp button{padding:8px 14px;font-size:12.5px;white-space:nowrap}
+  .ai-comp-hint{font-size:10.5px}
+  .ai-comp-hint span:last-child{display:none}
+}
+</style>
+</head>
+<body>
+<div class="ai-bg" aria-hidden="true"><img src="assets/img/ed/mist.jpg" alt=""></div>
+<div class="ai-app">
+  <header class="ai-top">
+    <a class="ai-brand" href="index.html"><b>汉韵彭城</b><i></i><small>彭城问策 · 双神 AI 数字导览厅</small></a>
+    <div class="ai-top-acts">
+      <button type="button" class="ai-tbtn" id="aiNewChat">+ 新对话</button>
+      <button type="button" class="ai-tbtn" id="aiExport">导出攻略</button>
+      <button type="button" class="ai-tbtn" id="aiApiBtn">⚙ 模型</button>
+      <a class="ai-tbtn pri" href="index.html">← 返回</a>
+    </div>
+  </header>
+
+  <div class="ai-mbar" id="aiMbar" aria-label="移动端快捷切换">
+    <div class="ai-mseg" id="aiMGods">
+      <button type="button" class="on" data-w="zq">朱雀 · 交通</button>
+      <button type="button" data-w="bh">白虎 · 文博</button>
+    </div>
+    <button type="button" class="ai-mbtn" id="aiMPlan">✦ 一键排行程</button>
+    <div class="ai-mchips" id="aiMChips">
+      <button type="button" data-q="介绍一下徐州博物馆的看点、开放时间和怎么去？">徐州博物馆</button>
+      <button type="button" data-q="介绍一下戏马台的看点、开放时间和怎么去？">戏马台</button>
+      <button type="button" data-q="介绍一下龟山汉墓的看点、开放时间和怎么去？">龟山汉墓</button>
+      <button type="button" data-q="介绍一下狮子山楚王陵的看点、开放时间和怎么去？">狮子山</button>
+    </div>
+  </div>
+
+  <div class="ai-body">
+    <aside class="ai-side">
+      <div>
+        <h4>DUAL PERSONA · 选择导览神兽</h4>
+        <div class="ai-gods" id="aiGods">
+          <button type="button" class="ai-god on" data-w="zq"><img src="assets/img/ip/zq_joy.webp" alt="朱雀"><b>朱雀</b><small>行旅路线 · 实时交通</small></button>
+          <button type="button" class="ai-god" data-w="bh"><img src="assets/img/ip/bh_joy.webp" alt="白虎"><b>白虎</b><small>两汉史事 · 文物解密</small></button>
+        </div>
+      </div>
+      <div>
+        <h4>CONTEXT · 聚焦景点语境</h4>
+        <div class="ai-ctx" id="aiCtx"></div>
+      </div>
+      <div>
+        <h4>ITINERARY · 一键定制彭城行程</h4>
+        <div class="ai-gen">
+          <div class="ai-gen-row">
+            <label>游览时长<select id="genDays"><option value="half">半日精华</option><option value="1" selected>一日典藏</option><option value="2">两日深游</option></select></label>
+            <label>同行偏好<select id="genStyle"><option value="han">两汉文化</option><option value="city">古城漫步</option><option value="family">亲子轻松</option><option value="night">夜游出片</option></select></label>
+          </div>
+          <button type="button" class="ai-gen-go" id="genBtn">✦ 立即生成专属行程</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="ai-main">
+      <div class="ai-feed" id="aiFeed">
+        <div class="ai-welcome" id="aiWelcome">
+          <div class="ai-w-avs"><img src="assets/img/ip/zq_proud.webp" alt="朱雀"><img src="assets/img/ip/bh_joy.webp" alt="白虎"></div>
+          <h1>问两汉 · 寻彭城</h1>
+          <p>我是行旅官朱雀，身旁是文博官白虎。无论是查实时开放、算高铁到景点的每一步换乘、定制一日游，还是细听金缕玉衣与楚王地宫的典故，直接问我们即可。</p>
+          <div class="ai-prompts" id="aiPrompts">
+            <button type="button" class="ai-pcard" data-q="从徐州东站去戏马台怎么走？"><small>01 · 实时路网演算</small><b>从徐州东站去戏马台怎么走？</b></button>
+            <button type="button" class="ai-pcard" data-q="现在哪些景点正开着？"><small>02 · 开放状态核查</small><b>此刻哪些徐州景点正开着？</b></button>
+            <button type="button" class="ai-pcard" data-q="金缕玉衣和汉兵马俑有什么联系？"><small>03 · 两汉文物解密</small><b>金缕玉衣和汉兵马俑有什么渊源？</b></button>
+            <button type="button" class="ai-pcard" data-q="从龟山汉墓去徐州博物馆怎么走？"><small>04 · 跨城接驳方案</small><b>从龟山汉墓到徐州博物馆怎么去？</b></button>
+            <button type="button" class="ai-pcard" data-q="徐州必吃地道美食与夜游机位推荐"><small>05 · 彭城风物指南</small><b>徐州必吃地道美食与夜游打卡机位</b></button>
+            <button type="button" class="ai-pcard" data-q="带娃或下雨天去徐州哪几个景点最合适？"><small>06 · 场景定制建议</small><b>带娃或下雨天怎么安排徐州行程？</b></button>
+          </div>
+        </div>
+        <div class="ai-msgs" id="aiMsgs"></div>
+      </div>
+
+      <div class="ai-comp-wrap">
+        <form class="ai-comp" id="aiForm">
+          <input id="aiInput" placeholder="问朱雀或白虎：例如「从徐州东站去云龙湖怎么走」「戏马台要预约吗」「帮我排两日游」…" autocomplete="off">
+          <button type="submit">问策 →</button>
+        </form>
+        <div class="ai-comp-hint">
+          <span id="aiModeLbl">当前引擎：彭城本地文旅知识与真实路网引擎（零延迟 · 离线可用）</span>
+          <span>支持自然语言直算任意两地换乘 · 点击卡片直达主卷详情与实景地图</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="ai-dlg" id="aiDlg" hidden role="dialog" aria-modal="true" aria-label="接入外部大模型设置">
+  <div class="ai-dlg-box">
+    <h3>接入外部大模型（可选）</h3>
+    <p>默认使用内置「彭城文旅知识 + 真实路网算法」引擎，无需 Key、断网 100% 可用。若希望联网接入 DeepSeek / OpenAI 兼容大模型，可在此填写（仅存于当前浏览器本地）：</p>
+    <label>API Endpoint<input id="apiUrl" placeholder="https://api.deepseek.com/v1/chat/completions"></label>
+    <label>Model 名称<input id="apiModel" placeholder="deepseek-chat"></label>
+    <label>API Key（留空即回归本地引擎）<input id="apiKey" type="password" placeholder="sk-..."></label>
+    <div class="ai-dlg-acts">
+      <button type="button" class="ai-tbtn" id="apiClose">取消</button>
+      <button type="button" class="ai-tbtn pri" id="apiSave">保存配置</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/data.js?v=11"></script>
+<script src="assets/js/data6.js?v=11"></script>
+<script>
+(function(){
+  const $ = (q, el = document) => el.querySelector(q);
+  const $$ = (q, el = document) => [...el.querySelectorAll(q)];
+  const SITES = window.SITES || [];
+  const ALL = window.ALL || SITES.map(s => s.id);
+  const get = id => SITES.find(s => s.id === id);
+  const HUBS = window.HUBS || [];
+  const STNS = window.STNS || {};
+  const EDGES = window.EDGES || [];
+  const NAME = id => get(id)?.n || STNS[id] || (HUBS.find(h => h[0] === id) || [0, id])[1];
+
+  // 最短路演算（与主站完全同步）
+  const ADJ = {};
+  const addE = (a, b, mode, min, txt) => (ADJ[a] = ADJ[a] || []).push({ to: b, mode, min, txt });
+  EDGES.forEach(([a, b, m, min, t1, t2]) => { addE(a, b, m, min, t1); addE(b, a, m, min, t2 || t1); });
+  function calcPath(a, b) {
+    if (a === b) return { min: 0, legs: [] };
+    const dist = { [a]: 0 }, prev = {}, vis = new Set();
+    while (true) {
+      let u = null, best = 1e9;
+      for (const k in dist) if (!vis.has(k) && dist[k] < best) { best = dist[k]; u = k; }
+      if (!u || u === b) break;
+      vis.add(u);
+      (ADJ[u] || []).forEach(e => {
+        if (dist[u] + e.min < (dist[e.to] ?? 1e9)) { dist[e.to] = dist[u] + e.min; prev[e.to] = { u, e }; }
+      });
+    }
+    if (!prev[b]) return null;
+    const legs = [];
+    for (let x = b; x !== a; x = prev[x].u) legs.unshift({ from: prev[x].u, ...prev[x].e });
+    return { min: dist[b], legs };
+  }
+
+  // 实时开放状态
+  function statusOf(id) {
+    const h = get(id)?.hrs;
+    if (!h) return '以景区公示为准';
+    if (h.all) return '全天免费开放';
+    const p = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Shanghai', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit', month: 'numeric' }).formatToParts(new Date());
+    const gv = t => (p.find(x => x.type === t) || {}).value;
+    const d = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(gv('weekday'));
+    const mins = (+gv('hour') % 24) * 60 + (+gv('minute'));
+    const toM = s => { const [hh, mm] = s.split(':'); return (+hh) * 60 + (+mm); };
+    if (!h.d.includes(d)) return '今日闭馆（节假日除外）';
+    if (mins < toM(h.o)) return `未开门 · ${h.o} 开放`;
+    if (mins >= toM(h.e)) return `今日已停止入园`;
+    return `开放中 · ${h.e} 止入`;
+  }
+
+  let who = 'zq';
+  let focusSite = new URLSearchParams(location.search).get('site') || '';
+  if (focusSite && !get(focusSite)) focusSite = '';
+  const historyLog = [];
+
+  // 构建左侧 9 景语境标签
+  const ctxBox = $('#aiCtx');
+  ctxBox.innerHTML = `<button type="button" data-sid="" class="${!focusSite ? 'on' : ''}">全城总览</button>` +
+    ALL.map(id => `<button type="button" data-sid="${id}" class="${focusSite === id ? 'on' : ''}">${get(id).n}</button>`).join('');
+  $$('button', ctxBox).forEach(b => b.onclick = () => {
+    focusSite = b.dataset.sid;
+    $$('button', ctxBox).forEach(x => x.classList.toggle('on', x === b));
+    if (focusSite) sendQuery(`介绍一下${get(focusSite).n}的看点、开放时间和怎么去？`);
+  });
+
+  // 切换朱雀 / 白虎（桌面端侧栏 + 移动端顶部条双向同步）
+  const syncGodBtns = w => {
+    who = w;
+    $$('#aiGods button, #aiMGods button').forEach(x => x.classList.toggle('on', x.dataset.w === w));
+  };
+  $$('#aiGods button, #aiMGods button').forEach(b => b.onclick = () => syncGodBtns(b.dataset.w));
+  const mPlanBtn = $('#aiMPlan');
+  if (mPlanBtn) mPlanBtn.onclick = () => { const gb = $('#genBtn'); if (gb) gb.click(); };
+  $$('#aiMChips button').forEach(b => b.onclick = () => sendQuery(b.dataset.q));
+
+  // API 配置读写
+  const getApiCfg = () => { try { return JSON.parse(localStorage.getItem('xz_ai_api') || '{}'); } catch { return {}; } };
+  const syncApiLbl = () => {
+    const c = getApiCfg();
+    $('#aiModeLbl').textContent = (c.key && c.url)
+      ? `当前引擎：外部大模型在线模式（${c.model || 'custom'}）· 附带徐州实景路网卡片`
+      : '当前引擎：彭城本地文旅知识与真实路网引擎（零延迟 · 离线可用）';
+  };
+  syncApiLbl();
+
+  $('#aiApiBtn').onclick = () => {
+    const c = getApiCfg();
+    $('#apiUrl').value = c.url || 'https://api.deepseek.com/v1/chat/completions';
+    $('#apiModel').value = c.model || 'deepseek-chat';
+    $('#apiKey').value = c.key || '';
+    $('#aiDlg').hidden = false;
+  };
+  $('#apiClose').onclick = () => { $('#aiDlg').hidden = true; };
+  $('#apiSave').onclick = () => {
+    localStorage.setItem('xz_ai_api', JSON.stringify({
+      url: $('#apiUrl').value.trim(),
+      model: $('#apiModel').value.trim(),
+      key: $('#apiKey').value.trim()
+    }));
+    syncApiLbl();
+    $('#aiDlg').hidden = true;
+  };
+
+  // 自然语言识别起终点 & 景点（按最长词优先匹配且不重叠，彻底杜绝“云龙湖/云龙山”前缀冲突）
+  const ALIAS = [
+    ['east', ['徐州东站', '高铁站', '东站']],
+    ['rail', ['徐州火车站', '徐州站', '火车站']],
+    ['ps', ['彭城广场站', '彭城广场']],
+    ['hs', ['户部山站']],
+    ['xmt', ['戏马台']],
+    ['gs', ['龟山汉墓', '龟山']],
+    ['sz', ['狮子山楚王陵', '狮子山', '兵马俑']],
+    ['bwg', ['徐州博物馆', '博物馆']],
+    ['hbs', ['户部山古民居', '户部山']],
+    ['hlw', ['回龙窝']],
+    ['wm', ['文庙街区', '文庙']],
+    ['yls', ['云龙山', '放鹤亭']],
+    ['ylh', ['云龙湖']]
+  ];
+  const ALIAS_FLAT = [];
+  ALIAS.forEach(([id, names]) => names.forEach(nm => ALIAS_FLAT.push({ id, nm })));
+  ALIAS_FLAT.sort((a, b) => b.nm.length - a.nm.length);
+
+  function findPlacesIn(q) {
+    const used = new Array(q.length).fill(false);
+    const hits = [];
+    for (const { id, nm } of ALIAS_FLAT) {
+      let from = 0;
+      while (from < q.length) {
+        const idx = q.indexOf(nm, from);
+        if (idx < 0) break;
+        let overlap = false;
+        for (let k = idx; k < idx + nm.length; k++) if (used[k]) { overlap = true; break; }
+        if (!overlap) {
+          for (let k = idx; k < idx + nm.length; k++) used[k] = true;
+          hits.push({ id, pos: idx });
+          break;
+        }
+        from = idx + 1;
+      }
+    }
+    hits.sort((a, b) => a.pos - b.pos);
+    return hits.map(h => h.id).filter((v, i, a) => a.indexOf(v) === i);
+  }
+
+  function localSolve(q) {
+    const places = findPlacesIn(q);
+    const askRoute = /怎么走|怎么去|怎么到|路线|换乘|坐车|地铁|打车/.test(q);
+    const askNow = /现在|此刻|开着|开门/.test(q);
+
+    // 1) 自然语言实时起终点路径演算！
+    if (askRoute && places.length >= 1) {
+      let from = places.length >= 2 ? places[0] : 'east';
+      let to = places.length >= 2 ? places[1] : places[0];
+      const mFrom = q.match(/从([^去到往，。？\s]{2,10})/);
+      if (mFrom && places.length >= 2) {
+        const fHit = findPlacesIn(mFrom[1])[0];
+        if (fHit && places.includes(fHit)) {
+          from = fHit;
+          to = places.find(id => id !== fHit) || to;
+        }
+      }
+      if (from !== to) {
+        const p = calcPath(from, to);
+        if (p) {
+          return {
+            w: 'zq', m: 'hype',
+            text: `我已为你沿徐州真实轨道与街巷路网算好最优路线：**从「${NAME(from)}」前往「${NAME(to)}」**，全程共 ${p.legs.length} 段，预计约 **${p.min} 分钟**。点击下方按钮可直接跳转至主卷实景街道地图开启镜头跟飞引导：`,
+            route: { from, to, p },
+            cards: get(to) ? [to] : []
+          };
+        }
+      }
+    }
+
+    // 2) 此刻实时开放状态查询
+    if (askNow) {
+      const list = ALL.map(id => `· **${get(id).n}**：${statusOf(id)}`).join('\n');
+      return {
+        w: 'zq', m: 'joy',
+        text: `按当前北京时间与各景区公开时刻表为你核对九处彭城此刻开放状态：\n${list}\n（周一徐州博物馆与回龙窝城墙博物馆闭馆，法定节假日除外；出发前请以景区官方公告为准。）`,
+        cards: ['xmt', 'bwg', 'gs']
+      };
+    }
+
+    // 3) 美食 / 夜游 / 亲子 / 雨天 / 金缕玉衣 / 兵马俑 / 汉代三绝
+    if (/美食|好吃|吃|特产|烧烤|地锅鸡|把子肉/.test(q)) {
+      return {
+        w: 'zq', m: 'love',
+        text: '来彭城怎能空腹而归！徐州地道风物必尝清单：\n· **早餐**：饣它（shá）汤配煎包、鳝鱼辣汤；\n· **正餐**：徐州地锅鸡（锅边贴饼吸满汤汁）、把子肉配米饭、烙馍卷馓子；\n· **夜宵与伴手礼**：环云龙湖散步后吃一顿徐州羊肉烧烤，户部山带一盒老字号蜜三刀。\n夜游拍照机位首推**回龙窝青砖红灯笼巷**、**文庙街区**与**云龙湖月夜拱桥**。',
+        cards: ['hlw', 'wm', 'ylh']
+      };
+    }
+    if (/雨|带娃|孩子|亲子|老人/.test(q)) {
+      return {
+        w: 'bh', m: 'peek',
+        text: '为你精选最稳妥的室内与轻松路线：\n· **下雨天 / 避暑首选**：**徐州博物馆**（全室内空调、看金缕玉衣）+ **龟山汉墓**（深入山体岩石地宫，冬暖夏凉不怕雨）；\n· **亲子 / 长辈友好**：**云龙湖**平缓步道、**文庙街区**平地漫步；去云龙山可乘索道，龟山甬道较凉记得备件薄外套。',
+        cards: ['bwg', 'gs', 'ylh']
+      };
+    }
+    if (/玉衣|兵马俑|三绝|楚王|汉文化|渊源/.test(q)) {
+      return {
+        w: 'bh', m: 'wow',
+        text: '“两汉文化看徐州”，**金缕玉衣**与**汉兵马俑**其实是同出一脉的“亲兄弟”！\n西汉第三代楚王刘戊在城东**狮子山**凿山为藏：陵墓腹中出土了由 **4248 片和田玉片以 1576 克金丝缀合而成的金缕玉衣**（现藏徐州博物馆镇馆），而山体西麓则埋藏着数千件彩绘步骑**汉兵马俑**，为楚王组成“事死如事生”的地下卫队。\n现在点击下方景点进入详情页，还能直接体验 **3D 谷纹玉璧、3D 黑漆陶钫与 3D 地下军阵展柜**！',
+        cards: ['bwg', 'sz', 'gs']
+      };
+    }
+
+    // 4) 指定景点深度答疑（含当前语境兜底）
+    const sid = places.find(id => get(id)) || focusSite;
+    if (sid && get(sid)) {
+      const s = get(sid);
+      const p = calcPath('east', sid);
+      return {
+        w: /门票|预约|开放|几点|怎么/.test(q) ? 'zq' : 'bh',
+        m: 'joy',
+        text: `**${s.n}（${s.era}）**——${s.line}。\n${s.lead}\n· **此刻状态**：${statusOf(sid)}（建议停留 ${s.time}）\n· **开放与门票**：${s.info ? `${s.info.open}；${s.info.tix}（${s.info.book}）` : '以景区公示为准'}\n· **文化核心**：${s.culture.t}——${s.culture.d}\n· **周边风味**：逛完可尝「${s.food.n}」。`,
+        route: p ? { from: 'east', to: sid, p } : null,
+        cards: [sid]
+      };
+    }
+
+    return {
+      w: who, m: 'proud',
+      text: '两千二百年的彭城风物尽在卷中！你可以这样问我：\n1. **查任意真实路线**：如“从徐州东站去云龙湖怎么走”或“从戏马台到龟山汉墓”；\n2. **查实时开放与预约**：如“现在哪些景点正开着？”“博物馆周一闭馆吗？”；\n3. **聊两汉典故与藏品**：如“金缕玉衣和汉兵马俑有什么渊源？”“苏轼在徐州的故事”；\n4. 或直接使用左侧 **「一键定制彭城行程」** 生成专属多站攻略！',
+      cards: ['xmt', 'bwg', 'ylh']
+    };
+  }
+
+  function renderMsg({ text, w, m, me, cards, route }) {
+    $('#aiWelcome').style.display = 'none';
+    const wrap = document.createElement('div');
+    wrap.className = 'ai-msg' + (me ? ' me' : '');
+    const face = me ? '客' : `<img src="assets/img/ip/${w}_${m || 'joy'}.webp" alt="${w === 'zq' ? '朱雀' : '白虎'}">`;
+    const fmt = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+    let extra = '';
+    if (route && route.p) {
+      extra += `<div class="ai-route-card">
+        <div class="ai-route-hd"><b>${NAME(route.from)} → ${NAME(route.to)}</b><span>全程约 ${route.p.min} 分钟</span></div>
+        <ol class="ai-route-legs">${route.p.legs.map(l => `<li><span>${l.mode} · ${l.min}分</span><div>${l.txt}（至 ${NAME(l.to)}）</div></li>`).join('')}</ol>
+        <div class="ai-route-acts"><a href="index.html#go">前往实景地图开启镜头引导 ↗</a></div>
+      </div>`;
+    }
+    if (cards && cards.length) {
+      extra += `<div class="ai-rcards">${cards.map(id => {
+        const s = get(id); if (!s) return '';
+        return `<a class="ai-scard" href="index.html#site-${id}">
+          <img src="assets/img/night/${id}_night.webp" alt="${s.n}">
+          <div><b>${s.n}</b><small>${statusOf(id)} · ${s.time}</small><em>入画观展 & 体验 3D/互动 →</em></div>
+        </a>`;
+      }).join('')}</div>`;
+    }
+
+    wrap.innerHTML = `
+      <div class="ai-av">${face}</div>
+      <div class="ai-bub">
+        ${me ? '' : `<div class="ai-who"><span>${w === 'zq' ? '朱雀 · 行旅交通官' : '白虎 · 文博史官'}</span><button type="button" class="ai-speak">🔊 朗读</button></div>`}
+        <div class="ai-txt">${fmt}</div>
+        ${extra}
+      </div>`;
+    $('#aiMsgs').appendChild(wrap);
+    $('#aiFeed').scrollTop = $('#aiFeed').scrollHeight;
+    historyLog.push((me ? '我：' : (w === 'zq' ? '朱雀：' : '白虎：')) + text.replace(/\*\*/g, ''));
+
+    const spk = $('.ai-speak', wrap);
+    if (spk) spk.onclick = () => {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/\*\*/g, ''));
+      u.lang = 'zh-CN';
+      window.speechSynthesis.speak(u);
+    };
+  }
+
+  async function sendQuery(q) {
+    if (!q || !q.trim()) return;
+    renderMsg({ text: q.trim(), me: true });
+    const local = localSolve(q.trim());
+    const cfg = getApiCfg();
+    if (cfg.key && cfg.url) {
+      try {
+        const res = await fetch(cfg.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
+          body: JSON.stringify({
+            model: cfg.model || 'deepseek-chat',
+            messages: [
+              { role: 'system', content: `你是「汉韵彭城」徐州汉文化数字导览里的${who === 'zq' ? '朱雀（擅长交通路线与游玩规划）' : '白虎（擅长两汉历史与文物讲解）'}。请用典雅简洁的中文回答用户关于徐州九景（戏马台、龟山汉墓、狮子山楚王陵、徐州博物馆、户部山古民居、回龙窝、文庙街区、云龙山、云龙湖）的问题。` },
+              { role: 'user', content: q.trim() }
+            ]
+          })
+        });
+        const data = await res.json();
+        const reply = data?.choices?.[0]?.message?.content;
+        if (reply) {
+          renderMsg({ text: reply, w: who, m: 'joy', cards: local.cards, route: local.route });
+          return;
+        }
+      } catch {}
+    }
+    setTimeout(() => renderMsg(local), 240);
+  }
+
+  $('#aiForm').onsubmit = e => {
+    e.preventDefault();
+    const inp = $('#aiInput');
+    sendQuery(inp.value);
+    inp.value = '';
+  };
+  $$('#aiPrompts button').forEach(b => b.onclick = () => sendQuery(b.dataset.q));
+
+  // 一键智能定制行程
+  $('#genBtn').onclick = () => {
+    const days = $('#genDays').value, style = $('#genStyle').value;
+    const PLAN = {
+      half: { title: '半日古城精华线', ids: style === 'han' ? ['bwg', 'xmt'] : ['wm', 'hlw', 'hbs', 'xmt'], desc: '全程步行串联彭城七里文脉，轻松不绕路，约 3.5 小时。' },
+      1: { title: style === 'han' ? '一日两汉深度线' : (style === 'night' ? '一日彭城夜色线' : '一日山水古城全景线'), ids: style === 'han' ? ['gs', 'sz', 'bwg', 'xmt'] : ['bwg', 'yls', 'ylh', 'hlw'], desc: '上午探汉墓/博物馆，午后赏云龙山水，傍晚入古城老巷观华灯与美食。' },
+      2: { title: '两日全城风雅深游线', ids: ['gs', 'bwg', 'yls', 'ylh', 'wm', 'hlw', 'hbs', 'xmt', 'sz'], desc: '第一天专攻龟山汉墓 + 博物馆 + 云龙山水；第二天漫步文庙、回龙窝、户部山戏马台与狮子山兵马俑，九景尽览！' }
+    }[days];
+    renderMsg({ text: `请为我生成一份「${PLAN.title}」专属行程`, me: true });
+    const legLines = PLAN.ids.map((id, i) => `**第 ${i + 1} 站 · ${get(id).n}**（${get(id).time} · ${statusOf(id)}）：${get(id).line}`).join('\n');
+    setTimeout(() => renderMsg({
+      w: 'zq', m: 'hype',
+      text: `已为你定制 **【${PLAN.title}】**——${PLAN.desc}\n\n${legLines}\n\n提示：点击下方任意景点卡片即可直接入画体验 3D 文物或专属微互动！`,
+      cards: PLAN.ids.slice(0, 4)
+    }), 260);
+  };
+
+  $('#aiNewChat').onclick = () => {
+    $('#aiMsgs').innerHTML = '';
+    $('#aiWelcome').style.display = '';
+    historyLog.length = 0;
+  };
+  $('#aiExport').onclick = () => {
+    if (!historyLog.length) return;
+    const blob = new Blob(['【汉韵彭城 · 专属问策攻略手账】\n\n' + historyLog.join('\n\n')], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '汉韵彭城-我的徐州攻略.txt';
+    a.click();
+  };
+
+  // 若从某景点详情页带 ?site=xxx 跳转而来，自动展开该景首问！
+  if (focusSite && get(focusSite)) {
+    setTimeout(() => sendQuery(`请为我精讲${get(focusSite).n}的历史看点、实时开放时间与门票预约`), 320);
+  }
+})();
+</script>
+</body>
+</html>

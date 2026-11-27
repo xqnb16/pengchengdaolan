@@ -1,0 +1,2728 @@
+/* ==========================================================================
+   汉韵彭城 · V37 流光换景 × 大视差叠画 × 电影级动效 (IZANAMI Kinetic Edition)
+   1. 清晰可见的「跟手滚动联动」双缓冲全屏画底 (#edAmbientBg)
+      - 去糊化清晰夜景（0.72 透度 + 非对称定向墨色暗角，边缘与留白处透出 ~50% 清晰景致）
+      - 滚轮实时驱动推镜缩放 (--amb-sc) + 纵横向视差平移 (--amb-x / --amb-y) + 每景专属色晕
+   2. IZANAMI 级大幅度反向叠画视差（主夜画 vs 拓本副画 100px+ 错位滑行）+ 鼠标景深微偏
+   3. 幕帘剪裁展开 (clip-path unveil) + 画内镜头反推缩放 + 逐行遮罩升起文字 + 字距滚动呼吸
+   4. 连续视口焦点景深 (Focus Depth-of-Field) + 机械滚轮景别指示器 (#izSceneHud)
+   ========================================================================== */
+
+/* ---------- 1. 清晰可见 · 滚动实时驱动全屏换景画底 (#edAmbientBg) ---------- */
+.ed-ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: #090C11;
+  opacity: 0;
+  transition: opacity 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.iz-amb-on .ed-ambient-bg {
+  opacity: 1;
+}
+html:not(.theme-obsidian) .ed-ambient-bg {
+  background: #F6F1E8;
+}
+html:not(.theme-obsidian) body.iz-amb-on .ed-ambient-bg {
+  opacity: 0.34;
+}
+
+.ed-amb-stage {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  transform: translate3d(var(--amb-x, 0px), var(--amb-y, 0px), 0) scale(var(--amb-sc, 1.04));
+  will-change: transform;
+}
+
+.ed-amb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: blur(2.2px) saturate(1.06) brightness(0.86) contrast(1.04);
+  transform: scale(1.10);
+  transition:
+    opacity 1.15s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 1.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.ed-amb-img.on {
+  opacity: 0.68;
+  transform: scale(1.00);
+}
+/* 水墨雾山图本身偏亮灰，压沉明度令其与九景玄夜底色无缝统一 */
+html.theme-obsidian .ed-amb-img[src*="mist"] {
+  filter: blur(2px) saturate(0.88) brightness(0.42) contrast(1.12);
+}
+html:not(.theme-obsidian) .ed-amb-img {
+  filter: blur(2px) saturate(0.75) brightness(1.04);
+}
+html:not(.theme-obsidian) .ed-amb-img.on {
+  opacity: 0.44;
+}
+
+/* 每景专属微光氛围色晕（戏马台朱砂灯晕 / 龟山青铜幽光 / 云龙湖月白水影） */
+.ed-amb-aura {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 68% 62% at 62% 58%, var(--amb-tint, rgba(186, 148, 86, 0.22)) 0%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0.82;
+  transition: opacity 0.9s ease;
+}
+html:not(.theme-obsidian) .ed-amb-aura {
+  opacity: 0.16;
+}
+
+/* IZANAMI 非对称定向墨色遮罩：文字一侧深沉保清晰可读，留白与下边缘大方露出真实流动画境 */
+.ed-amb-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9, 11, 16, 0.88) 0%, rgba(9, 11, 16, 0.68) 38%, rgba(9, 11, 16, 0.26) 72%, rgba(9, 11, 16, 0.42) 100%),
+    linear-gradient(180deg, rgba(9, 11, 16, 0.64) 0%, rgba(9, 11, 16, 0.14) 28%, rgba(9, 11, 16, 0.12) 74%, rgba(9, 11, 16, 0.48) 100%);
+  transition: opacity 0.8s ease;
+}
+body.iz-amb-side-right .ed-amb-veil {
+  background:
+    linear-gradient(270deg, rgba(9, 11, 16, 0.88) 0%, rgba(9, 11, 16, 0.68) 38%, rgba(9, 11, 16, 0.26) 72%, rgba(9, 11, 16, 0.42) 100%),
+    linear-gradient(180deg, rgba(9, 11, 16, 0.64) 0%, rgba(9, 11, 16, 0.14) 28%, rgba(9, 11, 16, 0.12) 74%, rgba(9, 11, 16, 0.48) 100%);
+}
+body.iz-amb-side-center .ed-amb-veil {
+  background:
+    radial-gradient(ellipse 64% 58% at 50% 48%, rgba(9, 11, 16, 0.78) 0%, rgba(9, 11, 16, 0.42) 66%, rgba(9, 11, 16, 0.64) 100%),
+    linear-gradient(180deg, rgba(9, 11, 16, 0.56) 0%, rgba(9, 11, 16, 0.16) 30%, rgba(9, 11, 16, 0.54) 100%);
+}
+html:not(.theme-obsidian) .ed-amb-veil {
+  background:
+    radial-gradient(ellipse 74% 68% at 50% 48%, rgba(247, 243, 236, 0.64) 0%, rgba(245, 240, 231, 0.84) 68%, rgba(243, 237, 227, 0.94) 100%);
+}
+
+/* 左下角极简流动景别滚轮指示器 (#izSceneHud) */
+.iz-scene-hud {
+  position: fixed;
+  left: 26px;
+  bottom: 24px;
+  z-index: 42;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 14px 7px 11px;
+  border-radius: 999px;
+  background: rgba(10, 13, 20, 0.62);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(212, 180, 117, 0.24);
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.65);
+  color: rgba(240, 236, 226, 0.88);
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.iz-amb-on .iz-scene-hud {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+body.ed-detail-open .iz-scene-hud {
+  opacity: 0 !important;
+}
+.iz-hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E2BE78;
+  box-shadow: 0 0 10px rgba(226, 190, 120, 0.85);
+  animation: izDotPulse 2.6s ease-in-out infinite;
+}
+@keyframes izDotPulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.iz-hud-reel {
+  display: inline-block;
+  overflow: hidden;
+  height: 15px;
+  line-height: 15px;
+  color: #F2D79E;
+}
+.iz-hud-reel b {
+  display: inline-block;
+  font-weight: 600;
+}
+.iz-hud-sep {
+  color: rgba(206, 212, 224, 0.44);
+  margin-left: -4px;
+}
+.iz-hud-name {
+  font-family: var(--serif);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: rgba(244, 240, 232, 0.92);
+  padding-left: 6px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+.iz-scene-hud.flip .iz-hud-reel b,
+.iz-scene-hud.flip .iz-hud-name {
+  animation: izHudFlip 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes izHudFlip {
+  0% { opacity: 0; transform: translate3d(0, 10px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+html:not(.theme-obsidian) .iz-scene-hud {
+  background: rgba(250, 246, 238, 0.78);
+  border-color: rgba(158, 42, 34, 0.22);
+  color: #2A241E;
+}
+html:not(.theme-obsidian) .iz-hud-reel { color: #9E2A22; }
+html:not(.theme-obsidian) .iz-hud-name { color: #241F1A; border-left-color: rgba(36, 31, 26, 0.15); }
+html:not(.theme-obsidian) .iz-hud-dot { background: #9E2A22; box-shadow: 0 0 8px rgba(158, 42, 34, 0.5); }
+
+/* 层级编排：首屏全实底覆盖画底之上，其余章节浮于动态画底之上 */
+#top {
+  position: relative;
+  z-index: 4;
+}
+/* 首屏底缘 86px 极克制暗雾溶边：绝不遮挡徐州博物馆主体，仅柔化最底端石阶/湖沿并与序言暗雾自然相融 */
+html.theme-obsidian #top::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 86px;
+  background: linear-gradient(180deg, rgba(11, 13, 18, 0) 0%, rgba(11, 13, 18, 0.24) 36%, rgba(11, 13, 18, 0.68) 72%, #0B0D12 100%);
+  pointer-events: none;
+  z-index: 9;
+}
+/* 左右卷轴木杆在最底部轻微渐隐，消除硬截断感 */
+html.theme-obsidian #top .roller {
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 91%, transparent 100%);
+}
+/* 保证首屏左下时间/四时栏与右下地标按钮浮于底部溶边之上，始终清晰可点 */
+#top .ed-hero-meta-l,
+#top .ed-pins-toggle {
+  z-index: 12 !important;
+}
+main > section:not(#top),
+#edInterlude,
+.foot.ed-foot {
+  position: relative;
+  z-index: 3;
+}
+.ed-ambient-dust {
+  z-index: 5 !important;
+}
+
+/* 暗夜模式下令序言、九景、暗室过渡、三绝、行旅底色全透，令动态换景清晰流转 */
+html.theme-obsidian body {
+  background: #090C11 !important;
+}
+html.theme-obsidian .iz-prologue,
+html.theme-obsidian #sites,
+html.theme-obsidian #edInterlude,
+html.theme-obsidian #sanjue,
+html.theme-obsidian #go {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-top: none !important;
+}
+
+#sites > .dk,
+#go > .dk {
+  display: none !important;
+}
+
+html.theme-obsidian .nav .links {
+  gap: 28px !important;
+}
+
+/* ---------- 2. 逐行遮罩升起排版基础 (.iz-mask / .iz-line-in) ---------- */
+.iz-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.08em;
+}
+.iz-line-in {
+  display: inline-block;
+  font-style: normal;
+  will-change: transform, opacity;
+}
+html.iz-motion-ready .iz-line-in {
+  opacity: 0;
+  transform: translate3d(0, 112%, 0);
+  transition:
+    transform 1.15s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.85s ease;
+}
+html.iz-motion-ready .iz-vis .iz-line-in {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+html.iz-motion-ready .iz-pro-copy .iz-l1 .iz-line-in { transition-delay: 0.04s; }
+html.iz-motion-ready .iz-pro-copy .iz-l2 .iz-line-in { transition-delay: 0.16s; }
+html.iz-motion-ready .iz-pro-copy .iz-l3 .iz-line-in { transition-delay: 0.28s; }
+
+/* ---------- 3. IZANAMI 空灵序言屏 (#edPrologue) ---------- */
+.iz-prologue {
+  position: relative;
+  min-height: 82vh;
+  display: flex;
+  align-items: center;
+  padding: clamp(96px, 12vh, 148px) clamp(24px, 5vw, 72px) clamp(64px, 8vh, 108px);
+  overflow: visible;
+}
+html.theme-obsidian .iz-prologue::before {
+  content: "";
+  position: absolute;
+  inset: -2px 0 auto 0;
+  height: 220px;
+  background: linear-gradient(180deg, #0B0D12 0%, rgba(11, 13, 18, 0.86) 24%, rgba(11, 13, 18, 0.44) 60%, rgba(11, 13, 18, 0) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.iz-prologue > * {
+  position: relative;
+  z-index: 1;
+}
+
+.iz-pro-in {
+  position: relative;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 0.92fr) minmax(0, 1.08fr);
+  gap: clamp(28px, 4.5vw, 68px);
+  align-items: center;
+}
+
+.iz-vert-tag {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.28em;
+  color: rgba(224, 196, 138, 0.56);
+  user-select: none;
+  white-space: nowrap;
+  justify-self: start;
+  transform: translate3d(0, var(--iz-pv, 0px), 0);
+  will-change: transform;
+}
+html:not(.theme-obsidian) .iz-vert-tag {
+  color: rgba(130, 96, 56, 0.62);
+}
+
+.iz-pro-kicker {
+  display: block;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.30em;
+  color: rgba(212, 180, 117, 0.72);
+  margin-bottom: 22px;
+}
+html:not(.theme-obsidian) .iz-pro-kicker {
+  color: rgba(158, 42, 34, 0.76);
+}
+
+.iz-pro-copy h2 {
+  margin: 0;
+  font-weight: 400;
+  font-size: clamp(30px, 3.2vw, 46px);
+  line-height: 1.48;
+  letter-spacing: calc(0.16em + var(--iz-ls, 0em));
+}
+.iz-pro-copy h2 > span {
+  display: block;
+}
+html.theme-obsidian .iz-pro-copy h2 .iz-l1 .iz-line-in,
+html.theme-obsidian .iz-pro-copy h2 .iz-l2 .iz-line-in,
+html.theme-obsidian .iz-pro-copy h2 .iz-l3 .iz-line-in {
+  background: linear-gradient(180deg, #FAF8F3 0%, #D8DFE9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html:not(.theme-obsidian) .iz-pro-copy h2 .iz-l1 .iz-line-in,
+html:not(.theme-obsidian) .iz-pro-copy h2 .iz-l2 .iz-line-in,
+html:not(.theme-obsidian) .iz-pro-copy h2 .iz-l3 .iz-line-in {
+  color: #1D1A16;
+}
+.iz-pro-copy h2 .iz-l2 {
+  padding-left: clamp(22px, 3.4vw, 52px);
+}
+.iz-pro-copy h2 .iz-l3 {
+  padding-left: clamp(46px, 7.2vw, 108px);
+}
+.iz-pro-rule {
+  display: block;
+  width: 56px;
+  height: 1px;
+  margin: 28px 0 24px;
+  background: linear-gradient(90deg, rgba(212, 180, 117, 0.72), rgba(212, 180, 117, 0));
+}
+
+.iz-pro-copy p {
+  margin: 0;
+  max-width: 432px;
+  font-size: 14px;
+  line-height: 2.2;
+  letter-spacing: 0.06em;
+  color: rgba(214, 220, 232, 0.76);
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.55);
+}
+html.iz-motion-ready .iz-pro-copy p {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 0.95s ease 0.36s, transform 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.36s;
+}
+html.iz-motion-ready .iz-prologue.iz-vis .iz-pro-copy p {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+html:not(.theme-obsidian) .iz-pro-copy p {
+  color: rgba(42, 37, 32, 0.78);
+  text-shadow: none;
+}
+
+/* 序言独幅「修长方幅 × 四向柔和羽化 + 底部水墨渐隐」 */
+.iz-pro-plates.iz-pro-solo {
+  position: relative;
+  min-height: 550px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0;
+  perspective: 1200px;
+}
+.iz-pro-plates.iz-pro-solo::before {
+  display: none !important;
+}
+
+.iz-pro-plates.iz-pro-solo .iz-pro-back {
+  width: min(100%, 512px);
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: none;
+  position: relative;
+  z-index: 2;
+  cursor: crosshair;
+  /* 保留干净修长方幅比例，四缘微羽化 + 底部长渐变自然溶入夜雾 */
+  -webkit-mask-image:
+    linear-gradient(180deg, transparent 0%, #000 7%, #000 58%, rgba(0, 0, 0, 0.72) 76%, rgba(0, 0, 0, 0.16) 91%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, #000 7%, #000 94%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(180deg, transparent 0%, #000 7%, #000 58%, rgba(0, 0, 0, 0.72) 76%, rgba(0, 0, 0, 0.16) 91%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, #000 7%, #000 94%, transparent 100%);
+  mask-composite: intersect;
+  transform:
+    translate3d(0, var(--iz-p1, 0px), 0)
+    skewY(var(--iz-skew, 0deg))
+    rotateX(var(--pro-rx, 0deg))
+    rotateY(var(--pro-ry, 0deg));
+  will-change: transform, clip-path, opacity;
+}
+.iz-pro-plates.iz-pro-solo .iz-pro-back::after {
+  display: none !important;
+}
+.iz-pro-plates.iz-pro-solo .iz-pro-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 60% 50%;
+  display: block;
+  transform: translate3d(0, var(--iz-img-y, 0px), 0) scale(var(--iz-img-sc, 1.05));
+  will-change: transform;
+}
+.iz-pro-live-cv {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+.iz-pro-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 58px;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(10, 13, 20, 0.68);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212, 180, 117, 0.28);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: rgba(238, 214, 164, 0.90);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.iz-pro-cue i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #F0CE84;
+  box-shadow: 0 0 8px rgba(240, 206, 132, 0.9);
+  animation: izDotPulse 2.4s ease-in-out infinite;
+}
+.iz-pro-back.is-hover .iz-pro-cue {
+  opacity: 0;
+  transform: translate(-50%, 6px);
+}
+
+/* 幕帘剪裁揭幕动画 (Clip-Path Curtain Unveil + 内部镜头回缩) */
+html.iz-motion-ready .iz-pro-back,
+html.iz-motion-ready .iz-main {
+  clip-path: inset(16% 0 0 0);
+  opacity: 0;
+  transition:
+    clip-path 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+    opacity 0.95s ease 0.08s;
+}
+html.iz-motion-ready .iz-pro-front,
+html.iz-motion-ready .iz-rub {
+  clip-path: inset(22% 0 0 0);
+  opacity: 0;
+  transition:
+    clip-path 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.28s,
+    opacity 0.95s ease 0.28s,
+    box-shadow 0.5s ease;
+}
+html.iz-motion-ready .iz-vis .iz-pro-back,
+html.iz-motion-ready .iz-vis .iz-main,
+html.iz-motion-ready .iz-vis .iz-pro-front,
+html.iz-motion-ready .iz-vis .iz-rub {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+/* ---------- 4. 壹至玖无框空灵九景 (.iz-sites / .iz-scene) ---------- */
+.iz-sites {
+  padding: clamp(32px, 5vh, 64px) 0 clamp(64px, 9vh, 120px) !important;
+}
+
+.iz-sites-hd {
+  max-width: 760px;
+  margin: 0 auto clamp(24px, 4vh, 52px);
+  padding: 0 24px;
+  text-align: center;
+}
+.iz-hd-kicker {
+  display: block;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  color: rgba(226, 196, 134, 0.84);
+  margin-bottom: 16px;
+}
+html:not(.theme-obsidian) .iz-hd-kicker {
+  color: rgba(158, 42, 34, 0.78);
+}
+.iz-sites-hd h2 {
+  margin: 0 0 16px;
+  font-size: clamp(30px, 3.2vw, 46px);
+  font-weight: 400;
+  letter-spacing: 0.22em;
+}
+html.theme-obsidian .iz-sites-hd h2 {
+  background: linear-gradient(180deg, #FAF8F3 0%, #DCE3F0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.iz-sites-hd p {
+  margin: 0 auto;
+  max-width: 520px;
+  font-size: 14px;
+  line-height: 1.95;
+  letter-spacing: 0.05em;
+  color: rgba(224, 228, 238, 0.76);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+html:not(.theme-obsidian) .iz-sites-hd p {
+  color: rgba(45, 40, 35, 0.74);
+  text-shadow: none;
+}
+.iz-sites-hd::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 44px;
+  margin: 28px auto 0;
+  background: linear-gradient(180deg, rgba(226, 194, 128, 0.74) 0%, rgba(226, 194, 128, 0) 100%);
+}
+
+.sgrid.iz-gallery {
+  display: block !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+.iz-scene {
+  position: relative;
+  min-height: 74vh;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(58px, 8vh, 98px) clamp(24px, 5vw, 72px);
+  display: grid;
+  grid-template-columns: 32px minmax(0, 0.82fr) minmax(0, 1.26fr);
+  gap: clamp(24px, 4vw, 62px);
+  align-items: center;
+  opacity: var(--iz-focus-op, 1);
+  transform: scale(var(--iz-focus-sc, 1));
+  will-change: transform, opacity;
+}
+
+.iz-scene.iz-rev {
+  grid-template-columns: minmax(0, 1.26fr) minmax(0, 0.82fr) 32px;
+}
+.iz-scene.iz-rev .iz-stage {
+  grid-column: 1;
+  grid-row: 1;
+}
+.iz-scene.iz-rev .iz-copy {
+  grid-column: 2;
+  grid-row: 1;
+  padding-left: clamp(6px, 1.4vw, 22px);
+}
+.iz-scene.iz-rev .iz-vert-tag {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+}
+
+/* 序号行：进入视口中心时「壹–玖」由空心描边柔和点亮古泥金微光 */
+.iz-num-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.iz-cn {
+  font-family: var(--serif);
+  font-size: clamp(44px, 4.4vw, 64px);
+  line-height: 1;
+  font-weight: 400;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(212, 180, 117, 0.44);
+  letter-spacing: 0.04em;
+  user-select: none;
+  transition: -webkit-text-stroke-color 0.7s ease, filter 0.7s ease, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.iz-scene.is-focus .iz-cn {
+  -webkit-text-stroke-color: rgba(242, 212, 148, 0.92);
+  filter: drop-shadow(0 0 18px rgba(232, 192, 112, 0.36));
+  transform: translate3d(0, -2px, 0);
+}
+html:not(.theme-obsidian) .iz-cn {
+  -webkit-text-stroke: 1px rgba(158, 42, 34, 0.48);
+}
+html:not(.theme-obsidian) .iz-scene.is-focus .iz-cn {
+  -webkit-text-stroke-color: rgba(158, 42, 34, 0.92);
+  filter: none;
+}
+
+.iz-era {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: rgba(226, 196, 134, 0.84);
+}
+html:not(.theme-obsidian) .iz-era {
+  color: rgba(132, 92, 52, 0.84);
+}
+
+.iz-copy h3 {
+  margin: 0 0 12px;
+  font-size: clamp(28px, 3.1vw, 44px);
+  font-weight: 400;
+  letter-spacing: calc(0.11em + var(--iz-ls, 0em));
+  line-height: 1.24;
+}
+.iz-copy h3 a {
+  text-decoration: none;
+  transition: opacity 0.35s ease;
+}
+html.theme-obsidian .iz-copy h3 .iz-line-in {
+  background: linear-gradient(180deg, #FFFFFF 0%, #DCE3F0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html:not(.theme-obsidian) .iz-copy h3 .iz-line-in {
+  color: #1B1815;
+}
+.iz-copy h3 a:hover {
+  opacity: 0.84;
+}
+
+.iz-sub {
+  margin: 0 0 18px;
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.2vw, 17.5px);
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+  color: rgba(238, 210, 152, 0.94);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.6);
+}
+html:not(.theme-obsidian) .iz-sub {
+  color: #8C3B2B;
+  text-shadow: none;
+}
+
+.iz-lead {
+  margin: 0 0 28px;
+  max-width: 392px;
+  font-size: 14px;
+  line-height: 2.05;
+  letter-spacing: 0.04em;
+  color: rgba(222, 228, 238, 0.78);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
+}
+html:not(.theme-obsidian) .iz-lead {
+  color: rgba(40, 36, 32, 0.78);
+  text-shadow: none;
+}
+
+/* 错峰浮现副标、正文与入口 */
+html.iz-motion-ready .iz-copy .iz-line-in { transition-delay: 0.08s; }
+html.iz-motion-ready .iz-copy .iz-sub,
+html.iz-motion-ready .iz-copy .iz-lead,
+html.iz-motion-ready .iz-copy .iz-foot {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 0.85s ease, transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.iz-motion-ready .iz-copy .iz-sub { transition-delay: 0.20s; }
+html.iz-motion-ready .iz-copy .iz-lead { transition-delay: 0.30s; }
+html.iz-motion-ready .iz-copy .iz-foot { transition-delay: 0.40s; }
+html.iz-motion-ready .iz-scene.iz-vis .iz-sub,
+html.iz-motion-ready .iz-scene.iz-vis .iz-lead,
+html.iz-motion-ready .iz-scene.iz-vis .iz-foot {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.iz-foot {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.iz-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  text-decoration: none;
+  color: rgba(250, 246, 238, 0.96);
+  border-bottom: 1px solid rgba(226, 194, 128, 0.56);
+  transition: color 0.35s ease, border-color 0.35s ease;
+}
+.iz-enter i {
+  font-style: normal;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.iz-enter:hover {
+  color: #F6DFA8;
+  border-color: rgba(246, 223, 168, 0.95);
+}
+.iz-enter:hover i {
+  transform: translateX(6px);
+}
+html:not(.theme-obsidian) .iz-enter {
+  color: #1D1915;
+  border-bottom-color: rgba(158, 42, 34, 0.48);
+}
+html:not(.theme-obsidian) .iz-enter:hover {
+  color: #9E2A22;
+  border-bottom-color: #9E2A22;
+}
+
+.iz-feat {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: rgba(218, 224, 236, 0.62);
+}
+html:not(.theme-obsidian) .iz-feat {
+  color: rgba(68, 60, 52, 0.62);
+}
+
+/* 右/左侧无框叠画舞台：大幅度反向视差（主画 ±30px，拓本 ∓82px，错位超 110px!） */
+.iz-stage {
+  position: relative;
+  display: block;
+  padding: 28px 0 68px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.iz-main {
+  position: relative;
+  width: 86%;
+  margin: 0 0 0 auto;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #0E1118;
+  box-shadow: 0 44px 96px -26px rgba(0, 0, 0, 0.90);
+  transform: translate3d(var(--iz-mx1, 0px), calc(var(--iz-p1, 0px) + var(--iz-my1, 0px)), 0) skewY(var(--iz-skew, 0deg));
+  will-change: transform, clip-path, opacity;
+}
+.iz-scene.iz-rev .iz-main {
+  margin: 0 auto 0 0;
+}
+.iz-main::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  pointer-events: none;
+}
+.iz-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: translate3d(0, var(--iz-img-y, 0px), 0) scale(var(--iz-img-sc, 1.06));
+  transition: filter 0.65s ease;
+  will-change: transform;
+}
+.iz-stage:hover .iz-main img {
+  filter: brightness(1.07) contrast(1.03);
+}
+
+/* 汉画像石拓本副画：大幅度反向漂浮 + 鼠标景深联动 */
+.iz-rub {
+  position: absolute;
+  width: 40%;
+  aspect-ratio: 4 / 3;
+  bottom: 8px;
+  left: 0;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #101218;
+  box-shadow: 0 32px 72px -14px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(212, 180, 117, 0.24);
+  transform: translate3d(var(--iz-mx2, 0px), calc(var(--iz-p2, 0px) + var(--iz-my2, 0px)), 0);
+  will-change: transform, clip-path, opacity;
+  z-index: 2;
+}
+.iz-scene.iz-rev .iz-rub {
+  left: auto;
+  right: 0;
+}
+.iz-rub::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+.iz-rub img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.10);
+  filter: brightness(0.86) contrast(1.08);
+  transition: transform 1.0s cubic-bezier(0.22, 1, 0.36, 1), filter 0.65s ease;
+}
+.iz-stage:hover .iz-rub {
+  box-shadow: 0 36px 78px -12px rgba(0, 0, 0, 0.96), 0 0 0 1px rgba(232, 204, 146, 0.44);
+}
+.iz-stage:hover .iz-rub img {
+  transform: scale(1.15);
+  filter: brightness(0.98) contrast(1.12);
+}
+html:not(.theme-obsidian) .iz-rub {
+  box-shadow: 0 24px 54px -16px rgba(24, 20, 16, 0.38), 0 0 0 1px rgba(30, 25, 21, 0.14);
+}
+
+.iz-rub span {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 20px 12px 9px;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 10, 15, 0.90) 100%);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  color: rgba(236, 210, 156, 0.92);
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+  pointer-events: none;
+}
+.iz-stage:hover .iz-rub span {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- 5. 「事死如事生」暗室过渡 & 精简版「汉代三绝」 & 「行旅路引」 ---------- */
+#edInterlude {
+  position: relative;
+  min-height: 58vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(96px, 13vh, 152px) 24px clamp(72px, 10vh, 128px) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+/* 顶部 220px 暗夜柔雾溶边，无缝承接「玖·云龙湖」底部渐隐，彻底消除横切硬线 */
+html.theme-obsidian #edInterlude::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: -4px 0 auto 0;
+  height: 280px;
+  background: linear-gradient(180deg, #090C11 0%, rgba(9, 12, 17, 0.90) 20%, rgba(9, 12, 17, 0.56) 48%, rgba(9, 12, 17, 0.18) 76%, rgba(9, 12, 17, 0) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+#edInterlude > * {
+  position: relative;
+  z-index: 1;
+}
+#edInterlude::after {
+  display: none !important;
+}
+
+#sanjue .life7 {
+  display: none !important;
+}
+#sanjue {
+  padding-top: clamp(24px, 4vh, 52px) !important;
+  padding-bottom: clamp(72px, 10vh, 128px) !important;
+}
+#sanjue::before,
+#sanjue::after {
+  display: none !important;
+}
+html #sanjue.sj6 .sh5,
+html.theme-obsidian #sanjue.sj6 .sh5 {
+  display: block !important;
+  min-height: 0 !important;
+  max-width: 780px !important;
+  margin: 0 auto clamp(40px, 5.5vh, 60px) !important;
+  padding: 0 16px !important;
+  text-align: center !important;
+  border: none !important;
+}
+html #sanjue.sj6 .sh5::before,
+html #sanjue.sj6 .sh5::after,
+html.theme-obsidian #sanjue.sj6 .sh5::before,
+html.theme-obsidian #sanjue.sj6 .sh5::after {
+  display: none !important;
+}
+html #sanjue.sj6 .sh5 .eye,
+html #sanjue.sj6 .sh5 h2,
+html #sanjue.sj6 .sh5 p {
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center !important;
+}
+html #sanjue.sj6 .sh5 .eye {
+  justify-content: center !important;
+}
+html #sanjue.sj6 .sh5 .eye::after {
+  display: none !important;
+}
+
+#epilogue {
+  border-top: none !important;
+}
+
+/* 隐藏三绝多余云纹 */
+#sanjue > .dk {
+  display: none !important;
+}
+
+/* ---------- 5B. V38「汉代三绝」空灵无框暗室三屏 (.sj-eth) ---------- */
+html #sanjue.sj6 .wrap,
+html.theme-obsidian #sanjue.sj6 .wrap {
+  max-width: none !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+html #sanjue.sj6 .sjg,
+html.theme-obsidian #sanjue.sj6 .sjg {
+  display: block !important;
+  grid-template-columns: none !important;
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+.sj-eth-list {
+  display: block;
+  width: 100%;
+}
+
+.sj-eth {
+  min-height: 70vh;
+  max-width: 1320px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: clamp(52px, 7vh, 92px) clamp(24px, 5vw, 72px) !important;
+}
+.sj-eth.iz-rev .sj-eth-stage {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* 彻底剥离旧版圆角方框卡片外壳，只留无框悬浮暗室光影展窗 */
+html #sanjue .sj-eth-stage.sjc,
+html.theme-obsidian #sanjue .sj-eth-stage.sjc {
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 2px !important;
+  box-shadow: 0 42px 96px -26px rgba(0, 0, 0, 0.92) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  overflow: hidden !important;
+  position: relative;
+  transform: translate3d(0, var(--iz-p1, 0px), 0);
+  will-change: transform, clip-path, opacity;
+}
+html #sanjue .sj-eth-stage.sjc::before,
+html #sanjue .sj-eth-stage.sjc::after {
+  display: none !important;
+}
+html #sanjue .sj-eth-stage.sjc .im {
+  width: 100% !important;
+  aspect-ratio: 16 / 10 !important;
+  border-radius: 2px !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+html #sanjue .sj-eth-stage.sjc .im img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: translate3d(0, var(--iz-img-y, 0px), 0) scale(var(--iz-img-sc, 1.05));
+}
+
+/* 第三绝 · 玄黑汉石无框悬浮拓印碑面 */
+.sj-rub-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  transform: translate3d(0, var(--iz-p1, 0px), 0);
+  will-change: transform;
+}
+html #sanjue .sj-rub-stage .rub {
+  width: min(100%, 490px) !important;
+  aspect-ratio: 4 / 5 !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(212, 180, 117, 0.22) !important;
+  box-shadow: 0 46px 104px -26px rgba(0, 0, 0, 0.95) !important;
+  background: #10131B !important;
+  overflow: hidden !important;
+  position: relative;
+}
+html #sanjue .sj-rub-stage .rub img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 1 !important;
+}
+html #sanjue .sj-rub-stage .rub canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 2 !important;
+  cursor: crosshair;
+}
+html #sanjue .sj-rub-stage .rubtip {
+  z-index: 3 !important;
+  background: rgba(11, 14, 21, 0.72) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 180, 117, 0.28) !important;
+  border-radius: 999px !important;
+  padding: 12px 24px !important;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.85) !important;
+}
+
+.sj-rub-hud {
+  margin-top: 22px;
+  max-width: 410px;
+}
+.sj-rub-hud .rubm {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: rgba(216, 222, 234, 0.74);
+  margin-bottom: 10px;
+}
+.sj-rub-hud .rubm b {
+  font-family: ui-monospace, monospace;
+  color: #F0D294;
+  font-weight: 500;
+}
+.sj-rub-hud .rubbar {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+.sj-rub-hud .rubbar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #C8A258, #F4DC9E);
+  transition: width 0.25s ease;
+}
+.sj-rub-acts {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.iz-line-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(226, 194, 128, 0.56);
+  padding: 0 0 5px;
+  color: rgba(250, 246, 238, 0.94);
+  font-family: var(--sans);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.iz-line-btn:hover {
+  color: #F6DFA8;
+  border-bottom-color: #F6DFA8;
+}
+.iz-line-btn.ghost {
+  color: rgba(208, 214, 226, 0.64);
+  border-bottom-color: rgba(255, 255, 255, 0.22);
+}
+.iz-line-btn.ghost:hover {
+  color: #FAF6EE;
+  border-bottom-color: rgba(255, 255, 255, 0.62);
+}
+.iz-line-link {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: rgba(226, 196, 134, 0.82);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.iz-line-link:hover {
+  color: #F6DFA8;
+}
+.sj-rub-hud .rubn {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.9;
+  color: rgba(196, 204, 218, 0.58);
+}
+.sj-rub-hud .rubdone {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: rgba(16, 20, 30, 0.62);
+  border-left: 2px solid #E2BE78;
+  color: rgba(232, 236, 244, 0.86);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.sj-rub-hud .rubdone b {
+  display: block;
+  color: #F3D9A0;
+  margin-bottom: 4px;
+  font-family: var(--serif);
+}
+html:not(.theme-obsidian) .iz-line-btn { color: #1E1915; border-bottom-color: rgba(158, 42, 34, 0.52); }
+html:not(.theme-obsidian) .iz-line-btn.ghost { color: rgba(48, 42, 36, 0.65); border-bottom-color: rgba(48, 42, 36, 0.25); }
+html:not(.theme-obsidian) .iz-line-link { color: #9E2A22; }
+html:not(.theme-obsidian) .sj-rub-hud .rubm { color: #4A4238; }
+html:not(.theme-obsidian) .sj-rub-hud .rubm b { color: #9E2A22; }
+html:not(.theme-obsidian) .sj-rub-hud .rubn { color: rgba(48, 42, 36, 0.66); }
+
+/* 幕帘展开同步支持三绝展幅 */
+html.iz-motion-ready .sj-eth-stage.sjc,
+html.iz-motion-ready .sj-rub-stage .rub {
+  clip-path: inset(16% 0 0 0);
+  opacity: 0;
+  transition: clip-path 1.25s cubic-bezier(0.16, 1, 0.3, 1) 0.1s, opacity 0.95s ease 0.1s;
+}
+html.iz-motion-ready .iz-vis .sj-eth-stage.sjc,
+html.iz-motion-ready .iz-vis .sj-rub-stage .rub {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+/* ---------- 5C. V38 彭城暗夜流金真实地理交互导览地图 (#go / .pc-map-shell) ---------- */
+.iz-go {
+  padding-top: clamp(48px, 6vh, 80px) !important;
+  padding-bottom: clamp(56px, 8vh, 96px) !important;
+}
+.iz-go .wrap {
+  max-width: 1320px !important;
+}
+.iz-go-hd {
+  max-width: 760px !important;
+  margin: 0 auto 22px !important;
+  text-align: center !important;
+  display: block !important;
+  padding: 0 16px !important;
+  border: none !important;
+}
+.iz-go-hd::before,
+.iz-go-hd::after {
+  display: none !important;
+}
+/* 隐藏旧版附加在 #go 标题旁的竖排诗句，保持一屏直达交互舆图 */
+#go .q7,
+#go .ed-poem,
+#go .poem,
+#go .sh5 blockquote,
+#go .ed-quote {
+  display: none !important;
+}
+.iz-go-hd .eye {
+  justify-content: center !important;
+}
+.iz-go-hd .eye::after {
+  display: none !important;
+}
+.iz-go-hd p {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+.iz-go .go-tabs {
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.pc-map-shell {
+  display: grid;
+  grid-template-columns: minmax(320px, 376px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+.pc-map-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 610px;
+}
+
+.pc-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.pc-presets button {
+  appearance: none;
+  padding: 10px 8px;
+  border-radius: 4px;
+  background: rgba(14, 18, 28, 0.54);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 180, 117, 0.18);
+  color: rgba(232, 236, 244, 0.84);
+  font-family: var(--serif);
+  font-size: 12.5px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 0.3s, background 0.3s, color 0.3s;
+}
+.pc-presets button span {
+  font-family: ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: rgba(212, 180, 117, 0.72);
+}
+.pc-presets button:hover,
+.pc-presets button.on {
+  border-color: rgba(234, 200, 132, 0.72);
+  background: rgba(212, 180, 117, 0.14);
+  color: #FAF2DE;
+}
+html:not(.theme-obsidian) .pc-presets button {
+  background: rgba(252, 248, 240, 0.85);
+  color: #241F1A;
+  border-color: rgba(158, 42, 34, 0.18);
+}
+html:not(.theme-obsidian) .pc-presets button.on {
+  background: rgba(158, 42, 34, 0.10);
+  border-color: #9E2A22;
+  color: #9E2A22;
+}
+
+html.theme-obsidian .pc-map-side .panel.planner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(12, 16, 24, 0.56) !important;
+  backdrop-filter: blur(20px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  border-radius: 4px !important;
+  padding: 18px 20px !important;
+}
+.pc-map-side .ticket {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 248px;
+  padding-right: 4px;
+}
+.pc-map-side .ticket .leg.pc-cur-leg {
+  background: rgba(212, 180, 117, 0.14);
+  border-radius: 4px;
+  box-shadow: inset 2px 0 0 #E8C57B;
+}
+.pc-ext-amap {
+  font-size: 11.5px;
+  color: rgba(196, 204, 218, 0.56);
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.25s;
+}
+.pc-ext-amap:hover {
+  color: #F0D294;
+  text-decoration: underline;
+}
+
+/* 地图主画布容器（锁定优雅的 610px 黄金视口高度，一屏完整呈现顶栏 + 地图 + 底部引导浮舱） */
+.pc-map-wrap {
+  position: relative;
+  height: 610px;
+  min-height: 610px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 180, 117, 0.22);
+  background: #0B0E15;
+  box-shadow: 0 38px 90px -28px rgba(0, 0, 0, 0.92);
+}
+#pcMapCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* 进入交互舆图区时自动隐去左下角小浮标，避免遮挡路线侧栏 */
+body.iz-in-go .iz-scene-hud {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 顶部悬浮地图工具条 */
+.pc-map-bar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  pointer-events: none;
+  z-index: 6;
+}
+.pc-map-bar > * {
+  pointer-events: auto;
+}
+.pc-map-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(10, 13, 20, 0.78);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 180, 117, 0.26);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: rgba(236, 214, 166, 0.92);
+}
+.pc-map-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E8C57B;
+  box-shadow: 0 0 8px rgba(232, 197, 123, 0.85);
+}
+.pc-bm-grp,
+.pc-zoom-grp {
+  display: inline-flex;
+  background: rgba(10, 13, 20, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 180, 117, 0.24);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+.pc-bm-grp button,
+.pc-zoom-grp button,
+.pc-map-pill {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(226, 230, 240, 0.78);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.25s, color 0.25s;
+}
+.pc-bm-grp button.on {
+  background: rgba(212, 180, 117, 0.22);
+  color: #FAF0D7;
+}
+.pc-map-pill {
+  background: rgba(10, 13, 20, 0.72);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(212, 180, 117, 0.24);
+  padding: 7px 14px;
+}
+.pc-map-pill:hover,
+.pc-zoom-grp button:hover,
+.pc-bm-grp button:hover {
+  color: #F6DFA8;
+  background: rgba(212, 180, 117, 0.16);
+}
+
+/* 左上角精简图例 */
+.pc-map-legend {
+  position: absolute;
+  top: 62px;
+  left: 18px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: rgba(216, 222, 234, 0.72);
+  background: rgba(10, 13, 20, 0.54);
+  backdrop-filter: blur(10px);
+  padding: 5px 11px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+  z-index: 5;
+}
+.pc-map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pc-map-legend i {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* 点击地标后的轻盈暗琉璃浮卡 */
+.pc-node-pop {
+  position: absolute;
+  top: 64px;
+  right: 16px;
+  width: min(296px, calc(100% - 32px));
+  padding: 16px;
+  border-radius: 4px;
+  background: rgba(11, 15, 23, 0.86);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(212, 180, 117, 0.34);
+  box-shadow: 0 22px 54px -12px rgba(0, 0, 0, 0.9);
+  color: #EDE8DC;
+  z-index: 8;
+}
+.pc-pop-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.pc-pop-hd small {
+  display: block;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: #DFBC78;
+}
+.pc-pop-hd h4 {
+  margin: 2px 0 0;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+}
+.pc-pop-x {
+  appearance: none;
+  background: none;
+  border: none;
+  color: rgba(220, 226, 238, 0.65);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+.pc-node-pop p {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: rgba(214, 220, 232, 0.78);
+}
+.pc-pop-acts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pc-pop-acts button {
+  appearance: none;
+  padding: 6px 11px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #EDE8DC;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.pc-pop-acts button.pri {
+  background: rgba(212, 180, 117, 0.22);
+  border-color: rgba(232, 200, 134, 0.62);
+  color: #FAF2DE;
+}
+
+/* 底部站内实景分段引导浮舱 (#pcGuideDock) */
+.pc-guide-dock {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 7;
+  border-radius: 4px;
+  background: rgba(10, 13, 21, 0.82);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(212, 180, 117, 0.28);
+  box-shadow: 0 22px 54px -14px rgba(0, 0, 0, 0.92);
+  padding: 14px 18px;
+  color: #EFEAE0;
+}
+.pc-gd-idle {
+  font-size: 13px;
+  color: rgba(212, 218, 230, 0.72);
+  text-align: center;
+}
+.pc-gd-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.pc-gd-summary small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: rgba(226, 196, 134, 0.86);
+  margin-bottom: 3px;
+}
+.pc-gd-summary b {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.pc-gd-btns button.pri {
+  appearance: none;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(200, 75, 62, 0.92), rgba(164, 48, 38, 0.95));
+  border: 1px solid rgba(242, 184, 148, 0.45);
+  color: #FFF9EE;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  box-shadow: 0 10px 26px -8px rgba(200, 75, 62, 0.75);
+  transition: transform 0.25s, filter 0.25s;
+}
+.pc-gd-btns button.pri:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.pc-gd-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.pc-gd-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--mc, #E2BE78);
+  color: #0D1017;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.pc-gd-step {
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: rgba(226, 200, 144, 0.92);
+}
+.pc-gd-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.pc-gd-nav button {
+  appearance: none;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #F4EFE4;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s;
+}
+.pc-gd-nav button:hover:not(:disabled) {
+  background: rgba(212, 180, 117, 0.22);
+  border-color: rgba(232, 200, 134, 0.56);
+}
+.pc-gd-nav button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.pc-gd-body h4 {
+  margin: 0 0 6px;
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: #FAF4E6;
+  letter-spacing: 0.06em;
+}
+.pc-gd-gate {
+  margin: 0 0 5px;
+  font-size: 12px;
+  color: rgba(232, 206, 152, 0.90);
+}
+.pc-gd-gate span {
+  display: inline-block;
+  padding: 1px 6px;
+  margin-right: 7px;
+  border: 1px solid rgba(212, 180, 117, 0.36);
+  border-radius: 2px;
+  font-size: 10.5px;
+}
+.pc-gd-desc {
+  margin: 0 0 5px;
+  font-size: 12.8px;
+  line-height: 1.75;
+  color: rgba(226, 230, 240, 0.86);
+}
+.pc-gd-tip {
+  margin: 0;
+  font-size: 11.8px;
+  color: rgba(186, 212, 204, 0.84);
+}
+
+.pc-builder-wide {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* 详情页顶栏按钮化适配 */
+.detail .v5bar button.bnav {
+  appearance: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ==========================================================================
+   V41 九处彭城「IZANAMI 向上叠页迭代」吸顶翻页引擎 (#sites .iz-folio)
+   - 确保祖先链无 overflow:hidden，原生 position:sticky 120fps 零卡顿逐层向上覆盖
+   - 统一左文右画精对齐轴线 + 1px 古金月白顶边分割线 + 被覆盖层柔和微缩暗退
+   ========================================================================== */
+#main,
+#sites.iz-sites,
+#sites .sgrid.iz-gallery {
+  overflow: visible !important;
+}
+#sites.iz-sites {
+  padding-bottom: 0 !important;
+}
+#sites .iz-sites-hd {
+  position: relative;
+  z-index: 5;
+  margin-bottom: 0 !important;
+  padding-bottom: clamp(48px, 6.5vh, 78px);
+}
+/* 上接缝（九处彭城标题 -> 壹·戏马台）：无缝沉降进玄夜底色，零横线 */
+html.theme-obsidian #sites .iz-sites-hd::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -2px;
+  width: 100vw;
+  height: 180px;
+  background: linear-gradient(180deg, rgba(9, 12, 17, 0) 0%, rgba(9, 12, 17, 0.72) 62%, #090C11 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#sites .iz-folio {
+  position: sticky !important;
+  top: 64px;
+  z-index: calc(10 + var(--iz-idx, 1));
+  max-width: none !important;
+  width: 100% !important;
+  min-height: calc(100vh - 64px);
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  opacity: 1 !important;
+  transform: none !important;
+  background: #090C11;
+  overflow: hidden;
+  box-shadow: 0 -46px 96px -10px rgba(5, 7, 12, 0.94);
+}
+#sites .iz-folio:first-child {
+  box-shadow: none;
+}
+/* 首景（壹·戏马台）顶部 220px 水墨羽化显影，令红门灯火从烟岚中自然浮现 */
+#sites .iz-folio:first-child .iz-folio-bg {
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.42) 16%, #000 34%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.42) 16%, #000 34%, #000 100%);
+}
+/* 末景（玖·云龙湖）底部 240px 水墨羽化淡入暗夜，丝滑过渡至「事死如事生」 */
+html.theme-obsidian #sites .iz-folio:last-child::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 240px;
+  background: linear-gradient(180deg, rgba(9, 12, 17, 0) 0%, rgba(9, 12, 17, 0.68) 54%, #090C11 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 每一页内置独立全屏清晰夜景画底：向上叠页覆盖时整片流动夜色一并丝滑翻涌！ */
+#sites .iz-folio-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+#sites .iz-folio-bg img {
+  position: absolute;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
+  object-fit: cover;
+  opacity: 0.66;
+  filter: blur(2.2px) saturate(1.06) brightness(0.86) contrast(1.04);
+  transform: translate3d(0, var(--fbg-y, 0px), 0) scale(var(--fbg-sc, 1.06));
+  will-change: transform;
+}
+#sites .iz-folio-aura {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 68% 62% at 64% 56%, var(--folio-tint, rgba(198, 162, 102, 0.22)) 0%, transparent 72%);
+  mix-blend-mode: screen;
+  opacity: 0.80;
+}
+#sites .iz-folio-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(9, 11, 16, 0.88) 0%, rgba(9, 11, 16, 0.68) 38%, rgba(9, 11, 16, 0.24) 72%, rgba(9, 11, 16, 0.42) 100%),
+    linear-gradient(180deg, rgba(9, 11, 16, 0.56) 0%, rgba(9, 11, 16, 0.12) 28%, rgba(9, 11, 16, 0.12) 74%, rgba(9, 11, 16, 0.48) 100%);
+}
+html:not(.theme-obsidian) #sites .iz-folio {
+  background: #F6F1E8;
+  box-shadow: 0 -22px 54px -18px rgba(32, 26, 20, 0.22);
+}
+html:not(.theme-obsidian) #sites .iz-folio-bg img {
+  opacity: 0.24;
+  filter: blur(3px) saturate(0.75) brightness(1.04);
+}
+html:not(.theme-obsidian) #sites .iz-folio-aura { opacity: 0.12; }
+html:not(.theme-obsidian) #sites .iz-folio-veil {
+  background: linear-gradient(90deg, rgba(246, 241, 232, 0.90) 0%, rgba(246, 241, 232, 0.72) 48%, rgba(246, 241, 232, 0.56) 100%);
+}
+
+#sites .iz-folio:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 8vw);
+  height: 1px;
+  z-index: 3;
+  background: linear-gradient(90deg, transparent 0%, rgba(226, 198, 141, 0.48) 16%, rgba(217, 215, 212, 0.30) 50%, rgba(226, 198, 141, 0.48) 84%, transparent 100%);
+  pointer-events: none;
+}
+html:not(.theme-obsidian) #sites .iz-folio:not(:first-child)::before {
+  background: linear-gradient(90deg, transparent 0%, rgba(158, 42, 34, 0.30) 20%, rgba(42, 36, 30, 0.16) 50%, rgba(158, 42, 34, 0.30) 80%, transparent 100%);
+}
+
+#sites .iz-folio-in {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(36px, 5vh, 68px) clamp(24px, 5vw, 72px);
+  display: grid;
+  grid-template-columns: 32px minmax(0, 0.84fr) minmax(0, 1.24fr);
+  gap: clamp(24px, 4vw, 62px);
+  align-items: center;
+  transform: translate3d(0, var(--folio-y, 0px), 0) scale(var(--folio-sc, 1));
+  opacity: var(--folio-op, 1);
+  transform-origin: center top;
+  will-change: transform, opacity;
+}
+
+@media (max-width: 980px) {
+  #sites .iz-folio {
+    position: relative !important;
+    top: auto;
+    min-height: auto;
+    background: rgba(9, 12, 18, 0.64);
+  }
+  #sites .iz-folio-in {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ==========================================================================
+   V40 精细交互特效层：
+   1) 全站香烟墨雾游丝 & 点击水波画布 (#izInkTrail)
+   2) 换景水墨轻岚光帘 (#izMistSweep)
+   3) 九景主画「时光透视镜 · 夜色显古石刻痕」(.iz-xray-layer / .iz-xray-ring)
+   ========================================================================== */
+.iz-ink-trail {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.iz-mist-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 56% 74% at 50% 50%, rgba(210, 198, 172, 0.14) 0%, rgba(128, 152, 184, 0.08) 42%, transparent 74%);
+  transform: translate3d(-32%, 0, 0) scale(1.1);
+  will-change: transform, opacity;
+}
+.iz-mist-sweep.run {
+  animation: izMistPass 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes izMistPass {
+  0%   { opacity: 0; transform: translate3d(-34%, 2%, 0) scale(1.06); }
+  36%  { opacity: 0.92; }
+  100% { opacity: 0; transform: translate3d(34%, -2%, 0) scale(1.16); }
+}
+
+/* 九景主画「时光透视镜」：鼠标划过夜画即显影两千年石刻拓片 */
+.iz-xray-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(
+    circle var(--xr-r, 0px) at var(--xr-x, 50%) var(--xr-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.96) 62%,
+    rgba(0, 0, 0, 0.36) 84%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--xr-r, 0px) at var(--xr-x, 50%) var(--xr-y, 50%),
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.96) 62%,
+    rgba(0, 0, 0, 0.36) 84%,
+    transparent 100%
+  );
+  will-change: -webkit-mask-image, mask-image;
+}
+.iz-xray-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.11);
+  filter: contrast(1.22) brightness(1.08) sepia(0.24);
+}
+.iz-xray-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 212px;
+  height: 212px;
+  margin: -106px 0 0 -106px;
+  border-radius: 50%;
+  border: 1px solid rgba(232, 202, 140, 0.48);
+  box-shadow:
+    0 0 28px rgba(232, 198, 128, 0.16),
+    inset 0 0 24px rgba(10, 14, 22, 0.42);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transform: translate3d(var(--xr-x, -200px), var(--xr-y, -200px), 0) scale(0.72);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.iz-xray-ring::before,
+.iz-xray-ring::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 1px;
+  height: 9px;
+  background: rgba(242, 214, 152, 0.78);
+}
+.iz-xray-ring::after {
+  top: auto;
+  bottom: -5px;
+}
+.iz-xray-ring span {
+  position: absolute;
+  left: 50%;
+  bottom: -22px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: rgba(242, 214, 152, 0.92);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+.iz-main.xr-on .iz-xray-ring {
+  opacity: 1;
+  transform: translate3d(var(--xr-x, -200px), var(--xr-y, -200px), 0) scale(1);
+}
+.iz-xray-cue {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: rgba(10, 13, 20, 0.62);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 180, 117, 0.24);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: rgba(236, 212, 160, 0.86);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.iz-main.xr-on .iz-xray-cue {
+  opacity: 0;
+}
+
+@media (max-width: 980px) {
+  .iz-pro-plates.iz-pro-solo {
+    min-height: 360px;
+    justify-content: center;
+  }
+  .iz-xray-cue,
+  .iz-pro-cue {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iz-ink-trail,
+  .iz-mist-sweep {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1020px) {
+  .pc-map-shell {
+    grid-template-columns: 1fr;
+  }
+  .pc-map-wrap,
+  #pcMapCanvas {
+    min-height: 520px;
+  }
+}
+
+/* 暗室展柜与行旅琉璃面板轻盈通透，让底层流动画境围绕呼吸 */
+html.theme-obsidian #go .panel {
+  background: rgba(14, 18, 27, 0.58) !important;
+  backdrop-filter: blur(20px) saturate(1.18);
+  -webkit-backdrop-filter: blur(20px) saturate(1.18);
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ---------- 6. 响应式适配 ---------- */
+@media (max-width: 980px) {
+  .iz-pro-in,
+  .iz-scene,
+  .iz-scene.iz-rev {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .iz-scene.iz-rev .iz-stage,
+  .iz-scene.iz-rev .iz-copy,
+  .iz-scene.iz-rev .iz-vert-tag {
+    grid-column: 1;
+    grid-row: auto;
+    padding-left: 0;
+  }
+  .iz-vert-tag,
+  .iz-scene.iz-rev .iz-vert-tag {
+    writing-mode: horizontal-tb;
+    justify-self: start;
+  }
+  .iz-pro-plates {
+    min-height: 360px;
+  }
+  .iz-scene {
+    min-height: auto;
+    padding: 52px 24px;
+  }
+  .iz-stage {
+    padding: 12px 0 46px;
+  }
+  .iz-main,
+  .iz-scene.iz-rev .iz-main {
+    width: 90%;
+    margin: 0 0 0 auto;
+  }
+  .iz-rub,
+  .iz-scene.iz-rev .iz-rub {
+    width: 44%;
+    left: 0;
+    right: auto;
+  }
+  .iz-scene-hud {
+    left: 16px;
+    bottom: 72px;
+  }
+}
+
+@media (max-width: 600px) {
+  .iz-pro-copy h2 { font-size: 28px; }
+  .iz-pro-copy h2 .iz-l2 { padding-left: 16px; }
+  .iz-pro-copy h2 .iz-l3 { padding-left: 32px; }
+  .iz-pro-plates { min-height: 290px; }
+  .iz-pro-back { width: 82%; }
+  .iz-pro-front { width: 52%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.iz-motion-ready .iz-line-in,
+  html.iz-motion-ready .iz-pro-copy p,
+  html.iz-motion-ready .iz-copy .iz-sub,
+  html.iz-motion-ready .iz-copy .iz-lead,
+  html.iz-motion-ready .iz-copy .iz-foot,
+  html.iz-motion-ready .iz-pro-back,
+  html.iz-motion-ready .iz-pro-front,
+  html.iz-motion-ready .iz-main,
+  html.iz-motion-ready .iz-rub {
+    opacity: 1 !important;
+    transform: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+  .iz-hud-dot { animation: none; }
+}
+
+/* ==========================================================================
+   V54 · 主页九景去小石刻拓本副图 + 主画大幅扩容（保持 .iz-folio 100% 全宽铺满，仅扩宽内层 .iz-folio-in）
+   ========================================================================== */
+#sites .iz-rub {
+  display: none !important;
+}
+#sites .iz-folio-in {
+  max-width: 1420px;
+  grid-template-columns: 32px minmax(0, 0.72fr) minmax(0, 1.48fr);
+  gap: clamp(26px, 4vw, 60px);
+}
+#sites .iz-stage {
+  padding: 12px 0 !important;
+}
+#sites .iz-main,
+#sites .iz-scene.iz-rev .iz-main {
+  width: 100% !important;
+  margin: 0 !important;
+  aspect-ratio: 16 / 10 !important;
+}
+@media (max-width: 980px) {
+  #sites .iz-folio-in {
+    grid-template-columns: 1fr;
+  }
+  #sites .iz-main,
+  #sites .iz-scene.iz-rev .iz-main {
+    width: 100% !important;
+  }
+}
+
+/* ==========================================================================
+   V55 · 全站 60–120fps 流畅度与 GPU 合成专项优化
+   - 隔离九景叠页绘制域，自动休眠被覆盖/未入屏叠页（9 层 -> 仅 1~2 层）
+   - 去除动画全屏底图的高斯 blur 实时重算，改用零开销色阶暗化 + 柔雾遮罩
+   - 九景遮盖视口时自动隐藏底层固定大背景，彻底消除过度绘制 (Overdraw)
+   ========================================================================== */
+#sites .iz-folio {
+  contain: layout paint style;
+  box-shadow: 0 -24px 48px -12px rgba(5, 7, 12, 0.86);
+}
+#sites .iz-folio.iz-off {
+  box-shadow: none;
+}
+#sites .iz-folio.iz-off .iz-folio-bg,
+#sites .iz-folio.iz-off .iz-folio-in {
+  visibility: hidden !important;
+}
+body.iz-folios-cover #edAmbientBg {
+  visibility: hidden !important;
+}
+#sites .iz-folio-bg img {
+  filter: saturate(1.04) brightness(0.76) contrast(1.04);
+  opacity: 0.48;
+  will-change: transform;
+}
+html:not(.theme-obsidian) #sites .iz-folio-bg img {
+  filter: saturate(0.76) brightness(1.04);
+  opacity: 0.22;
+}
+.ed-amb-img {
+  filter: saturate(1.02) brightness(0.76) contrast(1.04) !important;
+}
+#sites .iz-folio .iz-xray-cue,
+.iz-pro-cue {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: rgba(10, 13, 20, 0.78);
+}
+html.theme-obsidian #go .panel,
+.pc-guide-dock {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+.iz-main,
+.iz-pro-back,
+.iz-folio-in {
+  will-change: transform;
+}
+
+/* V57：九景主画彻底取消滚动扭斜/视差跳动，保持画幅端正静止（仅保留丝滑叠页翻页与鼠标石刻透视） */
+#sites .iz-main {
+  transform: none !important;
+  will-change: auto;
+}
+#sites .iz-main img {
+  transform: none !important;
+  will-change: auto;
+}
+
+/* ==========================================================================
+   V58 · 全站手机端深度响应式适配 (<= 768px · iPhone / Android 旗舰移动端体验)
+   ========================================================================== */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* 1. 顶栏精简为「品牌左对齐 + 极简三功能胶囊右对齐」，杜绝右侧裁切 */
+  .nav {
+    height: 56px !important;
+    padding: 0 14px !important;
+    background: rgba(9, 12, 18, 0.86) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+  .nav .logo .lg7 small,
+  .nav .logo .lg7 i {
+    display: none !important;
+  }
+  .nav .logo .lg7 b {
+    font-size: 16px !important;
+    letter-spacing: 0.16em !important;
+    color: #F6F0E4 !important;
+  }
+  html:not(.theme-obsidian) .nav {
+    background: rgba(246, 241, 232, 0.92) !important;
+    border-bottom-color: rgba(30, 24, 18, 0.1) !important;
+  }
+  html:not(.theme-obsidian) .nav .logo .lg7 b {
+    color: #1D1814 !important;
+  }
+  /* 隐藏顶栏重复文字导航（底部 tabbar 已承担全站跳转），仅留最右侧功能胶囊 */
+  .nav .links > li:not(.nav-pill-wrap) {
+    display: none !important;
+  }
+  .nav .links {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .nav .nav-glass-pill {
+    padding: 3px 5px !important;
+    gap: 2px !important;
+  }
+  .nav .nav-ico-btn {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  .nav .askbtn {
+    display: none !important;
+  }
+
+  /* 2. 首屏 Hero 彻底清除旧版米白遮罩、木轴与悬浮竖条，呈现纯净暗夜大片 */
+  #top.hero {
+    min-height: 100svh !important;
+    height: 100svh !important;
+    padding-bottom: 64px !important;
+    overflow: hidden !important;
+  }
+  #top .roller,
+  #top .pins,
+  #top .kai-zq,
+  #top .pano-hint,
+  #top .ed-pins-toggle,
+  #top .ed-scroll-cue,
+  #top .river-tag,
+  #top .ed-live-clock {
+    display: none !important;
+  }
+  #top .kai-paper,
+  #top .pano-wrap,
+  #top .pano {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+  }
+  #top .pano-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: 50% 66% !important;
+  }
+  html.theme-obsidian #top::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 54%;
+    background: linear-gradient(180deg, rgba(8, 11, 17, 0.86) 0%, rgba(8, 11, 17, 0.56) 58%, rgba(8, 11, 17, 0) 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  #top .kai-title,
+  html.theme-obsidian #top.hero.open .kai-title {
+    position: absolute !important;
+    top: 74px !important;
+    left: 20px !important;
+    right: 20px !important;
+    width: auto !important;
+    max-width: none !important;
+    padding: 12px 4px !important;
+    margin: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 10px !important;
+    z-index: 6 !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  #top .kai-title .tv {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    writing-mode: horizontal-tb !important;
+  }
+  #top .kai-title .tv .seal-s {
+    writing-mode: horizontal-tb !important;
+    padding: 3px 8px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.16em !important;
+  }
+  #top .kai-title .tv h1 {
+    writing-mode: horizontal-tb !important;
+    width: auto !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    font-size: clamp(44px, 13vw, 54px) !important;
+    letter-spacing: 0.28em !important;
+    padding-left: 0.28em !important;
+    margin: 0 !important;
+    line-height: 1.12 !important;
+    color: #FAF6EC !important;
+    text-shadow: 0 6px 26px rgba(0, 0, 0, 0.78) !important;
+  }
+  html:not(.theme-obsidian) #top .kai-title .tv h1 {
+    color: #1D1814 !important;
+    text-shadow: 0 2px 16px rgba(246, 241, 232, 0.9) !important;
+  }
+  #top .kai-title .tside {
+    display: none !important;
+  }
+  #top .kai-title .tdesc {
+    max-width: 310px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+  #top .kai-title .tdesc::before {
+    display: block !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    letter-spacing: 0.28em !important;
+    color: #E8C784 !important;
+    margin-bottom: 10px !important;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9) !important;
+  }
+  #top .kai-title .tdesc p {
+    display: none !important;
+  }
+  html:not(.theme-obsidian) #top .kai-title .tdesc p {
+    color: rgba(32, 26, 20, 0.86) !important;
+    text-shadow: none !important;
+  }
+  #top .kai-title .cta {
+    display: flex !important;
+    justify-content: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+  }
+  #top .kai-title .cta .lnk {
+    padding: 8px 16px !important;
+    font-size: 12.5px !important;
+    border-radius: 999px !important;
+    background: rgba(12, 16, 24, 0.66) !important;
+    border: 1px solid rgba(226, 196, 134, 0.48) !important;
+    color: #FAF2DF !important;
+  }
+  #top .kai-title .cta .lnk.subtle-ink,
+  #top .kai-title .cta .lnk.ghost {
+    display: none !important;
+  }
+  #top .ed-hero-meta-l {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 78px !important;
+    transform: translateX(-50%) !important;
+  }
+  #top .ed-season-bar {
+    padding: 4px 10px !important;
+    gap: 8px !important;
+  }
+  #top .ed-sb-lbl {
+    display: none !important;
+  }
+
+  /* 3. 隐藏桌面悬浮角标与标尺，杜绝遮挡页脚二维码与正文 */
+  .iz-scene-hud,
+  #edRail,
+  .ed-cursor-dot,
+  .ed-cursor-ring,
+  #izInkTrail {
+    display: none !important;
+  }
+
+  /* 4. 序言与九景手机单栏清爽排版 */
+  .iz-prologue {
+    min-height: auto !important;
+    padding: 54px 18px 42px !important;
+  }
+  .iz-pro-in {
+    padding: 0 !important;
+    gap: 24px !important;
+  }
+  .iz-pro-copy h2 {
+    font-size: clamp(26px, 7.6vw, 32px) !important;
+    line-height: 1.3 !important;
+  }
+  .iz-pro-plates.iz-pro-solo {
+    min-height: 0 !important;
+  }
+  .iz-pro-back {
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 4 / 3 !important;
+  }
+
+  #sites .iz-sites-hd {
+    padding: 36px 20px 28px !important;
+  }
+  #sites .iz-sites-hd h2 {
+    font-size: 28px !important;
+  }
+  #sites .iz-folio {
+    position: relative !important;
+    top: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    border-top: 1px solid rgba(226, 196, 134, 0.14);
+  }
+  #sites .iz-folio-in {
+    padding: 36px 18px 40px !important;
+    gap: 20px !important;
+  }
+  #sites .iz-cn {
+    font-size: 38px !important;
+  }
+  #sites .iz-copy h3 {
+    font-size: 28px !important;
+    margin-bottom: 8px !important;
+  }
+  #sites .iz-lead {
+    margin-bottom: 18px !important;
+    font-size: 13.5px !important;
+    line-height: 1.9 !important;
+  }
+  #sites .iz-stage {
+    padding: 4px 0 0 !important;
+  }
+
+  /* 5. 汉代三绝手机端排版与拓印区适配 */
+  #edInterlude {
+    min-height: auto !important;
+    padding: 52px 20px 32px !important;
+  }
+  #edInterlude h3 {
+    font-size: 24px !important;
+  }
+  #sanjue .sh5 h2 {
+    font-size: clamp(21px, 5.8vw, 26px) !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1.45 !important;
+  }
+  .sj-eth {
+    min-height: auto !important;
+    padding: 28px 18px 34px !important;
+  }
+
+  /* 6. 行旅与实景交互地图手机端紧凑适配 */
+  #go .sh5 h2 {
+    font-size: clamp(24px, 6.8vw, 30px) !important;
+    letter-spacing: 0.1em !important;
+  }
+  .go-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 18px !important;
+    justify-content: flex-start !important;
+    padding: 0 4px 8px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .go-tabs::-webkit-scrollbar { display: none; }
+  .go-tabs button {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    font-size: 13px !important;
+    padding: 8px 2px !important;
+  }
+  .pc-presets {
+    gap: 6px !important;
+  }
+  .pc-presets button {
+    padding: 9px 6px !important;
+    font-size: 12px !important;
+  }
+  .pc-map-wrap,
+  #pcMapCanvas {
+    min-height: 430px !important;
+    height: 430px !important;
+  }
+  .pc-map-bar {
+    top: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+  }
+  .pc-map-badge {
+    font-size: 10.5px !important;
+    padding: 5px 9px !important;
+  }
+  .pc-map-legend {
+    display: none !important;
+  }
+  .pc-guide-dock {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    padding: 11px 12px !important;
+  }
+  .pc-gd-summary b {
+    font-size: 14px !important;
+  }
+
+  /* 7. 卷尾与页脚预留底部 tabbar 安全区 */
+  .ed-epilogue {
+    padding: 64px 20px !important;
+  }
+  .ed-epilogue h2 {
+    font-size: 30px !important;
+  }
+  .ed-epi-acts {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .ed-epi-btn {
+    text-align: center !important;
+  }
+  .foot.ed-foot {
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .ed-foot-grid {
+    grid-template-columns: 1fr !important;
+    gap: 28px !important;
+  }
+
+  /* 8. 手机端底部导航栏精细黑金样式 */
+  html.theme-obsidian .tabbar {
+    background: rgba(9, 12, 18, 0.94) !important;
+    backdrop-filter: blur(14px) !important;
+    border-top: 1px solid rgba(212, 180, 117, 0.16) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    z-index: 40 !important;
+  }
+}
+
+/* ==========================================================================
+   V60 · 华灿奖冲刺精修（评审意见第一档全部落地 + 克制东方策展美学）
+   1. 统一完整字库宋体 (--serif)，彻底消除子集字体缺字导致的笔画粗细不一
+   2. 左下胶囊改为 Izanami 风格贴左边缘 11px 无底色竖排细字
+   3. 全站按钮收口为 2 种：金描边透明底 + 发丝线 CTA，清除所有红色渐变按钮
+   4. 九景背景去掉重复套娃大图，改用玄墨暗场 + 极淡东方色晕/微纹
+   5. 行旅区下拉隐藏原生丑陋箭头、加宽侧栏防终点名截断
+   ========================================================================== */
+:root {
+  --serif: "Source Han Serif SC", "Noto Serif CJK SC", "Noto Serif SC", "Songti SC", "STSong", "STZhongsong", "SimSun", Georgia, serif !important;
+}
+
+/* 2. 左边缘 Izanami 式 11px 无底色竖排章节细字（取代左下黑底圆角胶囊） */
+.iz-scene-hud {
+  left: 18px !important;
+  bottom: auto !important;
+  top: 50% !important;
+  transform: translate3d(0, -50%, 0) !important;
+  padding: 0 !important;
+  gap: 8px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  writing-mode: vertical-rl !important;
+  text-orientation: mixed !important;
+  font-size: 11px !important;
+  letter-spacing: 0.26em !important;
+  color: rgba(226, 198, 141, 0.62) !important;
+}
+.iz-scene-hud .iz-hud-dot {
+  width: 3px !important;
+  height: 3px !important;
+  opacity: 0.72;
+}
+.iz-scene-hud .iz-hud-sep {
+  opacity: 0.36;
+}
+.iz-scene-hud .iz-hud-name {
+  border-left: none !important;
+  border-top: 1px solid rgba(226, 198, 141, 0.26) !important;
+  padding-left: 0 !important;
+  padding-top: 10px !important;
+  font-size: 11px !important;
+  color: rgba(232, 224, 206, 0.68) !important;
+}
+html:not(.theme-obsidian) .iz-scene-hud {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: rgba(96, 74, 52, 0.72) !important;
+}
+html:not(.theme-obsidian) .iz-scene-hud .iz-hud-name {
+  border-top-color: rgba(96, 74, 52, 0.24) !important;
+  color: rgba(54, 46, 38, 0.72) !important;
+}
+
+/* 3. 全站按钮系统统一：撤掉所有红色渐变实心按钮 -> 金描边透明底 / 发丝线 CTA */
+.pc-gd-btns button.pri,
+html.theme-obsidian .btn.red,
+html.theme-obsidian #go .btn.red,
+html.theme-obsidian .ed-epi-btn.pri,
+html.theme-obsidian #gform .btn.red {
+  background: rgba(212, 180, 117, 0.08) !important;
+  border: 1px solid rgba(226, 196, 134, 0.58) !important;
+  color: #F6E6C2 !important;
+  box-shadow: none !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  transition: background 0.28s ease, border-color 0.28s ease, color 0.28s ease, transform 0.28s ease !important;
+}
+.pc-gd-btns button.pri:hover,
+html.theme-obsidian .btn.red:hover,
+html.theme-obsidian #go .btn.red:hover,
+html.theme-obsidian .ed-epi-btn.pri:hover,
+html.theme-obsidian #gform .btn.red:hover {
+  background: rgba(212, 180, 117, 0.20) !important;
+  border-color: rgba(244, 218, 158, 0.92) !important;
+  color: #FFF9EB !important;
+  transform: translateY(-1px) !important;
+}
+html.theme-obsidian .btn:not(.red),
+html.theme-obsidian .ed-epi-btn:not(.pri) {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: rgba(232, 236, 244, 0.84) !important;
+  box-shadow: none !important;
+  font-weight: 400 !important;
+}
+html.theme-obsidian .btn:not(.red):hover,
+html.theme-obsidian .ed-epi-btn:not(.pri):hover {
+  border-color: rgba(226, 196, 134, 0.56) !important;
+  color: #F6E6C2 !important;
+  background: rgba(212, 180, 117, 0.08) !important;
+}
+
+/* 4. V61：保留九景沉浸式全屏暗夜 WebP 氛围背景大图（无高斯 blur 重算，低饱和暗化衬托前景主画，既丰满又丝滑） */
+#sites .iz-folio {
+  background: #080B10 !important;
+}
+#sites .iz-folio-bg img {
+  display: block !important;
+  opacity: 0.44 !important;
+  filter: saturate(0.95) brightness(0.72) contrast(1.04) !important;
+}
+#sites .iz-folio-aura {
+  background: radial-gradient(ellipse 68% 62% at 64% 56%, var(--folio-tint, rgba(198, 162, 102, 0.20)) 0%, transparent 72%) !important;
+  opacity: 0.72 !important;
+}
+#sites .iz-folio-veil {
+  background:
+    linear-gradient(90deg, rgba(8, 11, 16, 0.90) 0%, rgba(8, 11, 16, 0.68) 38%, rgba(8, 11, 16, 0.28) 72%, rgba(8, 11, 16, 0.48) 100%),
+    linear-gradient(180deg, rgba(8, 11, 16, 0.58) 0%, rgba(8, 11, 16, 0.14) 28%, rgba(8, 11, 16, 0.14) 74%, rgba(8, 11, 16, 0.52) 100%) !important;
+}
+html:not(.theme-obsidian) #sites .iz-folio {
+  background: #F6F1E8 !important;
+}
+html:not(.theme-obsidian) #sites .iz-folio-bg img {
+  opacity: 0.22 !important;
+  filter: saturate(0.75) brightness(1.04) !important;
+}
+html:not(.theme-obsidian) #sites .iz-folio-veil {
+  background: linear-gradient(90deg, rgba(246, 241, 232, 0.92) 0%, rgba(246, 241, 232, 0.74) 48%, rgba(246, 241, 232, 0.58) 100%) !important;
+}
+
+/* 5. 行旅区下拉框隐藏原生箭头 + 定制古金细箭头 + 侧栏适度加宽防截断 */
+.pc-map-shell {
+  grid-template-columns: minmax(352px, 412px) minmax(0, 1fr) !important;
+}
+#go .planner .ft {
+  grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) !important;
+  gap: 8px !important;
+}
+#go select,
+#go .planner select,
+#go .builder select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23D4B475' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 12px 12px !important;
+  padding-right: 28px !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  cursor: pointer;
+}
+#go select::-ms-expand {
+  display: none;
+}
+html.theme-obsidian #go select option {
+  background: #0F1420;
+  color: #F0ECE2;
+}
+@media (max-width: 1020px) {
+  .pc-map-shell {
+    grid-template-columns: 1fr !important;
+  }
+}

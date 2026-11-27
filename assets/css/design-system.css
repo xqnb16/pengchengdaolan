@@ -1,0 +1,1125 @@
+/* ==========================================================================
+   汉韵彭城 · 统一视觉设计系统 (Design System v12 · 「纸本 · 墨 · 朱」)
+   收敛原 8 层分散 CSS，统一色彩、字阶、圆角、间距、装裱卡片与展板一致性
+   ========================================================================== */
+
+:root {
+  /* 1. 色彩令牌 · Color Tokens (10 核心语义色) */
+  --ds-paper: #F5EFE4;          /* 宣纸白 · 全站唯一主底 */
+  --ds-surface: #FBF8F1;        /* 素笺白 · 卡片/弹窗面 */
+  --ds-subtle: #EAE1D0;         /* 绢帛浅 · 次级底/按钮底 */
+  --ds-ink: #1E1915;            /* 焦墨黑 · 主标题与正文 */
+  --ds-ink-2: #5E5449;          /* 淡墨灰 · 次级正文/说明 */
+  --ds-ink-3: #84786A;          /* 烟墨浅 · 注释/元信息 */
+  --ds-vermilion: #B23A2E;      /* 朱砂红 · 品牌主色/印章/主交互 */
+  --ds-vermilion-d: #8B2920;    /* 暗朱红 · 悬停/强调 */
+  --ds-jade: #3F6B5A;           /* 石青绿 · 山水/开放态/官方原典 */
+  --ds-indigo: #3B5B78;         /* 靛青蓝 · 地铁2号线/次级数据 */
+  --ds-ochre: #B8863B;          /* 赭石金 · 步行/文献整理 */
+  --ds-lacquer: #1C1512;        /* 汉漆黑 · 仅限「三绝」沉浸段 */
+  --ds-lacquer-2: #2A1F1A;      /* 漆器褐 · 沉浸段层次 */
+  --ds-gold: #C8A05C;           /* 泥金色 · 沉浸段线条与点缀 */
+
+  /* 线条与遮罩 */
+  --ds-line: rgba(30, 25, 21, 0.11);
+  --ds-line-s: rgba(30, 25, 21, 0.22);
+  --ds-line-gold: rgba(200, 160, 92, 0.28);
+
+  /* 2. 兼容旧变量映射（消除 style / v4-v10 冲突） */
+  --paper: var(--ds-paper);
+  --paper2: var(--ds-subtle);
+  --bg: var(--ds-paper);
+  --cream: var(--ds-surface);
+  --card: var(--ds-surface);
+  --ink: var(--ds-ink);
+  --ink2: var(--ds-ink-2);
+  --ink3: var(--ds-ink-3);
+  --red: var(--ds-vermilion);
+  --red2: var(--ds-vermilion-d);
+  --jade: var(--ds-jade);
+  --ochre: var(--ds-ochre);
+  --line: rgba(30, 25, 21, 0.14);
+  --line6: var(--ds-line);
+  --hair: var(--ds-line);
+  --lacq: var(--ds-lacquer);
+  --lacq2: var(--ds-lacquer-2);
+  --gold7: var(--ds-gold);
+
+  /* 3. 统一 4 级圆角 · Border Radius Scale */
+  --ds-r-seal: 2px;
+  --ds-r-sm: 6px;
+  --ds-r-md: 12px;
+  --ds-r-pill: 999px;
+  --r5: var(--ds-r-md);
+  --r6: var(--ds-r-sm);
+
+  /* 4. 纸墨层次阴影 · Elevation */
+  --ds-sh-sm: 0 1px 2px rgba(30, 25, 21, 0.04), 0 8px 20px -14px rgba(30, 25, 21, 0.18);
+  --ds-sh-md: 0 2px 6px rgba(30, 25, 21, 0.05), 0 18px 40px -20px rgba(30, 25, 21, 0.24);
+  --sh5: var(--ds-sh-sm);
+
+  /* 5. 统一字阶与节奏 · Typography & Spacing */
+  --ds-maxw: 1200px;
+  --ds-gap: 24px;
+  --ds-sec-py: 96px;
+}
+
+/* ==========================================================================
+   一、全局纸本底色与排版基线
+   ========================================================================== */
+html {
+  background: var(--ds-paper);
+  color: var(--ds-ink);
+  overflow-x: clip;
+}
+body {
+  background: var(--ds-paper);
+  color: var(--ds-ink);
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: clip;
+}
+body::after {
+  opacity: 0.42 !important;
+}
+.wrap {
+  max-width: var(--ds-maxw) !important;
+}
+
+/* 彻底修复 v10 reduced-motion 错误倾斜 Bug */
+@media (prefers-reduced-motion: reduce) {
+  .rv10, .rv-h h2, .rv-h .eye span, .rv-h > p, .rv-h .stamp10 {
+    opacity: 1 !important;
+    translate: none !important;
+    transform: none !important;
+    clip-path: none !important;
+    animation: none !important;
+  }
+}
+
+/* ==========================================================================
+   二、顶部导航栏与标准品牌 Logo
+   ========================================================================== */
+.nav {
+  height: 64px !important;
+  padding: 0 32px !important;
+  transition: background 0.35s ease, box-shadow 0.35s ease;
+}
+.nav.solid {
+  background: rgba(245, 239, 228, 0.90) !important;
+  backdrop-filter: saturate(1.4) blur(16px);
+  -webkit-backdrop-filter: saturate(1.4) blur(16px);
+  box-shadow: inset 0 -1px 0 var(--ds-line) !important;
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--ds-ink);
+}
+.logo-seal {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: block;
+  border-radius: 3px;
+  box-shadow: 0 2px 6px rgba(178, 58, 46, 0.22);
+  transition: transform 0.25s ease;
+}
+.logo:hover .logo-seal {
+  transform: scale(1.05);
+}
+.lg7 {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.lg7 b {
+  font-family: var(--serif);
+  font-size: 19px !important;
+  font-weight: 900;
+  letter-spacing: 0.14em !important;
+  color: var(--ds-ink);
+}
+.lg7 i {
+  color: var(--ds-vermilion);
+  font-style: normal;
+  font-weight: 900;
+}
+.lg7 small {
+  font-family: var(--sans) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--ds-ink-2) !important;
+  letter-spacing: 0.08em !important;
+}
+
+.nav .links {
+  gap: 6px;
+}
+.nav .links a {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ds-ink-2);
+  border-radius: var(--ds-r-sm);
+  transition: color 0.2s, background 0.2s;
+}
+.nav .links a:hover,
+.nav .links a.on {
+  color: var(--ds-vermilion);
+  background: rgba(178, 58, 46, 0.06);
+}
+.nav .links a.on::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 3px;
+  height: 2px;
+  background: var(--ds-vermilion);
+  border-radius: 1px;
+}
+.nav-ds-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px !important;
+  margin-left: 8px;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  color: var(--ds-ink) !important;
+  border: 1px solid var(--ds-line-s);
+  border-radius: var(--ds-r-pill) !important;
+  background: rgba(251, 248, 241, 0.85);
+}
+.nav-ds-link:hover {
+  border-color: var(--ds-vermilion);
+  color: var(--ds-vermilion) !important;
+  background: var(--ds-surface) !important;
+}
+
+/* ==========================================================================
+   三、首屏「开卷 · 彭城全景」精修（避让遮挡、去冗余卡片、强主操作）
+   ========================================================================== */
+.hero.kai {
+  background: var(--ds-paper);
+}
+/* 收起盖在全景画左下角的突兀白底二维码卡，保留页脚扫码区 */
+.hero .qr10,
+.hero .qr10-mini {
+  display: none !important;
+}
+/* 左侧卷首标题防遮挡微调 */
+.hero .kai-title {
+  top: clamp(78px, 10vh, 112px) !important;
+  left: clamp(24px, 3.6vw, 56px) !important;
+}
+.hero .tdesc {
+  max-width: 440px !important;
+  width: auto !important;
+}
+.hero .tv h1 {
+  font-size: clamp(64px, 7.6vw, 104px) !important;
+  line-height: 0.96 !important;
+  color: var(--ds-ink);
+  text-shadow: 0 2px 24px rgba(245, 239, 228, 0.9);
+}
+.hero .seal-s {
+  border-radius: var(--ds-r-seal) !important;
+  background: var(--ds-vermilion) !important;
+  color: var(--ds-surface) !important;
+  box-shadow: inset 0 0 0 1px rgba(251, 248, 241, 0.45), 0 4px 12px rgba(178, 58, 46, 0.25);
+}
+.hero .tdesc p {
+  color: var(--ds-ink-2);
+  font-size: 14px;
+  line-height: 1.8;
+  text-shadow: 0 1px 12px rgba(245, 239, 228, 0.95);
+}
+.hero .cta {
+  display: flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px !important;
+  margin-top: 16px !important;
+}
+.hero .cta .lnk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: var(--ds-r-sm);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  border: 1px solid var(--ds-vermilion);
+  background: var(--ds-vermilion);
+  color: var(--ds-surface);
+  box-shadow: 0 8px 20px -10px rgba(178, 58, 46, 0.55);
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.hero .cta .lnk:hover {
+  background: var(--ds-vermilion-d);
+  border-color: var(--ds-vermilion-d);
+  transform: translateY(-1px);
+}
+.hero .cta .lnk.ghost {
+  background: rgba(251, 248, 241, 0.88);
+  color: var(--ds-ink);
+  border-color: var(--ds-line-s);
+  box-shadow: none;
+}
+.hero .cta .lnk.ghost:hover {
+  background: var(--ds-surface);
+  border-color: var(--ds-ink);
+  color: var(--ds-ink);
+}
+.hero .cta .lnk.subtle-ink {
+  background: rgba(28, 21, 18, 0.86);
+  color: #F4E9D6;
+  border-color: rgba(200, 160, 92, 0.55);
+  box-shadow: 0 8px 20px -12px rgba(28, 21, 18, 0.5);
+}
+.hero .cta .lnk.subtle-ink:hover {
+  background: var(--ds-lacquer);
+  border-color: var(--ds-gold);
+  color: var(--ds-gold);
+}
+.pano-hint {
+  background: rgba(251, 248, 241, 0.85);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-pill);
+  padding: 5px 14px;
+  font-size: 12px !important;
+  color: var(--ds-ink-2) !important;
+  letter-spacing: 0.1em;
+  backdrop-filter: blur(8px);
+}
+
+/* 首屏印章签微调：去掉歪斜，更端庄 */
+.pin2 .seal {
+  transform: none !important;
+  border-radius: var(--ds-r-seal) !important;
+  border-width: 1.6px !important;
+}
+.pin2:hover .seal,
+.pin2:focus-visible .seal,
+.pin2.ex .seal {
+  background: var(--ds-vermilion) !important;
+  color: var(--ds-surface) !important;
+  animation: none !important;
+  transform: scale(0.95) !important;
+}
+.pin2 .pv {
+  border-radius: var(--ds-r-md) !important;
+  border-color: var(--ds-line-s) !important;
+  background: var(--ds-surface) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+
+/* ==========================================================================
+   四、统一板块节奏、去杂乱底纹、统一标题规制
+   ========================================================================== */
+.sec {
+  padding: var(--ds-sec-py) 0 !important;
+  background: var(--ds-paper);
+  position: relative;
+}
+/* 取消多余的割裂分界图形，只保留进入「三绝漆黑沉浸段」的云龙山轮廓 */
+.dv-paper,
+.dv-cloud,
+.dv-water {
+  display: none !important;
+}
+#sites.sec,
+#fy.sec,
+#go.sec {
+  padding-top: var(--ds-sec-py) !important;
+  padding-bottom: var(--ds-sec-py) !important;
+}
+#sites.sec {
+  padding-bottom: 168px !important; /* 为三绝山峦剪影留出呼吸空间 */
+}
+#sanjue.sec {
+  padding-top: 108px !important;
+  padding-bottom: 112px !important;
+}
+
+/* 板块之间的极简汉风细线云纹分隔（用于浅色板块间） */
+#fy::before,
+#go::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--ds-maxw), calc(100% - 48px));
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ds-line-s) 15%, var(--ds-line-s) 85%, transparent);
+}
+
+/* 统一全站板块头部 (.sh5)：端庄方正、左对齐眉标、无倾斜、支持右侧诗句 */
+.sh5 {
+  max-width: none !important;
+  margin-bottom: 48px !important;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "eye quote"
+    "title quote"
+    "desc quote";
+  column-gap: 40px;
+  align-items: end;
+}
+.sh5 .eye {
+  grid-area: eye;
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--ds-vermilion);
+  margin-bottom: 10px;
+}
+.sh5 h2 {
+  grid-area: title;
+  font-family: var(--serif);
+  font-size: clamp(32px, 3.8vw, 44px) !important;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.2 !important;
+  margin: 0 0 12px !important;
+  color: var(--ds-ink);
+}
+.sh5 > p:not(.eye) {
+  grid-area: desc;
+  max-width: 660px;
+  font-size: 15.5px !important;
+  line-height: 1.8 !important;
+  color: var(--ds-ink-2);
+  margin: 0;
+}
+.sh5 .q7s {
+  grid-area: quote;
+  margin: 0 !important;
+  align-self: end;
+  max-width: 340px !important;
+}
+
+/* 端庄朱砂方印编号（取消歪斜 -6deg） */
+.stamp10 {
+  display: inline-grid !important;
+  place-items: center;
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 5px !important;
+  margin-right: 0 !important;
+  background: var(--ds-vermilion) !important;
+  color: var(--ds-surface) !important;
+  font-family: var(--serif);
+  font-weight: 900;
+  font-size: 13px !important;
+  letter-spacing: 0.04em;
+  border-radius: var(--ds-r-seal) !important;
+  box-shadow: inset 0 0 0 1px rgba(251, 248, 241, 0.45) !important;
+  transform: none !important;
+}
+.rv-h .stamp10 {
+  transform: scale(1.25) !important;
+}
+.rv-h.in .stamp10 {
+  animation: stampClean 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+}
+@keyframes stampClean {
+  from { opacity: 0; transform: scale(1.28); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ==========================================================================
+   五、01 彭城七里长卷 · 规范化芯片与控制栏
+   ========================================================================== */
+.scrollsec {
+  background: var(--ds-paper);
+  border-top: 1px solid var(--ds-line);
+}
+.sch6 .eye {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--ds-vermilion);
+}
+.sch6 h2 {
+  font-size: clamp(26px, 3vw, 34px) !important;
+  letter-spacing: 0.06em;
+}
+.chips .chip {
+  border-radius: var(--ds-r-pill) !important;
+  border: 1px solid var(--ds-line-s) !important;
+  background: var(--ds-surface) !important;
+  color: var(--ds-ink-2) !important;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 16px;
+  transition: all 0.2s ease;
+}
+.chips .chip:hover {
+  border-color: var(--ds-ink) !important;
+  color: var(--ds-ink) !important;
+}
+.chips .chip[aria-pressed="true"],
+.chips .chip.in {
+  background: var(--ds-ink) !important;
+  border-color: var(--ds-ink) !important;
+  color: var(--ds-surface) !important;
+}
+.sc-card {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line-s) !important;
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+
+/* ==========================================================================
+   六、02 九处彭城 · 去除杂乱分区底纹，打造「书画册页装裱卡片」
+   ========================================================================== */
+.chap {
+  padding: 40px 0 48px !important;
+  margin-top: 0 !important;
+}
+.chap + .chap {
+  border-top: 1px solid var(--ds-line);
+  padding-top: 52px !important;
+}
+/* 彻底移除 3 篇章割裂的菱格/红云/绿水波全屏色块底纹 */
+.chap::before {
+  display: none !important;
+}
+.chap .chh {
+  margin-bottom: 28px !important;
+  padding-top: 0 !important;
+  border-top: 0 !important;
+  align-items: center !important;
+}
+.chap .chn {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: var(--ds-r-seal) !important;
+  background: var(--ds-vermilion) !important;
+  color: var(--ds-surface) !important;
+  box-shadow: inset 0 0 0 1px rgba(251, 248, 241, 0.45);
+  font-size: 18px !important;
+}
+.chap.ct2 .chn {
+  background: var(--ds-ink) !important;
+}
+.chap.ct3 .chn {
+  background: var(--ds-jade) !important;
+}
+.chap .chh h3 {
+  font-size: 24px !important;
+  letter-spacing: 0.08em;
+}
+.chap .chh p {
+  font-size: 14.5px !important;
+  color: var(--ds-ink-2);
+}
+.q7 {
+  border-left: 2px solid var(--ds-vermilion) !important;
+  padding-left: 16px !important;
+}
+.q7 blockquote {
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+  letter-spacing: 0.1em !important;
+  color: var(--ds-ink) !important;
+}
+.q7 figcaption {
+  font-size: 12.5px !important;
+  color: var(--ds-ink-3) !important;
+}
+.chap.ct3 .q7 {
+  border-color: var(--ds-jade) !important;
+}
+
+/* 书画装裱风景点卡片 (.sc5) */
+.cgrid {
+  gap: var(--ds-gap) !important;
+}
+.sc5 {
+  position: relative;
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: var(--ds-sh-sm) !important;
+  padding: 10px 10px 0 10px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s, box-shadow 0.35s !important;
+}
+.sc5:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(178, 58, 46, 0.38) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+.sc5 .im {
+  position: relative;
+  border-radius: var(--ds-r-sm) !important;
+  border: 1px solid rgba(30, 25, 21, 0.08);
+  overflow: hidden;
+  background: var(--ds-subtle);
+}
+.sc5 .tx {
+  padding: 16px 10px 18px !important;
+  gap: 6px !important;
+}
+.sc5 small {
+  font-size: 12px !important;
+  font-weight: 600;
+  letter-spacing: 0.12em !important;
+  color: var(--ds-ink-3) !important;
+}
+.sc5 h3 {
+  font-size: 21px !important;
+  letter-spacing: 0.06em !important;
+  color: var(--ds-ink);
+}
+.sc5 p {
+  font-size: 14px !important;
+  color: var(--ds-ink-2) !important;
+}
+/* 戏马台宽卡 (n1) 适配装裱边距 */
+.cgrid.n1 .sc5 {
+  padding: 12px;
+  gap: 24px;
+  align-items: stretch;
+}
+.cgrid.n1 .sc5 .tx {
+  padding: 18px 16px !important;
+  justify-content: center;
+}
+
+/* 卡片底部元数据 + 王牌互动微标透出 */
+.sc5-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.feat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--ds-r-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(178, 58, 46, 0.09);
+  color: var(--ds-vermilion);
+  border: 1px solid rgba(178, 58, 46, 0.22);
+}
+.feat-tag.jade {
+  background: rgba(63, 107, 90, 0.10);
+  color: var(--ds-jade);
+  border-color: rgba(63, 107, 90, 0.22);
+}
+
+/* 状态胶囊统一规范 */
+.st {
+  border-radius: var(--ds-r-pill) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  padding: 3px 10px !important;
+}
+.st.ok {
+  background: rgba(63, 107, 90, 0.11) !important;
+  color: var(--ds-jade) !important;
+}
+.st.ok i { background: var(--ds-jade) !important; }
+
+/* ==========================================================================
+   七、03 汉代三绝 · 全站唯一「汉漆黑金」沉浸段
+   ========================================================================== */
+#sanjue {
+  background:
+    var(--cl7d) 40px 32px / 440px 188px,
+    radial-gradient(110% 75% at 50% 0%, var(--ds-lacquer-2), var(--ds-lacquer)) !important;
+  color: #EFE4D2;
+}
+#sanjue::before {
+  top: 20px !important;
+  opacity: 0.55 !important;
+}
+#sanjue::after {
+  bottom: 20px !important;
+  opacity: 0.55 !important;
+}
+#sanjue .sh5 .eye {
+  color: var(--ds-gold) !important;
+}
+#sanjue .stamp10 {
+  background: var(--ds-gold) !important;
+  color: var(--ds-lacquer) !important;
+  box-shadow: inset 0 0 0 1px rgba(28, 21, 18, 0.25) !important;
+}
+#sanjue .sh5 h2 {
+  color: #F7EFE0 !important;
+}
+#sanjue .sh5 > p {
+  color: #D5C8B3 !important;
+}
+#sanjue .lfl li {
+  border-color: var(--ds-line-gold) !important;
+  border-radius: var(--ds-r-md) !important;
+  background: rgba(251, 248, 241, 0.035) !important;
+  transition: border-color 0.25s, background 0.25s;
+}
+#sanjue .lfl li:hover {
+  border-color: rgba(200, 160, 92, 0.58) !important;
+  background: rgba(251, 248, 241, 0.06) !important;
+}
+#sanjue .lfn {
+  border-radius: var(--ds-r-seal) !important;
+  width: 32px !important;
+  height: 32px !important;
+  font-size: 15px !important;
+}
+#sanjue .sjc,
+#sanjue .sjr {
+  background: var(--ds-surface) !important;
+  border: 1px solid rgba(200, 160, 92, 0.42) !important;
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: 0 20px 48px -24px rgba(0, 0, 0, 0.55) !important;
+}
+#sanjue .sjc {
+  padding: 10px 10px 0 10px;
+}
+#sanjue .sjc .im {
+  border-radius: var(--ds-r-sm);
+  overflow: hidden;
+}
+#sanjue .sjc .tx {
+  padding: 16px 10px 18px;
+}
+/* 拓印台与隔空拓印引流徽章 */
+.rub-air-tip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 6px 12px;
+  border-radius: var(--ds-r-sm);
+  background: rgba(178, 58, 46, 0.07);
+  border: 1px dashed rgba(178, 58, 46, 0.35);
+  font-size: 12.5px;
+  color: var(--ds-vermilion);
+  font-weight: 600;
+  text-decoration: none;
+}
+.rub-air-tip:hover {
+  background: rgba(178, 58, 46, 0.13);
+}
+
+/* ==========================================================================
+   八、04 彭城手艺 · 装裱卡片对齐
+   ========================================================================== */
+.fyg {
+  gap: var(--ds-gap) !important;
+}
+.fyc {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: var(--ds-sh-sm) !important;
+  padding: 10px 10px 0 10px;
+  transition: transform 0.3s ease, border-color 0.25s, box-shadow 0.3s;
+}
+.fyc:hover {
+  transform: translateY(-3px);
+  border-color: var(--ds-line-s) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+.fyc .im {
+  border-radius: var(--ds-r-sm);
+  background: var(--ds-paper) !important;
+  border: 1px solid rgba(30, 25, 21, 0.06);
+  overflow: hidden;
+}
+.fyc .tx {
+  padding: 16px 10px 18px !important;
+}
+.fyc h3 {
+  font-size: 20px !important;
+}
+
+/* ==========================================================================
+   九、05 交通导览 · 票根路单化 + 国风配色地铁图
+   ========================================================================== */
+.go-grid {
+  gap: var(--ds-gap) !important;
+}
+.panel {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: var(--ds-sh-sm) !important;
+  padding: 28px !important;
+}
+.panel h3 {
+  font-size: 21px !important;
+  letter-spacing: 0.06em;
+  padding-bottom: 14px;
+  margin-bottom: 18px !important;
+  border-bottom: 1px dashed var(--ds-line-s);
+}
+.panel select {
+  border-radius: var(--ds-r-sm) !important;
+  border: 1px solid var(--ds-line-s) !important;
+  background: var(--ds-paper) !important;
+  color: var(--ds-ink) !important;
+}
+.panel .swap {
+  border-radius: var(--ds-r-sm) !important;
+  border-color: var(--ds-line-s) !important;
+  background: var(--ds-paper) !important;
+}
+.tfoot {
+  border-top: 1px dashed var(--ds-line-s) !important;
+  padding-top: 16px !important;
+}
+.btn {
+  border-radius: var(--ds-r-sm) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  transition: all 0.2s ease !important;
+}
+.btn.red {
+  background: var(--ds-vermilion) !important;
+  border-color: var(--ds-vermilion) !important;
+  color: var(--ds-surface) !important;
+}
+.btn.red:hover {
+  background: var(--ds-vermilion-d) !important;
+}
+
+/* ==========================================================================
+   十、景点详情页 (#detail) · 整治散乱拼贴板 → 规整「典藏图谱 Bento 网格」
+   ========================================================================== */
+.detail {
+  background: var(--ds-paper) !important;
+}
+.v5bar {
+  background: rgba(245, 239, 228, 0.92) !important;
+  border-bottom: 1px solid var(--ds-line) !important;
+}
+.detail .h5img {
+  padding: 10px;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--ds-r-md) !important;
+  box-shadow: var(--ds-sh-sm);
+}
+.detail .h5img img {
+  border-radius: var(--ds-r-sm) !important;
+}
+
+/* 文化拼贴板彻底重做：从杂乱自由旋转 → 博物馆典藏 Bento 网格 */
+.detail .board {
+  position: static !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+  gap: 16px !important;
+  margin-top: 24px !important;
+  padding: 0 !important;
+}
+.detail .board .ci {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: auto !important;
+  transform: none !important;
+  rotate: 0deg !important;
+  grid-column: span 4;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-md) !important;
+  padding: 10px !important;
+  box-shadow: var(--ds-sh-sm) !important;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+.detail .board .ci:nth-child(1) {
+  grid-column: span 8;
+}
+.detail .board .ci:nth-child(2) {
+  grid-column: span 4;
+}
+.detail .board .ci:nth-child(3),
+.detail .board .ci:nth-child(4),
+.detail .board .ci:nth-child(5) {
+  grid-column: span 4;
+}
+.detail .board .ci:nth-child(6),
+.detail .board .ci:nth-child(7) {
+  grid-column: span 6;
+}
+.detail .board .ci:nth-child(8) {
+  grid-column: span 12;
+}
+.detail .board .ci:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(178, 58, 46, 0.36) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+.detail .board .ci .im {
+  border-radius: var(--ds-r-sm) !important;
+  box-shadow: none !important;
+  background: var(--ds-paper) !important;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.detail .board .ci:nth-child(1) .im {
+  aspect-ratio: 16 / 9;
+}
+.detail .board .ci .im img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.detail .board .ci.cut .im img,
+.detail .board .ci.stamp .im img,
+.detail .board .ci.wood .im img {
+  object-fit: contain;
+  padding: 10px;
+}
+.detail .board .ci figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 4px 2px !important;
+  margin-top: 0 !important;
+  text-align: left !important;
+}
+.detail .board .ci figcaption b {
+  font-family: var(--serif);
+  font-size: 14.5px;
+  color: var(--ds-ink);
+}
+.detail .board .ci figcaption span {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: var(--ds-r-pill);
+  background: var(--ds-subtle);
+  color: var(--ds-ink-2);
+  white-space: nowrap;
+}
+
+/* 三级史料可信度徽章统一规范 */
+.lv {
+  border-radius: var(--ds-r-seal) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+}
+.lv.a {
+  background: rgba(63, 107, 90, 0.14) !important;
+  color: var(--ds-jade) !important;
+}
+.lv.b {
+  background: rgba(184, 134, 59, 0.14) !important;
+  color: #8A6121 !important;
+}
+.lv.c {
+  background: rgba(178, 58, 46, 0.12) !important;
+  color: var(--ds-vermilion) !important;
+}
+
+/* ==========================================================================
+   十一、IP 小导游统一宣纸圆章载体 + 页脚升级
+   ========================================================================== */
+.gav {
+  width: 72px !important;
+  height: 72px !important;
+  padding: 4px;
+  background: var(--ds-surface) !important;
+  border: 2px solid var(--ds-vermilion) !important;
+  box-shadow: 0 0 0 4px rgba(245, 239, 228, 0.92), var(--ds-sh-md) !important;
+}
+.gav::after {
+  content: "问导游" !important;
+  background: var(--ds-vermilion) !important;
+  border-radius: var(--ds-r-pill) !important;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.06em;
+  top: -10px !important;
+  left: -8px !important;
+}
+.gpanel {
+  border-radius: var(--ds-r-md) !important;
+  border: 1px solid var(--ds-line-s) !important;
+  box-shadow: var(--ds-sh-md) !important;
+}
+
+.foot {
+  background: var(--ds-paper) !important;
+  border-top: 1px solid var(--ds-line) !important;
+  padding: 48px 28px 96px !important;
+}
+.foot .fqr10 {
+  display: inline-flex !important;
+  margin: 0 auto 20px !important;
+}
+.foot-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto 14px;
+}
+.foot-brand img {
+  width: 34px;
+  height: 34px;
+}
+.foot-brand span {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: var(--ds-ink);
+}
+
+/* ==========================================================================
+   十二、响应式与移动端精细适配
+   ========================================================================== */
+@media (max-width: 960px) {
+  .sh5 {
+    grid-template-columns: 1fr;
+    grid-template-areas: "eye" "title" "desc" "quote";
+    row-gap: 4px;
+  }
+  .sh5 .q7s {
+    margin-top: 18px !important;
+    max-width: none !important;
+  }
+  .detail .board {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .detail .board .ci,
+  .detail .board .ci:nth-child(1),
+  .detail .board .ci:nth-child(2),
+  .detail .board .ci:nth-child(6),
+  .detail .board .ci:nth-child(7),
+  .detail .board .ci:nth-child(8) {
+    grid-column: span 1;
+  }
+  .detail .board .ci:nth-child(1) {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --ds-sec-py: 64px;
+    --ds-gap: 16px;
+  }
+  .nav {
+    height: 56px !important;
+    padding: 0 16px !important;
+  }
+  .logo-seal {
+    width: 26px;
+    height: 26px;
+  }
+  .nav-ds-link {
+    display: none !important;
+  }
+  .hero .tv h1 {
+    font-size: 46px !important;
+  }
+  .hero .kai-title {
+    left: 14px !important;
+    right: 14px !important;
+    top: 68px !important;
+    padding: 14px !important;
+    gap: 12px !important;
+    align-items: flex-start !important;
+    border-radius: var(--ds-r-md);
+    background: linear-gradient(180deg, rgba(245, 239, 228, 0.92), rgba(245, 239, 228, 0.78));
+    backdrop-filter: blur(6px);
+    box-sizing: border-box;
+    max-width: calc(100vw - 28px);
+  }
+  .hero .tdesc {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    padding-top: 0 !important;
+  }
+  .hero .tdesc p {
+    font-size: 12.5px !important;
+    line-height: 1.65 !important;
+  }
+  .hero .cta {
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+  .hero .cta .lnk {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+  .wrap, .sec, .chap, .cgrid, .sc5 {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .cgrid,
+  .cgrid.n1 {
+    grid-template-columns: 1fr !important;
+  }
+  .cgrid.n1 .sc5 {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: none !important;
+    padding: 10px 10px 0 10px !important;
+    gap: 0 !important;
+  }
+  .cgrid.n1 .sc5 .tx {
+    padding: 14px 8px 16px !important;
+  }
+  .wrap {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    overflow-x: clip;
+  }
+  .panel {
+    padding: 20px 16px !important;
+  }
+  .detail .board {
+    grid-template-columns: 1fr !important;
+  }
+  .detail .board .ci:nth-child(1) {
+    grid-column: span 1;
+  }
+  .tabbar {
+    background: rgba(251, 248, 241, 0.94) !important;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--ds-line) !important;
+  }
+}
