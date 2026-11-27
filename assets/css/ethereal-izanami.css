@@ -2749,3 +2749,15 @@ html.touch-lite .tabbar {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+.wechat-mobile #sites .iz-folio {
+  position: relative !important;
+  top: auto;
+  box-shadow: none;
+}
+.wechat-mobile #sites .iz-folio-in {
+  transform: none !important;
+}
+.wechat-mobile #sites .iz-folio-bg {
+  display: none;
+}

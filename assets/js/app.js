@@ -5,7 +5,11 @@ const S=window.SITES,R=window.ROUTES,O=window.ORDER,A=window.ALL||O;
 const get=id=>S.find(s=>s.id===id);
 const art=k=>`assets/img/art/${k}.webp`, ip=k=>`assets/img/ip/${k}.webp`;
 const NMAP=new Set(['gs','wm','hlw','hbs','xmt','bwg','sz','yls','ylh']);
-const artThemed=k=>(document.documentElement.classList.contains('theme-obsidian')&&NMAP.has(k))?`assets/img/night/${k}_night.webp`:art(k);
+const WECHAT=document.documentElement.classList.contains('wechat-mobile');
+const darkTheme=()=>document.documentElement.classList.contains('theme-obsidian');
+const artThemed=(k,dark=darkTheme())=>dark&&NMAP.has(k)?`assets/img/night/${k}_night.webp`:art(k);
+const sceneCover=(k,dark=darkTheme())=>WECHAT&&NMAP.has(k)
+ ?`assets/img/wechat/${k}${dark?'_night':''}.webp`:artThemed(k,dark);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 /* ---------- 事件 & 印章 ---------- */
 const bus={};const on=(e,f)=>(bus[e]=bus[e]||[]).push(f);const emit=(e,d)=>(bus[e]||[]).forEach(f=>f(d));
@@ -327,7 +331,7 @@ function route_(){const h=location.hash;if(h.startsWith('#site-'))openDetail(h.s
 addEventListener('popstate',route_);addEventListener('hashchange',route_);
 document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#play-"]');if(a){e.preventDefault();goPlay(a.getAttribute('href').slice(6))}});
 
-window.XZ={status,addTrip,get,art,ip,esc,on,emit,stamp,has:id=>stamps.includes(id),stamps:()=>stamps.slice(),openDetail,closeDetail,goPlay,goStop:id=>{const scEl=document.getElementById('scroll');if(scEl){scEl.scrollIntoView();setTimeout(()=>goStop(O.indexOf(id)),50)}else{const lm=document.getElementById('landmark-'+id)||document.getElementById('sites');lm&&lm.scrollIntoView({behavior:'smooth'})}},planTo,path,NAME,modes,amapTo,openLB,decorate,parallax,cloud,stPill,curStop:()=>curI>=0?O[curI]:null};
+window.XZ={status,addTrip,get,art,sceneCover,ip,esc,on,emit,stamp,has:id=>stamps.includes(id),stamps:()=>stamps.slice(),openDetail,closeDetail,goPlay,goStop:id=>{const scEl=document.getElementById('scroll');if(scEl){scEl.scrollIntoView();setTimeout(()=>goStop(O.indexOf(id)),50)}else{const lm=document.getElementById('landmark-'+id)||document.getElementById('sites');lm&&lm.scrollIntoView({behavior:'smooth'})}},planTo,path,NAME,modes,amapTo,openLB,decorate,parallax,cloud,stPill,curStop:()=>curI>=0?O[curI]:null};
 const FEAT={gs:['✦ 提灯走甬道',''],bwg:['✦ 玉衣放大镜',''],sz:['✦ 隔空拓印','jade'],xmt:['✦ 隔空拓印','jade'],hbs:['✦ 隔空拓印','jade'],hlw:['✦ 隔空拓印','jade'],wm:['✦ 隔空拓印','jade'],yls:['✦ 隔空拓印','jade'],ylh:['✦ 隔空拓印','jade']};
 const CN_NUM=['壹','贰','叁','肆','伍','陆','柒','捌','玖'];
 const EN_CODE={xmt:'XIMATAI',gs:'GUISHAN TOMB',sz:'SHIZISHAN',bwg:'XUZHOU MUSEUM',hbs:'HUBUSHAN',hlw:'HUILONGWO',wm:'WENMIAO',yls:'YUNLONG HILL',ylh:'YUNLONG LAKE'};
@@ -347,12 +351,14 @@ function renderSites(){const g=$('#sgrid');if(!g)return;
  g.innerHTML=list.map((id,i)=>{
   const s=get(id),ft=FEAT[id];
   const no=String(i+1).padStart(2,'0');
+  const cover=sceneCover(s.cover);
+  const loading=WECHAT||i>=2?'lazy':'eager';
   return `<article class="iz-scene iz-folio" id="landmark-${id}" style="--iz-idx:${i+1};--folio-tint:${AMB_TINT[id]||'rgba(198, 162, 102, 0.22)'}" data-id="${id}" data-amb="assets/img/night/${id}_night.webp" data-hud-no="${no}" data-hud-name="${CN_NUM[i]} · ${s.n}" data-amb-side="left" data-amb-tint="${AMB_TINT[id]||'rgba(198, 162, 102, 0.22)'}">
-   <div class="iz-folio-bg" aria-hidden="true">
-    <img src="${artThemed(s.cover)}" alt="" loading="${i<2?'eager':'lazy'}" decoding="async">
+   ${WECHAT?'':`<div class="iz-folio-bg" aria-hidden="true">
+    <img src="${cover}" alt="" loading="${loading}" decoding="async">
     <i class="iz-folio-aura"></i>
     <i class="iz-folio-veil"></i>
-   </div>
+   </div>`}
    <div class="iz-folio-in">
     <span class="iz-vert-tag" aria-hidden="true">${no} · ${EN_CODE[id]||id.toUpperCase()}</span>
     <div class="iz-copy">
@@ -366,7 +372,7 @@ function renderSites(){const g=$('#sgrid');if(!g)return;
      </div>
     </div>
     <a class="iz-stage" href="#site-${id}" aria-label="入画观展：${s.n}">
-     <figure class="iz-main"><img src="${artThemed(s.cover)}" alt="${s.n}暗夜手绘" loading="${i<2?'eager':'lazy'}" decoding="async"></figure>
+     <figure class="iz-main"><img src="${cover}" alt="${s.n}手绘" loading="${loading}" decoding="async"></figure>
     </a>
    </div>
   </article>`;

@@ -617,9 +617,9 @@
         const im = $('.iz-main img', sc);
         const bgIm = $('.iz-folio-bg img', sc);
         if (NIGHT_SITES.has(id)) {
-          const src = dark ? `assets/img/night/${id}_night.webp` : `assets/img/art/${id}.webp`;
-          if (im) im.setAttribute('src', src);
-          if (bgIm) bgIm.setAttribute('src', src);
+          const src = window.XZ.sceneCover(id, dark);
+          if (im && im.getAttribute('src') !== src) im.setAttribute('src', src);
+          if (bgIm && bgIm.getAttribute('src') !== src) bgIm.setAttribute('src', src);
         }
       });
       const proBack = $('#edPrologue .iz-pro-back img');

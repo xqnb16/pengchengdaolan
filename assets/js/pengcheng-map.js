@@ -264,7 +264,8 @@
     lat: 34.2640, lng: 117.1960, zoom: 12.45,
     tLat: 34.2640, tLng: 117.1960, tZoom: 12.45
   };
-  let W = 800, H = 560, dpr = Math.min(1.5, devicePixelRatio || 1);
+  const WECHAT = document.documentElement.classList.contains('wechat-mobile');
+  let W = 800, H = 560, dpr = WECHAT ? 1 : Math.min(1.5, devicePixelRatio || 1);
   let tileMode = true; // 唯一默认模式：暗夜古金中文实景街道地图（断网时自动静默保底）
   const tileCache = new Map();
 
@@ -324,8 +325,11 @@
     const r = cv.parentElement.getBoundingClientRect();
     W = Math.max(320, r.width);
     H = Math.max(380, r.height);
-    cv.width = W * dpr;
-    cv.height = H * dpr;
+    const width = Math.floor(W * dpr);
+    const height = Math.floor(H * dpr);
+    if (cv.width === width && cv.height === height) return;
+    cv.width = width;
+    cv.height = height;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
@@ -808,9 +812,10 @@
 
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(es => {
-      mapInView = !!(es[0] && es[0].isIntersecting);
+      const entry = es[0];
+      mapInView = WECHAT ? entry.intersectionRatio >= 0.12 : entry.isIntersecting;
       if (mapInView) wakeMap();
-    }, { rootMargin: '120px 0px' }).observe(host);
+    }, { rootMargin: WECHAT ? '0px' : '120px 0px', threshold: WECHAT ? 0.12 : 0 }).observe(host);
   } else {
     mapInView = true;
     wakeMap();
